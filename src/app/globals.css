@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+@import "tailwindcss";
 
 /* ── Theme: modern (default) ───────────────────────────────── */
 :root,
@@ -76,8 +76,15 @@
   --color-accent-2:     var(--accent-2);
   --color-border:       var(--border);
   --color-must:         var(--must-bg);
+  --color-must-text:    var(--must-text);
   --color-want:         var(--want-bg);
+  --color-want-text:    var(--want-text);
   --color-meh:          var(--meh-bg);
+  --color-meh-text:     var(--meh-text);
+  --color-cell-must:    var(--cell-must);
+  --color-cell-want:    var(--cell-want);
+  --color-cell-meh:     var(--cell-meh);
+  --color-cell-empty:   var(--cell-empty);
 }
 
 body {
