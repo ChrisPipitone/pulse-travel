@@ -32,7 +32,7 @@ migration:
 # ── Type generation ──────────────────────────────────────────────────────────
 
 types:
-	supabase gen types typescript --local > src/types/supabase.gen.ts
+	supabase gen types typescript --local > packages/types/src/supabase.gen.ts
 
 # ── Remote (hosted Supabase) ─────────────────────────────────────────────────
 
@@ -47,4 +47,4 @@ push:
 # ── Dev server ───────────────────────────────────────────────────────────────
 
 dev:
-	pnpm dev
+	pnpm --filter=pulse-web dev

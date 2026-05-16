@@ -1,4 +1,4 @@
-import type { Rating } from '@/types'
+import type { Rating } from '@pulse/types'
 
 const styles: Record<Rating, string> = {
   MUST: 'bg-must text-must-text',

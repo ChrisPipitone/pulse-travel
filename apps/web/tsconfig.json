@@ -19,7 +19,12 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@pulse/types": ["../../packages/types/src/index.ts"],
+      "@pulse/ui": ["../../packages/ui/src/index.ts"],
+      "@pulse/store": ["../../packages/store/src/index.ts"],
+      "@pulse/services": ["../../packages/services/src/index.ts"],
+      "@pulse/hooks": ["../../packages/hooks/src/index.ts"]
     }
   },
   "include": [

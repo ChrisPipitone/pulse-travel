@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Trip, Activity, ActivityRating, Member } from '@/types'
+import type { Trip, Activity, ActivityRating, Member } from '@pulse/types'
 
 interface TripStore {
   trip: Trip | null
