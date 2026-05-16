@@ -1,0 +1,2 @@
+-- Seed data for local development
+-- Populated after schema migrations are in place
