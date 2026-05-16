@@ -3,7 +3,7 @@ import { ThemeProvider } from '@/components/ui/ThemeProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Activity Matrix',
+  title: 'Pulse',
   description: 'Group vacation planner — find what everyone wants to do',
 }
 

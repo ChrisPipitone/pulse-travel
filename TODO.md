@@ -1,8 +1,8 @@
-# Activity Matrix — TODO
+# Pulse — TODO
 
 ## Pending Setup
 - [ ] Create Supabase project + get credentials
-- [ ] Wire Supabase env vars (.env.local)
+- [x] Wire Supabase env vars (.env.local)
 - [ ] Design DB schema (trips, members, activities, ratings, events)
 - [ ] Set up Supabase Auth (magic link + Google OAuth)
 - [ ] Set up Row Level Security (RLS) policies
@@ -22,7 +22,7 @@
 
 ## Design
 - [x] Visual themes defined (modern + editorial) → UI_DESIGN.md
-- [ ] Build core components: Card, Badge (MUST/WANT/MEH), Button, Input
+- [x] Build core components: Card, Badge (MUST/WANT/MEH), Button, Input
 - [ ] Build compatibility matrix visualizer
 - [ ] Build date/availability picker
 - [ ] Build itinerary calendar view
@@ -35,6 +35,18 @@
 - [ ] Compatibility matrix view
 - [ ] Date/availability layer
 - [ ] Itinerary builder (drag onto calendar)
+
+## Prod Readiness
+- [ ] Create hosted Supabase project (supabase.com)
+- [ ] Enable RLS on every table before any data goes in
+- [ ] Write RLS policies: users can only read/write their own trip data
+- [ ] Set Supabase Auth redirect URLs to prod domain
+- [ ] Add prod env vars to Vercel (URL + anon key — never secret key)
+- [ ] Enable Supabase Spend Cap (if ever upgraded to Pro)
+- [ ] Confirm no service role key in any client-side code
+- [ ] Set CORS / allowed origins in Supabase dashboard
+- [ ] Smoke test auth flow on prod (magic link + Google OAuth)
+- [ ] Verify `.env*` never committed (gitignore check)
 
 ## Future
 - [ ] PWA support
