@@ -1,0 +1,40 @@
+import { create } from 'zustand'
+import type { Trip, Activity, ActivityRating, Member } from '@/types'
+
+interface TripStore {
+  trip: Trip | null
+  members: Member[]
+  activities: Activity[]
+  ratings: ActivityRating[]
+  setTrip: (trip: Trip | null) => void
+  setMembers: (members: Member[]) => void
+  setActivities: (activities: Activity[]) => void
+  setRatings: (ratings: ActivityRating[]) => void
+  addActivity: (activity: Activity) => void
+  upsertRating: (rating: ActivityRating) => void
+}
+
+export const useTripStore = create<TripStore>((set) => ({
+  trip: null,
+  members: [],
+  activities: [],
+  ratings: [],
+  setTrip: (trip) => set({ trip }),
+  setMembers: (members) => set({ members }),
+  setActivities: (activities) => set({ activities }),
+  setRatings: (ratings) => set({ ratings }),
+  addActivity: (activity) =>
+    set((state) => ({ activities: [...state.activities, activity] })),
+  upsertRating: (rating) =>
+    set((state) => ({
+      ratings: state.ratings.some(
+        (r) => r.activity_id === rating.activity_id && r.member_id === rating.member_id
+      )
+        ? state.ratings.map((r) =>
+            r.activity_id === rating.activity_id && r.member_id === rating.member_id
+              ? rating
+              : r
+          )
+        : [...state.ratings, rating],
+    })),
+}))
