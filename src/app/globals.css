@@ -1,0 +1,89 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+/* ── Theme: modern (default) ───────────────────────────────── */
+:root,
+[data-theme="modern"] {
+  --bg:           #F5F4F0;
+  --bg-card:      #FFFFFF;
+  --text-primary: #1A1916;
+  --text-muted:   #8B8779;
+  --text-subtle:  #A8A49A;
+  --accent:       #FF5C35;
+  --accent-2:     #00C9A7;
+  --border:       #F0EFE9;
+
+  --must-bg:      #FF5C35;
+  --must-text:    #FFFFFF;
+  --want-bg:      #00C9A7;
+  --want-text:    #FFFFFF;
+  --meh-bg:       #E8E6E0;
+  --meh-text:     #8B8779;
+
+  --cell-must:    #FF5C35;
+  --cell-want:    #00C9A7;
+  --cell-meh:     #D9D6CE;
+  --cell-empty:   #ECEAE4;
+
+  --radius-card:  16px;
+  --radius-badge: 20px;
+  --radius-btn:   20px;
+  --radius-cell:  8px;
+
+  --font-display: 'DM Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+}
+
+/* ── Theme: editorial ──────────────────────────────────────── */
+[data-theme="editorial"] {
+  --bg:           #FAFAF8;
+  --bg-card:      #FFFFFF;
+  --text-primary: #2C1810;
+  --text-muted:   #8B7355;
+  --text-subtle:  #A89178;
+  --accent:       #C4603A;
+  --accent-2:     #D4A96A;
+  --border:       #F2EDE8;
+
+  --must-bg:      #C4603A;
+  --must-text:    #FFFFFF;
+  --want-bg:      #D4A96A;
+  --want-text:    #FFFFFF;
+  --meh-bg:       #E8E2D9;
+  --meh-text:     #8B7355;
+
+  --cell-must:    #C4603A;
+  --cell-want:    #EFC98A;
+  --cell-meh:     #F0EBE3;
+  --cell-empty:   #F7F4F0;
+
+  --radius-card:  8px;
+  --radius-badge: 4px;
+  --radius-btn:   8px;
+  --radius-cell:  4px;
+
+  --font-display: 'Playfair Display', serif;
+  --font-body:    'Inter', sans-serif;
+}
+
+@theme inline {
+  --color-bg:           var(--bg);
+  --color-bg-card:      var(--bg-card);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted:   var(--text-muted);
+  --color-text-subtle:  var(--text-subtle);
+  --color-accent:       var(--accent);
+  --color-accent-2:     var(--accent-2);
+  --color-border:       var(--border);
+  --color-must:         var(--must-bg);
+  --color-want:         var(--want-bg);
+  --color-meh:          var(--meh-bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}

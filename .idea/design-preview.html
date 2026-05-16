@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activity Matrix — Design Preview</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family: 'Inter', sans-serif; }
+
+.style-section {
+  min-height: 100vh;
+  padding: 64px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.style-label {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.style-title {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 56px;
+  text-align: center;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── STYLE 1: WARM & EDITORIAL ─────────────────────────────── */
+.s1 {
+  background: #FAFAF8;
+}
+.s1 .style-label { color: #C4603A; }
+.s1 .style-title { font-family: 'Playfair Display', serif; color: #2C1810; }
+
+.s1 .trip-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 28px 32px;
+  box-shadow: 0 1px 4px rgba(44,24,16,0.08), 0 4px 16px rgba(44,24,16,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.s1 .trip-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #2C1810;
+  letter-spacing: -0.02em;
+}
+.s1 .trip-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #8B7355;
+  margin-top: 4px;
+  font-weight: 400;
+}
+.s1 .trip-badge {
+  background: #FDF3ED;
+  border: 1px solid #EDD5C5;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #C4603A;
+  font-weight: 500;
+}
+
+.s1 .section-head {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  color: #2C1810;
+  font-weight: 600;
+  margin-bottom: 2px;
+  letter-spacing: -0.01em;
+}
+
+.s1 .activities-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(44,24,16,0.08), 0 4px 16px rgba(44,24,16,0.04);
+  overflow: hidden;
+}
+.s1 .activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #F2EDE8;
+}
+.s1 .activity-row:last-child { border-bottom: none; }
+.s1 .activity-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2C1810;
+}
+.s1 .activity-cat {
+  font-size: 11px;
+  color: #A89178;
+  margin-top: 2px;
+}
+.s1 .badge-group { display: flex; gap: 6px; }
+.s1 .badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+  font-family: 'Inter', sans-serif;
+}
+.s1 .badge-must { background: #C4603A; color: #fff; }
+.s1 .badge-want { background: #D4A96A; color: #fff; }
+.s1 .badge-meh  { background: #E8E2D9; color: #8B7355; }
+
+.s1 .matrix-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(44,24,16,0.08), 0 4px 16px rgba(44,24,16,0.04);
+}
+.s1 .matrix-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  color: #2C1810;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.s1 table { width: 100%; border-collapse: collapse; }
+.s1 th {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #A89178;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0 8px 12px;
+  text-align: center;
+}
+.s1 td { padding: 4px 8px; text-align: center; }
+.s1 .row-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #5C4A36;
+  text-align: left;
+  padding-right: 16px;
+  font-weight: 500;
+}
+.s1 .cell {
+  width: 28px; height: 28px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  font-family: 'Inter', sans-serif;
+}
+.s1 .c-must { background: #C4603A; }
+.s1 .c-want { background: #EFC98A; color: #7A4A1A; }
+.s1 .c-meh  { background: #F0EBE3; color: #A89178; }
+.s1 .c-none { background: #F7F4F0; color: #C5B9AC; }
+
+.s1 .cta-btn {
+  background: #C4603A;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 28px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  align-self: flex-start;
+  transition: background 0.15s;
+  box-shadow: 0 2px 8px rgba(196,96,58,0.3);
+}
+.s1 .cta-btn:hover { background: #A84E2C; }
+
+/* ─── STYLE 2: CRISP & FUNCTIONAL ───────────────────────────── */
+.s2 {
+  background: #FFFFFF;
+}
+.s2 .style-label { color: #2D6BE4; font-family: 'Inter', sans-serif; }
+.s2 .style-title { font-family: 'Inter', sans-serif; color: #1B2A4A; letter-spacing: -0.03em; }
+
+.s2 .trip-card {
+  background: #F8FAFC;
+  border-radius: 4px;
+  padding: 24px 28px;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.s2 .trip-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1B2A4A;
+  letter-spacing: -0.03em;
+}
+.s2 .trip-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #64748B;
+  margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+.s2 .trip-badge {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 2px;
+  padding: 6px 12px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #2D6BE4;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.s2 .section-head {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.s2 .activities-card {
+  background: #F8FAFC;
+  border-radius: 4px;
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+}
+.s2 .activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #E2E8F0;
+}
+.s2 .activity-row:last-child { border-bottom: none; }
+.s2 .activity-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1B2A4A;
+  letter-spacing: -0.01em;
+}
+.s2 .activity-cat { font-size: 11px; color: #94A3B8; margin-top: 1px; letter-spacing: 0.02em; }
+.s2 .badge-group { display: flex; gap: 4px; }
+.s2 .badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.08em;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+}
+.s2 .badge-must { background: #1B2A4A; color: #fff; }
+.s2 .badge-want { background: #2D6BE4; color: #fff; }
+.s2 .badge-meh  { background: #E2E8F0; color: #64748B; }
+
+.s2 .matrix-card {
+  background: #F8FAFC;
+  border-radius: 4px;
+  padding: 20px;
+  border: 1px solid #E2E8F0;
+}
+.s2 .matrix-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.s2 table { width: 100%; border-collapse: collapse; }
+.s2 th {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748B;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0 6px 10px;
+  text-align: center;
+}
+.s2 td { padding: 3px 6px; text-align: center; }
+.s2 .row-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #1B2A4A;
+  text-align: left;
+  padding-right: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.s2 .cell {
+  width: 28px; height: 28px;
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.95);
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.05em;
+}
+.s2 .c-must { background: #1B2A4A; }
+.s2 .c-want { background: #2D6BE4; }
+.s2 .c-meh  { background: #CBD5E1; color: #475569; }
+.s2 .c-none { background: #F1F5F9; color: #CBD5E1; }
+
+.s2 .cta-btn {
+  background: #2D6BE4;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  align-self: flex-start;
+  transition: background 0.12s;
+}
+.s2 .cta-btn:hover { background: #1D5BD4; }
+
+/* ─── STYLE 3: VIBRANT & MODERN ─────────────────────────────── */
+.s3 {
+  background: #F5F4F0;
+}
+.s3 .style-label { color: #FF5C35; font-family: 'DM Sans', sans-serif; }
+.s3 .style-title { font-family: 'DM Sans', sans-serif; color: #1A1916; font-weight: 700; }
+
+.s3 .trip-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 28px 32px;
+  box-shadow: 0 2px 12px rgba(26,25,22,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.s3 .trip-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1A1916;
+}
+.s3 .trip-meta {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #8B8779;
+  margin-top: 4px;
+  font-weight: 400;
+}
+.s3 .trip-badge {
+  background: #FFF0EC;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #FF5C35;
+  font-weight: 600;
+}
+
+.s3 .section-head {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #1A1916;
+  font-weight: 600;
+}
+
+.s3 .activities-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(26,25,22,0.08);
+  overflow: hidden;
+}
+.s3 .activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #F0EFE9;
+}
+.s3 .activity-row:last-child { border-bottom: none; }
+.s3 .activity-name {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1A1916;
+}
+.s3 .activity-cat { font-size: 12px; color: #A8A49A; margin-top: 2px; }
+.s3 .badge-group { display: flex; gap: 8px; }
+.s3 .badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-family: 'DM Sans', sans-serif;
+}
+.s3 .badge-must { background: #FF5C35; color: #fff; }
+.s3 .badge-want { background: #00C9A7; color: #fff; }
+.s3 .badge-meh  { background: #E8E6E0; color: #8B8779; }
+
+.s3 .matrix-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(26,25,22,0.08);
+}
+.s3 .matrix-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #1A1916;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.s3 table { width: 100%; border-collapse: collapse; }
+.s3 th {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #A8A49A;
+  padding: 0 8px 12px;
+  text-align: center;
+}
+.s3 td { padding: 4px 8px; text-align: center; }
+.s3 .row-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #1A1916;
+  text-align: left;
+  padding-right: 16px;
+  font-weight: 500;
+}
+.s3 .cell {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+}
+.s3 .c-must { background: #FF5C35; }
+.s3 .c-want { background: #00C9A7; }
+.s3 .c-meh  { background: #D9D6CE; color: #8B8779; }
+.s3 .c-none { background: #ECEAE4; color: #C5C1B8; }
+
+.s3 .cta-btn {
+  background: #FF5C35;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 14px 28px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: transform 0.1s, background 0.15s;
+  box-shadow: 0 4px 16px rgba(255,92,53,0.35);
+}
+.s3 .cta-btn:hover { background: #E54A25; transform: translateY(-1px); }
+
+/* ─── STYLE 4: DARK & PREMIUM ───────────────────────────────── */
+.s4 {
+  background: #111110;
+}
+.s4 .style-label { color: #F59E0B; font-family: 'Inter', sans-serif; }
+.s4 .style-title { font-family: 'Inter', sans-serif; color: #FAFAF8; letter-spacing: -0.03em; }
+
+.s4 .trip-card {
+  background: #1C1C1A;
+  border-radius: 12px;
+  padding: 28px 32px;
+  border: 1px solid #2A2A28;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.s4 .trip-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #FAFAF8;
+  letter-spacing: -0.02em;
+}
+.s4 .trip-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #71717A;
+  margin-top: 4px;
+}
+.s4 .trip-badge {
+  background: #292218;
+  border: 1px solid #3D2E10;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #F59E0B;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.s4 .section-head {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #52525B;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.s4 .activities-card {
+  background: #1C1C1A;
+  border-radius: 12px;
+  border: 1px solid #2A2A28;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.s4 .activity-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #232321;
+}
+.s4 .activity-row:last-child { border-bottom: none; }
+.s4 .activity-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #E4E4E2;
+  letter-spacing: -0.01em;
+}
+.s4 .activity-cat { font-size: 11px; color: #52525B; margin-top: 2px; }
+.s4 .badge-group { display: flex; gap: 6px; }
+.s4 .badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.04em;
+}
+.s4 .badge-must { background: #F59E0B; color: #111110; }
+.s4 .badge-want { background: #78350F; color: #FDE68A; }
+.s4 .badge-meh  { background: #27272A; color: #71717A; }
+
+.s4 .matrix-card {
+  background: #1C1C1A;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #2A2A28;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.s4 .matrix-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: #52525B;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.s4 table { width: 100%; border-collapse: collapse; }
+.s4 th {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #52525B;
+  letter-spacing: 0.06em;
+  padding: 0 8px 12px;
+  text-align: center;
+}
+.s4 td { padding: 4px 8px; text-align: center; }
+.s4 .row-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #A1A1AA;
+  text-align: left;
+  padding-right: 16px;
+  font-weight: 500;
+}
+.s4 .cell {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 800;
+  font-family: 'Inter', sans-serif;
+}
+.s4 .c-must { background: #F59E0B; color: #111110; }
+.s4 .c-want { background: #92400E; color: #FDE68A; }
+.s4 .c-meh  { background: #3F3F46; color: #71717A; }
+.s4 .c-none { background: #27272A; color: #3F3F46; }
+
+.s4 .cta-btn {
+  background: #F59E0B;
+  color: #111110;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 26px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  align-self: flex-start;
+  transition: background 0.12s;
+  box-shadow: 0 4px 20px rgba(245,158,11,0.25);
+}
+.s4 .cta-btn:hover { background: #D97706; }
+
+/* ─── DIVIDER ──────────────────────────────────────────────── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(128,128,128,0.15);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     STYLE 1 — WARM & EDITORIAL
+════════════════════════════════════════════════════════════ -->
+<section class="style-section s1">
+  <div class="style-label">Option 1</div>
+  <div class="style-title">Warm &amp; Editorial</div>
+
+  <div class="app-shell">
+    <!-- Trip Header -->
+    <div class="s1 trip-card">
+      <div>
+        <div class="trip-name">Italy 2025</div>
+        <div class="trip-meta">June 3 – 24 &nbsp;·&nbsp; 12 people</div>
+      </div>
+      <div class="trip-badge">Wedding: June 10–12</div>
+    </div>
+
+    <!-- Activities -->
+    <div class="s1 activities-card">
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Colosseum Tour</div>
+          <div class="activity-cat">Sightseeing · Rome · ~3h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-want">WANT</span>
+          <span class="badge badge-meh">MEH</span>
+        </div>
+      </div>
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Wine Tasting in Tuscany</div>
+          <div class="activity-cat">Food &amp; Drink · Chianti · ~5h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-want">WANT</span>
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-meh">MEH</span>
+        </div>
+      </div>
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Vatican Museums</div>
+          <div class="activity-cat">Culture · Rome · ~4h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-want">WANT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compatibility Matrix -->
+    <div class="s1 matrix-card">
+      <div class="matrix-title">Compatibility Matrix</div>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Marco</th>
+            <th>Sara</th>
+            <th>Lena</th>
+            <th>Chris</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Colosseum</td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-want">W</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-meh">—</div></td>
+          </tr>
+          <tr>
+            <td class="row-label">Wine Tasting</td>
+            <td><div class="cell c-want">W</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-want">W</div></td>
+          </tr>
+          <tr>
+            <td class="row-label">Vatican</td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-meh">—</div></td>
+            <td><div class="cell c-want">W</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="s1 cta-btn">+ Add Activity</button>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     STYLE 2 — CRISP & FUNCTIONAL
+════════════════════════════════════════════════════════════ -->
+<section class="style-section s2">
+  <div class="style-label">Option 2</div>
+  <div class="style-title">Crisp &amp; Functional</div>
+
+  <div class="app-shell">
+    <div class="s2 trip-card">
+      <div>
+        <div class="trip-name">Italy 2025</div>
+        <div class="trip-meta">JUNE 3 – 24 &nbsp;·&nbsp; 12 PEOPLE</div>
+      </div>
+      <div class="trip-badge">WEDDING JUN 10–12</div>
+    </div>
+
+    <div class="s2 activities-card">
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Colosseum Tour</div>
+          <div class="activity-cat">SIGHTSEEING · ROME · 3H</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-want">WANT</span>
+          <span class="badge badge-meh">MEH</span>
+        </div>
+      </div>
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Wine Tasting in Tuscany</div>
+          <div class="activity-cat">FOOD &amp; DRINK · CHIANTI · 5H</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-want">WANT</span>
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-meh">MEH</span>
+        </div>
+      </div>
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Vatican Museums</div>
+          <div class="activity-cat">CULTURE · ROME · 4H</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-want">WANT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="s2 matrix-card">
+      <div class="matrix-title">Compatibility Matrix</div>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Marco</th>
+            <th>Sara</th>
+            <th>Lena</th>
+            <th>Chris</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Colosseum</td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-want">W</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-meh">—</div></td>
+          </tr>
+          <tr>
+            <td class="row-label">Wine Tasting</td>
+            <td><div class="cell c-want">W</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-want">W</div></td>
+          </tr>
+          <tr>
+            <td class="row-label">Vatican</td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-meh">—</div></td>
+            <td><div class="cell c-want">W</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="s2 cta-btn">+ Add Activity</button>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     STYLE 3 — VIBRANT & MODERN
+════════════════════════════════════════════════════════════ -->
+<section class="style-section s3">
+  <div class="style-label">Option 3</div>
+  <div class="style-title">Vibrant &amp; Modern</div>
+
+  <div class="app-shell">
+    <div class="s3 trip-card">
+      <div>
+        <div class="trip-name">Italy 2025</div>
+        <div class="trip-meta">June 3 – 24 · 12 people</div>
+      </div>
+      <div class="trip-badge">🎊 Wedding Jun 10–12</div>
+    </div>
+
+    <div class="s3 activities-card">
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Colosseum Tour</div>
+          <div class="activity-cat">Sightseeing · Rome · ~3h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-want">WANT</span>
+          <span class="badge badge-meh">MEH</span>
+        </div>
+      </div>
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Wine Tasting in Tuscany</div>
+          <div class="activity-cat">Food &amp; Drink · Chianti · ~5h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-want">WANT</span>
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-meh">MEH</span>
+        </div>
+      </div>
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Vatican Museums</div>
+          <div class="activity-cat">Culture · Rome · ~4h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-want">WANT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="s3 matrix-card">
+      <div class="matrix-title">Compatibility Matrix</div>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Marco</th>
+            <th>Sara</th>
+            <th>Lena</th>
+            <th>Chris</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Colosseum</td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-want">W</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-meh">—</div></td>
+          </tr>
+          <tr>
+            <td class="row-label">Wine Tasting</td>
+            <td><div class="cell c-want">W</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-want">W</div></td>
+          </tr>
+          <tr>
+            <td class="row-label">Vatican</td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-meh">—</div></td>
+            <td><div class="cell c-want">W</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="s3 cta-btn">+ Add Activity</button>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════════════════════════
+     STYLE 4 — DARK & PREMIUM
+════════════════════════════════════════════════════════════ -->
+<section class="style-section s4">
+  <div class="style-label">Option 4</div>
+  <div class="style-title">Dark &amp; Premium</div>
+
+  <div class="app-shell">
+    <div class="s4 trip-card">
+      <div>
+        <div class="trip-name">Italy 2025</div>
+        <div class="trip-meta">June 3 – 24 · 12 people</div>
+      </div>
+      <div class="trip-badge">Wedding Jun 10–12</div>
+    </div>
+
+    <div class="s4 activities-card">
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Colosseum Tour</div>
+          <div class="activity-cat">Sightseeing · Rome · ~3h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-want">WANT</span>
+          <span class="badge badge-meh">MEH</span>
+        </div>
+      </div>
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Wine Tasting in Tuscany</div>
+          <div class="activity-cat">Food &amp; Drink · Chianti · ~5h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-want">WANT</span>
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-meh">MEH</span>
+        </div>
+      </div>
+      <div class="activity-row">
+        <div>
+          <div class="activity-name">Vatican Museums</div>
+          <div class="activity-cat">Culture · Rome · ~4h</div>
+        </div>
+        <div class="badge-group">
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-must">MUST</span>
+          <span class="badge badge-want">WANT</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="s4 matrix-card">
+      <div class="matrix-title">Compatibility Matrix</div>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Marco</th>
+            <th>Sara</th>
+            <th>Lena</th>
+            <th>Chris</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Colosseum</td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-want">W</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-meh">—</div></td>
+          </tr>
+          <tr>
+            <td class="row-label">Wine Tasting</td>
+            <td><div class="cell c-want">W</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-want">W</div></td>
+          </tr>
+          <tr>
+            <td class="row-label">Vatican</td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-must">M</div></td>
+            <td><div class="cell c-meh">—</div></td>
+            <td><div class="cell c-want">W</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="s4 cta-btn">+ Add Activity</button>
+  </div>
+</section>
+
+</body>
+</html>
