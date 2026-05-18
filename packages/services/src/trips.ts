@@ -12,7 +12,7 @@ export async function getTripByInviteCode(client: SupabaseClient, code: string):
 }
 
 export async function getMembers(client: SupabaseClient, tripId: string): Promise<Member[]> {
-  const { data } = await client.from('members').select('*').eq('trip_id', tripId)
+  const { data } = await client.from('trip_members').select('*').eq('trip_id', tripId)
   return data ?? []
 }
 
@@ -33,5 +33,10 @@ export async function getRatings(client: SupabaseClient, activityIds: string[]):
 }
 
 export async function upsertRating(client: SupabaseClient, rating: Omit<ActivityRating, 'id'>): Promise<void> {
-  await client.from('activity_ratings').upsert(rating, { onConflict: 'activity_id,member_id' })
+  await client.from('activity_ratings').upsert(rating, { onConflict: 'activity_id,user_id' })
+}
+
+export async function joinTrip(client: SupabaseClient, tripId: string, userId: string): Promise<void> {
+  // ignoreDuplicates: member clicking the invite link twice is not an error
+  await client.from('trip_members').upsert({ trip_id: tripId, user_id: userId }, { onConflict: 'trip_id,user_id', ignoreDuplicates: true })
 }
