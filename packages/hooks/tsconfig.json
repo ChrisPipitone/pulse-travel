@@ -6,5 +6,5 @@
       "@pulse/types": ["../types/src/index.ts"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "src/__tests__"]
 }

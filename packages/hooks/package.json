@@ -4,11 +4,22 @@
   "private": true,
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "dependencies": {
-    "@pulse/types": "workspace:*",
-    "@pulse/store": "workspace:*",
     "@pulse/services": "workspace:*",
+    "@pulse/store": "workspace:*",
+    "@pulse/types": "workspace:*",
     "@supabase/supabase-js": "^2.105.4",
     "react": "19.2.4"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/react-hooks": "^8.0.1",
+    "happy-dom": "^20.9.0",
+    "react-dom": "19.2.4",
+    "vitest": "^4.1.6"
   }
 }
