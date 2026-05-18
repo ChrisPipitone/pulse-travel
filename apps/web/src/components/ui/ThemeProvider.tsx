@@ -1,16 +1,20 @@
 'use client'
 
-import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from 'next-themes'
+
+// next-themes v0.4 ThemeProviderProps doesn't include children in its React 19
+// type definitions. Cast to add it back so JSX children pass type-checking.
+const Provider = NextThemesProvider as React.ComponentType<ThemeProviderProps & { children?: React.ReactNode }>
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
-    <NextThemesProvider
+    <Provider
       attribute="data-theme"
       defaultTheme="modern"
       themes={['modern', 'editorial']}
       disableTransitionOnChange
     >
       {children}
-    </NextThemesProvider>
+    </Provider>
   )
 }
