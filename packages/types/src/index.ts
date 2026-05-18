@@ -21,14 +21,23 @@ export interface Trip {
   invite_code: string
 }
 
+export interface ActivityCategory {
+  id: string
+  name: string
+  slug: string
+  icon?: string
+}
+
 export interface Activity {
   id: string
   trip_id: string
   name: string
+  description?: string
+  url?: string
   location?: string
   region?: string
   duration_hours?: number
-  category?: string
+  category_id?: string
   added_by: string
   created_at: string
 }
