@@ -1,4 +1,7 @@
-.PHONY: up down reset status logs studio types migration link push
+.PHONY: up down reset status logs studio types migration link push seed reseed clear
+
+PSQL := $(shell which psql 2>/dev/null || echo /opt/homebrew/opt/postgresql@15/bin/psql)
+DB   := postgresql://postgres:postgres@127.0.0.1:54322/postgres
 
 # ── Local Supabase (Docker) ──────────────────────────────────────────────────
 
@@ -11,6 +14,20 @@ down:
 
 reset:
 	supabase db reset
+
+# ── Seed targets ─────────────────────────────────────────────────────────────
+
+# Apply seed.sql to the running local DB (truncates first — safe to re-run)
+seed:
+	$(PSQL) $(DB) -f supabase/seed.sql
+
+# Full reset: drop DB, replay migrations, run seed.sql (Supabase does this automatically)
+reseed:
+	supabase db reset
+
+# Wipe all data rows, keep schema and activity_categories intact
+clear:
+	$(PSQL) $(DB) -c "truncate table trip_event_members, trip_events, activity_ratings, activities, trip_members, trips, profiles restart identity cascade; delete from auth.users;"
 
 status:
 	supabase status
