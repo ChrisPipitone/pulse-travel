@@ -130,44 +130,61 @@ Every primitive in `src/components/ui/` ships as two files:
 
 Same props interface. Same class names. Metro auto-resolves `.native.tsx` in RN.
 
-### Folder Structure
+### Monorepo Structure (Turborepo + pnpm workspaces)
 ```
-src/
-  lib/              # supabase client, utils — portable
-  hooks/            # all custom hooks — portable
-  types/            # TS interfaces — portable
-  services/         # supabase queries, API calls — portable
-  store/            # zustand stores — portable
-  components/
-    ui/             # primitives — dual web+RN files
-    features/       # feature components — web, rewrite for RN
-  app/              # Next.js App Router — replace with Expo Router for RN
+apps/
+  web/              # Next.js 16 + React 19 (App Router)
+  mobile/           # Expo (future)
+
+packages/
+  types/            # @pulse/types — shared TS interfaces
+  ui/               # @pulse/ui — dual .tsx + .native.tsx primitives
+  store/            # @pulse/store — Zustand stores (portable)
+  services/         # @pulse/services — Supabase fns (client-injected, portable)
+  hooks/            # @pulse/hooks — custom hooks (portable, no platform APIs)
 ```
+
+Key constraints:
+- `packages/services` accepts a `SupabaseClient` arg — no env var reads directly
+- `packages/ui` Tailwind class strings only — consuming app configures Tailwind/NativeWind
+- `packages/hooks` zero platform APIs — no `window`, `document`, `AsyncStorage`
+- Each app creates its own Supabase client (NEXT_PUBLIC_* vs EXPO_PUBLIC_*)
+
+Vercel deployment: set `rootDirectory=apps/web` in project settings.
 
 ---
 
 ## Current State (session handoff)
-- [x] Scaffolded: Next.js 16 + React 19 + TypeScript + Tailwind v4 + ESLint
-- [x] pnpm installed (brew), `.npmrc` has `ignore-scripts=true`
-- [x] ThemeProvider wired in root layout (`data-theme` attribute)
-- [x] Both themes (modern + editorial) defined in `globals.css` as CSS vars
-- [x] Core TypeScript types in `src/types/index.ts`
-- [x] Supabase client stub in `src/lib/supabase.ts` (needs env vars)
-- [x] `.env.local.example` created
-- [x] Clean build verified (`pnpm build` passes)
-- [ ] Git repo not yet created — name: `pulse-travel` (private)
-- [ ] Supabase project not yet created
-- [ ] First components not yet built (Badge, Button, Card — dual web+RN)
+- [x] Monorepo: Turborepo + pnpm workspaces (`apps/web`, `packages/*`)
+- [x] Next.js 16 + React 19 + TypeScript + Tailwind v4 + ESLint in `apps/web/`
+- [x] pnpm v11 (brew), `.npmrc` `ignore-scripts=true`, `pnpm-workspace.yaml` `allowBuilds` set
+- [x] ThemeProvider wired in `apps/web/src/app/layout.tsx` (`data-theme` attribute)
+- [x] Both themes (modern + editorial) in `apps/web/src/app/globals.css` as CSS vars
+- [x] Core TypeScript types in `packages/types/src/index.ts`
+- [x] Supabase client stub in `apps/web/src/lib/supabase.ts` (needs env vars)
+- [x] `.env.local.example` in root + `apps/web/`
+- [x] UI primitives (web only): Badge, Button, Card, Input in `packages/ui/src/`
+- [x] Zustand store: `packages/store/src/tripStore.ts`
+- [x] Service functions: `packages/services/src/trips.ts`
+- [x] Local Supabase: `supabase/config.toml` + `supabase/seed.sql`
+- [x] `page.tsx` renders Badge/Button/Card from `@pulse/ui` — visual smoke test
+- [x] `.native.tsx` files created (Badge, Button, Card, Input)
+- [x] Git repo exists (private)
+- [x] Supabase project exists
+- [x] DB schema: `supabase/schema.sql` — 8 tables, enum type, indexes, seeded categories
+- [x] RLS policies: `supabase/rls.sql` — 27 policies, no security definer, inline subqueries only
+- [x] Migrations: `supabase/migrations/` — init_schema + init_rls, applied to local DB
+- [ ] `packages/hooks/` is a stub — no hook implementations yet
+- [ ] Hosted Supabase: link + push migrations + fill `apps/web/.env.local`
+- [ ] Compatibility matrix component not yet built
 
-## Desktop / New Session Setup
+## Dev Setup
 ```bash
 brew install pnpm          # if not installed
-git clone <repo-url>
-cd pulse-travel            # or whatever dir
-pnpm install               # .npmrc handles ignore-scripts
-cp .env.local.example .env.local
-# fill in Supabase URL + anon key once project is created
-pnpm dev
+pnpm install               # at repo root — covers all workspaces
+cp apps/web/.env.local.example apps/web/.env.local
+# fill in Supabase URL + anon key
+make dev                   # or: pnpm dev (turbo --filter=web)
 ```
 
 ## Key Constraint
