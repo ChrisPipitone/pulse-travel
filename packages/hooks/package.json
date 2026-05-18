@@ -7,6 +7,8 @@
   "dependencies": {
     "@pulse/types": "workspace:*",
     "@pulse/store": "workspace:*",
-    "@pulse/services": "workspace:*"
+    "@pulse/services": "workspace:*",
+    "@supabase/supabase-js": "^2.105.4",
+    "react": "19.2.4"
   }
 }
