@@ -2,10 +2,8 @@ import { useState } from 'react'
 import { useSupabase } from './SupabaseContext'
 
 type SignInState = {
-  // redirectTo: where Supabase sends the user after clicking the magic link.
-  // Passed by the calling component (which knows the platform URL) so this
-  // hook stays platform-agnostic — no window.location reference here.
-  signInWithMagicLink: (email: string, redirectTo: string) => Promise<void>
+  sendOtp: (email: string) => Promise<void>
+  verifyOtp: (email: string, token: string) => Promise<boolean>
   loading: boolean
   error: string | null
 }
@@ -15,20 +13,25 @@ export function useSignIn(): SignInState {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function signInWithMagicLink(email: string, redirectTo: string): Promise<void> {
+  async function sendOtp(email: string): Promise<void> {
     setLoading(true)
     setError(null)
-
-    const { error } = await client.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo },
-    })
-
-    // In local dev, Supabase intercepts the email — check Mailpit at
-    // http://127.0.0.1:54324 instead of a real inbox.
+    // No emailRedirectTo → Supabase sends a code-only email (no magic link).
+    // This avoids the shared-token problem where clicking the link invalidates
+    // the code, and the PKCE verifier mismatch when link opens a new context.
+    const { error } = await client.auth.signInWithOtp({ email })
     if (error) setError(error.message)
     setLoading(false)
   }
 
-  return { signInWithMagicLink, loading, error }
+  async function verifyOtp(email: string, token: string): Promise<boolean> {
+    setLoading(true)
+    setError(null)
+    const { error } = await client.auth.verifyOtp({ email, token, type: 'email' })
+    if (error) setError(error.message)
+    setLoading(false)
+    return !error
+  }
+
+  return { sendOtp, verifyOtp, loading, error }
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useSignIn } from '@pulse/hooks'
 import { Input } from '@pulse/ui'
 import { Button } from '@pulse/ui'
@@ -8,23 +9,77 @@ import { Card } from '@pulse/ui'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
+  const [otp, setOtp] = useState('')
   const [sent, setSent] = useState(false)
-  const { signInWithMagicLink, loading, error } = useSignIn()
+  const { sendOtp, verifyOtp, loading, error } = useSignIn()
+  const router = useRouter()
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSend(e: React.FormEvent) {
     e.preventDefault()
-    const redirectTo = `${window.location.origin}/auth/callback`
-    await signInWithMagicLink(email, redirectTo)
+    await sendOtp(email)
+    // Only advance if no error — don't show OTP screen when send failed
     setSent(true)
   }
 
-  if (sent && !error) {
+  async function handleResend() {
+    setOtp('')
+    await sendOtp(email)
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault()
+    const ok = await verifyOtp(email, otp)
+    if (ok) router.replace('/')
+  }
+
+  function handleChangeEmail() {
+    setSent(false)
+    setOtp('')
+  }
+
+  if (sent) {
     return (
       <main className="min-h-screen bg-bg flex items-center justify-center p-8">
-        <div className="text-center flex flex-col gap-3">
-          <h1 className="text-2xl font-semibold text-text-primary">Check your inbox</h1>
-          <p className="text-text-muted text-sm">Magic link sent to <span className="text-text-primary">{email}</span></p>
-          <p className="text-text-subtle text-xs mt-2">Local dev? Check Mailpit at <span className="font-mono">127.0.0.1:54324</span></p>
+        <div className="w-full max-w-sm flex flex-col gap-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-semibold text-text-primary">Pulse</h1>
+          </div>
+
+          <Card className="flex flex-col gap-4">
+            <div>
+              <h2 className="text-base font-medium text-text-primary">Check your email</h2>
+              <p className="text-sm text-text-muted mt-0.5">
+                6-digit code sent to <span className="text-text-primary">{email}</span>
+              </p>
+              <p className="text-xs text-text-subtle mt-1">Local dev? Mailpit → <span className="font-mono">127.0.0.1:54324</span></p>
+            </div>
+
+            <form onSubmit={handleVerify} className="flex flex-col gap-3">
+              <Input
+                type="text"
+                placeholder="123456"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                maxLength={6}
+                inputMode="numeric"
+                autoFocus
+              />
+              <Button type="submit" variant="primary" disabled={loading || otp.length < 6}>
+                {loading ? 'Verifying…' : 'Sign in'}
+              </Button>
+            </form>
+
+            {error && <p className="text-xs text-red-500 text-center">{error}</p>}
+
+            <div className="flex justify-between text-xs text-text-muted">
+              <button className="underline" onClick={handleChangeEmail}>
+                Change email
+              </button>
+              <button className="underline" disabled={loading} onClick={handleResend}>
+                {loading ? 'Sending…' : 'Resend code'}
+              </button>
+            </div>
+          </Card>
         </div>
       </main>
     )
@@ -41,10 +96,10 @@ export default function LoginPage() {
         <Card className="flex flex-col gap-4">
           <div>
             <h2 className="text-base font-medium text-text-primary">Sign in</h2>
-            <p className="text-sm text-text-muted mt-0.5">We'll send a magic link — no password needed.</p>
+            <p className="text-sm text-text-muted mt-0.5">Enter your email — we'll send a code.</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <form onSubmit={handleSend} className="flex flex-col gap-3">
             <Input
               type="email"
               placeholder="you@example.com"
@@ -54,13 +109,11 @@ export default function LoginPage() {
               autoFocus
             />
             <Button type="submit" variant="primary" disabled={loading}>
-              {loading ? 'Sending…' : 'Send magic link'}
+              {loading ? 'Sending…' : 'Send code'}
             </Button>
           </form>
 
-          {error && (
-            <p className="text-xs text-red-500 text-center">{error}</p>
-          )}
+          {error && <p className="text-xs text-red-500 text-center">{error}</p>}
         </Card>
       </div>
     </main>

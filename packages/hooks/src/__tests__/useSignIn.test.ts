@@ -9,17 +9,14 @@ describe('useSignIn', () => {
 
   beforeEach(() => { client = createMockClient() })
 
-  it('calls signInWithOtp with email and redirectTo', async () => {
+  it('calls signInWithOtp with email only (no redirectTo)', async () => {
     const { result } = renderHookWithClient(() => useSignIn(), client)
 
     await act(async () => {
-      await result.current.signInWithMagicLink('marco@example.com', 'https://app.example.com/auth/callback')
+      await result.current.sendOtp('marco@example.com')
     })
 
-    expect(client.auth.signInWithOtp).toHaveBeenCalledWith({
-      email: 'marco@example.com',
-      options: { emailRedirectTo: 'https://app.example.com/auth/callback' },
-    })
+    expect(client.auth.signInWithOtp).toHaveBeenCalledWith({ email: 'marco@example.com' })
   })
 
   it('sets error when signInWithOtp fails', async () => {
@@ -27,19 +24,45 @@ describe('useSignIn', () => {
     const { result } = renderHookWithClient(() => useSignIn(), client)
 
     await act(async () => {
-      await result.current.signInWithMagicLink('x@x.com', 'https://app/callback')
+      await result.current.sendOtp('x@x.com')
     })
 
     expect(result.current.error).toBe('rate limited')
   })
 
-  it('clears loading after call completes', async () => {
+  it('clears loading after sendOtp completes', async () => {
     const { result } = renderHookWithClient(() => useSignIn(), client)
 
     await act(async () => {
-      await result.current.signInWithMagicLink('x@x.com', 'https://app/callback')
+      await result.current.sendOtp('x@x.com')
     })
 
     expect(result.current.loading).toBe(false)
+  })
+
+  it('returns true and clears error on successful verifyOtp', async () => {
+    vi.mocked(client.auth.verifyOtp).mockResolvedValue({ data: {}, error: null } as never)
+    const { result } = renderHookWithClient(() => useSignIn(), client)
+
+    let ok: boolean = false
+    await act(async () => {
+      ok = await result.current.verifyOtp('x@x.com', '123456')
+    })
+
+    expect(ok).toBe(true)
+    expect(result.current.error).toBeNull()
+  })
+
+  it('returns false and sets error on failed verifyOtp', async () => {
+    vi.mocked(client.auth.verifyOtp).mockResolvedValue({ error: { message: 'invalid otp' } } as never)
+    const { result } = renderHookWithClient(() => useSignIn(), client)
+
+    let ok: boolean = true
+    await act(async () => {
+      ok = await result.current.verifyOtp('x@x.com', '000000')
+    })
+
+    expect(ok).toBe(false)
+    expect(result.current.error).toBe('invalid otp')
   })
 })
