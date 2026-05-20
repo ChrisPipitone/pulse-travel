@@ -161,22 +161,26 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] ThemeProvider wired in `apps/web/src/app/layout.tsx` (`data-theme` attribute)
 - [x] Both themes (modern + editorial) in `apps/web/src/app/globals.css` as CSS vars
 - [x] Core TypeScript types in `packages/types/src/index.ts`
-- [x] Supabase client stub in `apps/web/src/lib/supabase.ts` (needs env vars)
-- [x] `.env.local.example` in root + `apps/web/`
+- [x] Supabase client in `apps/web/src/lib/supabase.ts` (placeholder fallback for build safety)
+- [x] `.env.local` → local Supabase, `.env.prod` → hosted Supabase (gitignored)
 - [x] UI primitives (web only): Badge, Button, Card, Input in `packages/ui/src/`
+- [x] `.native.tsx` files created (Badge, Button, Card, Input)
 - [x] Zustand store: `packages/store/src/tripStore.ts`
 - [x] Service functions: `packages/services/src/trips.ts`
-- [x] Local Supabase: `supabase/config.toml` + `supabase/seed.sql`
-- [x] `page.tsx` renders Badge/Button/Card from `@pulse/ui` — visual smoke test
-- [x] `.native.tsx` files created (Badge, Button, Card, Input)
-- [x] Git repo exists (private)
-- [x] Supabase project exists
+- [x] Local Supabase: `supabase/config.toml` (pg17) + `supabase/seed.sql`
 - [x] DB schema: `supabase/schema.sql` — 8 tables, enum type, indexes, seeded categories
 - [x] RLS policies: `supabase/rls.sql` — 27 policies, no security definer, inline subqueries only
-- [x] Migrations: `supabase/migrations/` — init_schema + init_rls, applied to local DB
-- [ ] `packages/hooks/` is a stub — no hook implementations yet
-- [ ] Hosted Supabase: link + push migrations + fill `apps/web/.env.local`
-- [ ] Compatibility matrix component not yet built
+- [x] Migrations: `supabase/migrations/` — init_schema + init_rls + revoke_anon_select, applied local + hosted
+- [x] Hosted Supabase: project `qphuglkhzdwqamslekyc` (West US Oregon), linked, migrations pushed
+- [x] 9 hooks in `packages/hooks/src/` — 37 tests passing
+- [x] SupabaseProvider wired into `apps/web/src/app/layout.tsx` via `Providers.tsx`
+- [x] Auth flow: OTP sign-in (`/login`), protected home route, sign out
+- [ ] Trip page — activity list with per-member ratings (`/trip/[id]`)
+- [ ] Rating tap interaction — MUST/WANT/MEH on activity row
+- [ ] Compatibility matrix component
+- [ ] Trip create + join flow (home page post-auth)
+- [ ] Add activity UI
+- [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs
 
 ## Dev Setup
 ```bash
