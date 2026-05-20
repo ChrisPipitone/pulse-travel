@@ -1,13 +1,15 @@
 # Pulse — TODO
 
 ## Pending Setup
-- [ ] Create Supabase project + get credentials
+
+- [x] Create Supabase project + get credentials
 - [x] Wire Supabase env vars (.env.local)
-- [ ] Design DB schema (trips, members, activities, ratings, events)
+- [x] Design DB schema (trips, members, activities, ratings, events)
 - [ ] Set up Supabase Auth (magic link + Google OAuth)
-- [ ] Set up Row Level Security (RLS) policies
+- [x] Set up Row Level Security (RLS) policies
 
 ## Scaffolding
+
 - [x] Next.js + TypeScript + Tailwind + ESLint + App Router (pnpm)
 - [x] Install next-themes + configure theme provider
 - [x] Install Zustand
@@ -21,6 +23,7 @@
 - [x] .env.local.example created
 
 ## Design
+
 - [x] Visual themes defined (modern + editorial) → UI_DESIGN.md
 - [x] Build core components: Card, Badge (MUST/WANT/MEH), Button, Input
 - [ ] Build compatibility matrix visualizer
@@ -28,6 +31,7 @@
 - [ ] Build itinerary calendar view
 
 ## Features (MVP)
+
 - [ ] Trip creation + invite via share link
 - [ ] Member onboarding (zero friction — link → in app)
 - [ ] Activity list (add, view, categorize)
@@ -37,6 +41,7 @@
 - [ ] Itinerary builder (drag onto calendar)
 
 ## Prod Readiness
+
 - [ ] Create hosted Supabase project (supabase.com)
 - [ ] Enable RLS on every table before any data goes in
 - [ ] Write RLS policies: users can only read/write their own trip data
@@ -49,6 +54,7 @@
 - [ ] Verify `.env*` never committed (gitignore check)
 
 ## Future
+
 - [ ] PWA support
 - [ ] ***REMOVED*** links (***REMOVED***, ***REMOVED***, Booking.com)
 - [ ] Calendar export (Google, Apple, Proton)
