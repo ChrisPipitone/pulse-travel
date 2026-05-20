@@ -9,11 +9,21 @@ alter table activity_categories enable row level security;
 alter table trip_events         enable row level security;
 alter table trip_event_members  enable row level security;
 
--- No security definer functions.
--- Membership checks are inline subqueries.
--- trip_members self-referential subquery: Postgres breaks recursion at the same
--- table boundary — inner query runs without RLS, which is documented safe behavior
--- and does not grant elevated privileges.
+-- is_trip_member: security-definer helper used by trips + trip_members policies.
+-- Inline subquery on trip_members from within a trips policy triggers trip_members
+-- RLS, which self-references trip_members → infinite recursion in Postgres 17.
+-- Security definer bypasses RLS on the inner read (membership check only, read-only).
+create function public.is_trip_member(p_trip_id uuid)
+returns boolean
+language sql security definer stable set search_path = public
+as $$
+  select exists (
+    select 1 from trip_members
+    where trip_id = p_trip_id and user_id = auth.uid()
+  );
+$$;
+revoke all on function public.is_trip_member(uuid) from public;
+grant execute on function public.is_trip_member(uuid) to authenticated;
 
 -- ── profiles ─────────────────────────────────────────────────────────────────
 
@@ -37,13 +47,7 @@ create policy "profiles: update own"
 create policy "trips: read if member"
   on trips for select
   to authenticated
-  using (
-    exists (
-      select 1 from trip_members
-      where trip_members.trip_id = trips.id
-        and trip_members.user_id = auth.uid()
-    )
-  );
+  using (public.is_trip_member(id));
 
 create policy "trips: insert own"
   on trips for insert
@@ -61,21 +65,11 @@ create policy "trips: delete if owner"
   using (created_by = auth.uid());
 
 -- ── trip_members ──────────────────────────────────────────────────────────────
--- Self-referential subquery: Postgres does not apply RLS recursively to the
--- same table within its own policy expression. The inner SELECT runs without
--- the policy applied, which is Postgres's documented recursion-breaking behavior.
--- This is not a privilege escalation — the inner query is read-only and scoped
--- to user_id = auth.uid().
 
 create policy "trip_members: read if member of same trip"
   on trip_members for select
   to authenticated
-  using (
-    trip_id in (
-      select trip_id from trip_members
-      where user_id = auth.uid()
-    )
-  );
+  using (public.is_trip_member(trip_id));
 
 create policy "trip_members: insert self"
   on trip_members for insert
@@ -124,10 +118,17 @@ create policy "activities: insert if member"
     )
   );
 
-create policy "activities: update if adder"
+create policy "activities: update if adder or owner"
   on activities for update
   to authenticated
-  using (added_by = auth.uid());
+  using (
+    added_by = auth.uid()
+    or exists (
+      select 1 from trips
+      where trips.id = activities.trip_id
+        and trips.created_by = auth.uid()
+    )
+  );
 
 create policy "activities: delete if adder or owner"
   on activities for delete
