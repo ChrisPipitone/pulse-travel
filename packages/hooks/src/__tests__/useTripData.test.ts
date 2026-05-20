@@ -7,7 +7,10 @@ import { useTripStore } from '@pulse/store'
 import type { Trip, Member, Activity } from '@pulse/types'
 
 const fakeTrip: Trip = { id: 't1', name: 'Italy 2025', destination: 'Italy', start_date: '', end_date: '', created_by: 'u1', invite_code: 'abc' }
-const fakeMembers: Member[] = [{ id: 'u1', name: 'Marco', email: 'marco@example.com', arrival_date: '', departure_date: '' }]
+// getMembers fetches trip_members rows then joins profiles — fakeMembers reflects the mapped output.
+const fakeTripMemberRows = [{ user_id: 'u1', arrival_date: '', departure_date: '' }]
+const fakeProfileRows = [{ id: 'u1', display_name: 'Marco', avatar_url: null }]
+const fakeMembers: Member[] = [{ id: 'u1', name: 'Marco', email: '', avatar_url: undefined, arrival_date: '', departure_date: '' }]
 const fakeActivities: Activity[] = [{ id: 'a1', trip_id: 't1', name: 'Colosseum', added_by: 'u1', created_at: '' }]
 
 describe('useTripData', () => {
@@ -17,12 +20,12 @@ describe('useTripData', () => {
     client = createMockClient()
     useTripStore.setState({ trip: null, members: [], activities: [], ratings: [] })
 
-    // Default: each from() call returns the appropriate fixture
     vi.mocked(client.from).mockImplementation((table: string) => {
-      if (table === 'trips')        return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), single: vi.fn().mockResolvedValue({ data: fakeTrip,       error: null }) } as never
-      if (table === 'trip_members') return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: fakeMembers,   error: null }) } as never
+      if (table === 'trips')        return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), single: vi.fn().mockResolvedValue({ data: fakeTrip, error: null }) } as never
+      if (table === 'trip_members') return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ data: fakeTripMemberRows, error: null }) } as never
+      if (table === 'profiles')     return { select: vi.fn().mockReturnThis(), in: vi.fn().mockResolvedValue({ data: fakeProfileRows, error: null }) } as never
       if (table === 'activities')   return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), order: vi.fn().mockResolvedValue({ data: fakeActivities, error: null }) } as never
-      if (table === 'activity_ratings') return { select: vi.fn().mockReturnThis(), in: vi.fn().mockResolvedValue({ data: [],          error: null }) } as never
+      if (table === 'activity_ratings') return { select: vi.fn().mockReturnThis(), in: vi.fn().mockResolvedValue({ data: [], error: null }) } as never
       return {} as never
     })
   })

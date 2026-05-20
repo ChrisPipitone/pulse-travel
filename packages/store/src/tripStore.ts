@@ -11,6 +11,8 @@ interface TripStore {
   setActivities: (activities: Activity[]) => void
   setRatings: (ratings: ActivityRating[]) => void
   addActivity: (activity: Activity) => void
+  updateActivity: (activity: Activity) => void
+  removeActivity: (id: string) => void
   upsertRating: (rating: ActivityRating) => void
   reset: () => void
 }
@@ -30,6 +32,10 @@ export const useTripStore = create<TripStore>((set) => ({
   setRatings: (ratings) => set({ ratings }),
   addActivity: (activity) =>
     set((state) => ({ activities: [...state.activities, activity] })),
+  updateActivity: (activity) =>
+    set((state) => ({ activities: state.activities.map((a) => a.id === activity.id ? activity : a) })),
+  removeActivity: (id) =>
+    set((state) => ({ activities: state.activities.filter((a) => a.id !== id) })),
   upsertRating: (rating) =>
     set((state) => ({
       ratings: state.ratings.some(

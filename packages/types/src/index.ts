@@ -5,7 +5,7 @@ export type Theme = 'modern' | 'editorial'
 export interface Member {
   id: string
   name: string
-  email: string
+  email?: string
   avatar_url?: string
   arrival_date?: string
   departure_date?: string
@@ -32,12 +32,12 @@ export interface Activity {
   id: string
   trip_id: string
   name: string
-  description?: string
-  url?: string
-  location?: string
-  region?: string
-  duration_hours?: number
-  category_id?: string
+  description?: string | null
+  url?: string | null
+  location?: string | null
+  region?: string | null
+  duration_hours?: number | null
+  category_id?: string | null
   added_by: string
   created_at: string
 }
