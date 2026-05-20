@@ -23,8 +23,14 @@ export function useSession(): SessionState {
       setState({ user: session?.user ?? null, session, loading: false })
     })
 
-    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
-      setState({ user: session?.user ?? null, session, loading: false })
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+      // TOKEN_REFRESH_FAILED means the stored refresh token is invalid (e.g.
+      // revoked, or left over from a different auth method). Treat as signed out.
+      if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+        setState({ user: session?.user ?? null, session, loading: false })
+      } else if ((event as string) === 'TOKEN_REFRESH_FAILED') {
+        setState({ user: null, session: null, loading: false })
+      }
     })
 
     // Without this cleanup the callback fires on unmount and tries to setState

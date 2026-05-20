@@ -3,6 +3,11 @@
 PSQL := $(shell which psql 2>/dev/null || echo /opt/homebrew/opt/postgresql@15/bin/psql)
 DB   := postgresql://postgres:postgres@127.0.0.1:54322/postgres
 
+# Auto-load supabase/.env so env() references in config.toml (e.g. Google OAuth
+# credentials) are always available without manual sourcing.
+-include supabase/.env
+export
+
 # ── Local Supabase (Docker) ──────────────────────────────────────────────────
 
 up:
