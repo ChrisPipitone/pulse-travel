@@ -11,13 +11,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [sent, setSent] = useState(false)
-  const { sendOtp, verifyOtp, loading, error } = useSignIn()
+  const { sendOtp, verifyOtp, signInWithGoogle, loading, error } = useSignIn()
   const router = useRouter()
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
     await sendOtp(email)
-    // Only advance if no error — don't show OTP screen when send failed
     setSent(true)
   }
 
@@ -35,6 +34,11 @@ export default function LoginPage() {
   function handleChangeEmail() {
     setSent(false)
     setOtp('')
+  }
+
+  function handleGoogleSignIn() {
+    const redirectTo = `${window.location.origin}/auth/callback`
+    signInWithGoogle(redirectTo)
   }
 
   if (sent) {
@@ -72,9 +76,7 @@ export default function LoginPage() {
             {error && <p className="text-xs text-red-500 text-center">{error}</p>}
 
             <div className="flex justify-between text-xs text-text-muted">
-              <button className="underline" onClick={handleChangeEmail}>
-                Change email
-              </button>
+              <button className="underline" onClick={handleChangeEmail}>Change email</button>
               <button className="underline" disabled={loading} onClick={handleResend}>
                 {loading ? 'Sending…' : 'Resend code'}
               </button>
@@ -112,6 +114,16 @@ export default function LoginPage() {
               {loading ? 'Sending…' : 'Send code'}
             </Button>
           </form>
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-text-subtle">or</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+
+          <Button variant="outline" disabled={loading} onClick={handleGoogleSignIn}>
+            {loading ? 'Redirecting…' : 'Continue with Google'}
+          </Button>
 
           {error && <p className="text-xs text-red-500 text-center">{error}</p>}
         </Card>

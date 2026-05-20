@@ -9,60 +9,67 @@ describe('useSignIn', () => {
 
   beforeEach(() => { client = createMockClient() })
 
-  it('calls signInWithOtp with email only (no redirectTo)', async () => {
+  // ── OTP ──────────────────────────────────────────────────────────────────
+
+  it('sendOtp calls signInWithOtp with email only', async () => {
     const { result } = renderHookWithClient(() => useSignIn(), client)
-
-    await act(async () => {
-      await result.current.sendOtp('marco@example.com')
-    })
-
+    await act(async () => { await result.current.sendOtp('marco@example.com') })
     expect(client.auth.signInWithOtp).toHaveBeenCalledWith({ email: 'marco@example.com' })
   })
 
-  it('sets error when signInWithOtp fails', async () => {
+  it('sendOtp sets error on failure', async () => {
     vi.mocked(client.auth.signInWithOtp).mockResolvedValue({ error: { message: 'rate limited' } } as never)
     const { result } = renderHookWithClient(() => useSignIn(), client)
-
-    await act(async () => {
-      await result.current.sendOtp('x@x.com')
-    })
-
+    await act(async () => { await result.current.sendOtp('x@x.com') })
     expect(result.current.error).toBe('rate limited')
   })
 
-  it('clears loading after sendOtp completes', async () => {
+  it('sendOtp clears loading after call', async () => {
     const { result } = renderHookWithClient(() => useSignIn(), client)
-
-    await act(async () => {
-      await result.current.sendOtp('x@x.com')
-    })
-
+    await act(async () => { await result.current.sendOtp('x@x.com') })
     expect(result.current.loading).toBe(false)
   })
 
-  it('returns true and clears error on successful verifyOtp', async () => {
+  it('verifyOtp returns true on success', async () => {
     vi.mocked(client.auth.verifyOtp).mockResolvedValue({ data: {}, error: null } as never)
     const { result } = renderHookWithClient(() => useSignIn(), client)
-
-    let ok: boolean = false
-    await act(async () => {
-      ok = await result.current.verifyOtp('x@x.com', '123456')
-    })
-
+    let ok = false
+    await act(async () => { ok = await result.current.verifyOtp('x@x.com', '123456') })
     expect(ok).toBe(true)
     expect(result.current.error).toBeNull()
   })
 
-  it('returns false and sets error on failed verifyOtp', async () => {
+  it('verifyOtp returns false and sets error on failure', async () => {
     vi.mocked(client.auth.verifyOtp).mockResolvedValue({ error: { message: 'invalid otp' } } as never)
     const { result } = renderHookWithClient(() => useSignIn(), client)
-
-    let ok: boolean = true
-    await act(async () => {
-      ok = await result.current.verifyOtp('x@x.com', '000000')
-    })
-
+    let ok = true
+    await act(async () => { ok = await result.current.verifyOtp('x@x.com', '000000') })
     expect(ok).toBe(false)
     expect(result.current.error).toBe('invalid otp')
+  })
+
+  // ── Google OAuth ──────────────────────────────────────────────────────────
+
+  it('signInWithGoogle calls signInWithOAuth with google provider and redirectTo', async () => {
+    const { result } = renderHookWithClient(() => useSignIn(), client)
+    await act(async () => { await result.current.signInWithGoogle('http://localhost:3000/auth/callback') })
+    expect(client.auth.signInWithOAuth).toHaveBeenCalledWith({
+      provider: 'google',
+      options: { redirectTo: 'http://localhost:3000/auth/callback' },
+    })
+  })
+
+  it('signInWithGoogle sets error and clears loading on failure', async () => {
+    vi.mocked(client.auth.signInWithOAuth).mockResolvedValue({ error: { message: 'OAuth error' } } as never)
+    const { result } = renderHookWithClient(() => useSignIn(), client)
+    await act(async () => { await result.current.signInWithGoogle('http://localhost:3000/auth/callback') })
+    expect(result.current.error).toBe('OAuth error')
+    expect(result.current.loading).toBe(false)
+  })
+
+  it('signInWithGoogle keeps loading true on success (browser navigates away)', async () => {
+    const { result } = renderHookWithClient(() => useSignIn(), client)
+    await act(async () => { await result.current.signInWithGoogle('http://localhost:3000/auth/callback') })
+    expect(result.current.loading).toBe(true)
   })
 })

@@ -37,6 +37,7 @@ export function createMockClient(): SupabaseClient {
       getUser:             vi.fn().mockResolvedValue({ data: { user: null } }),
       onAuthStateChange:   vi.fn().mockReturnValue({ data: { subscription: sub } }),
       signInWithOtp:       vi.fn().mockResolvedValue({ error: null }),
+      signInWithOAuth:     vi.fn().mockResolvedValue({ error: null }),
       verifyOtp:           vi.fn().mockResolvedValue({ data: {}, error: null }),
       signOut:             vi.fn().mockResolvedValue({ error: null }),
     },
