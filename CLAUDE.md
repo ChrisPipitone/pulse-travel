@@ -186,10 +186,10 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] Trip create flow — insert trip + add creator as first member
 - [x] Join flow — `/join?code=<code>` page, trip preview, redirect on success
 - [x] Technical docs — AUTH.md, DATA_MODEL.md, TRIP_FLOW.md, RATING_MATRIX.md, DEPLOYMENT.md (all Mermaid)
-- [ ] Compatibility matrix UI — grid component on trip page (hook + scoring logic exists)
-- [ ] Profile creation trigger — auth.users INSERT → public.profiles row (gap: display name breaks on new signup)
-- [ ] Auth config for prod — enable_confirmations = true, max_frequency = "60s"
-- [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs
+- [x] Profile creation trigger — on_auth_user_created fires AFTER INSERT on auth.users, display_name from meta or email prefix
+- [x] Auth config — enable_confirmations = true, max_frequency = "60s" (config.toml + supabase restart)
+- [ ] Compatibility matrix UI — grid component on trip page (useCompatibilityMatrix hook + CompatibilityScore type exist)
+- [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs + push migrations
 
 ## Dev Setup
 ```bash
