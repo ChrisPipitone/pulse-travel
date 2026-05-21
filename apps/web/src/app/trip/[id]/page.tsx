@@ -101,18 +101,24 @@ export default function TripPage({
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("activities");
-  const [pendingDelete, setPendingDelete] = useState<string | null>(null);
-  const deleteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const pendingDeleteRef = useRef<string | null>(null);
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function requestDelete(key: string) {
-    if (pendingDelete === key) {
-      clearTimeout(deleteTimer.current!)
-      setPendingDelete(null)
+  function requestDelete(key: string, ms = 3000) {
+    if (pendingDeleteRef.current === key) {
+      clearTimeout(deleteTimerRef.current!)
+      pendingDeleteRef.current = null
+      setPendingDeleteId(null)
       return true
     }
-    clearTimeout(deleteTimer.current!)
-    setPendingDelete(key)
-    deleteTimer.current = setTimeout(() => setPendingDelete(null), 3000)
+    clearTimeout(deleteTimerRef.current!)
+    pendingDeleteRef.current = key
+    setPendingDeleteId(key)
+    deleteTimerRef.current = setTimeout(() => {
+      pendingDeleteRef.current = null
+      setPendingDeleteId(null)
+    }, ms)
     return false
   }
 
@@ -159,7 +165,7 @@ export default function TripPage({
   }
 
   async function handleDelete(activity: Activity) {
-    if (!requestDelete(activity.id)) return;
+    if (!requestDelete(activity.id, 3000)) return;
     await deleteActivity(activity.id);
   }
 
@@ -179,7 +185,7 @@ export default function TripPage({
   }
 
   async function handleDeleteTrip() {
-    if (!requestDelete('trip')) return;
+    if (!requestDelete('trip', 5000)) return;
     await deleteTrip(trip!.id, () => router.replace("/"));
   }
 
@@ -247,8 +253,8 @@ export default function TripPage({
                     <button
                       onClick={handleDeleteTrip}
                       disabled={deleting}
-                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDelete === 'trip' ? 'text-red-500 bg-red-500/10' : 'text-red-500 hover:text-red-600 hover:bg-bg'}`}
-                      title={pendingDelete === 'trip' ? 'Tap again to delete' : 'Delete trip'}
+                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === 'trip' ? 'text-red-500 bg-red-500/10' : 'text-text-muted hover:text-red-500 hover:bg-bg'}`}
+                      title={pendingDeleteId === 'trip' ? 'Tap again to confirm delete' : 'Delete trip'}
                     >
                       <svg
                         width="14"
@@ -512,8 +518,8 @@ export default function TripPage({
                             <button
                               onClick={() => handleDelete(activity)}
                               disabled={acting}
-                              className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDelete === activity.id ? 'text-red-500 bg-red-500/10' : 'text-red-500 hover:text-red-600 hover:bg-bg'}`}
-                              title={pendingDelete === activity.id ? 'Tap again to delete' : 'Delete'}
+                              className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === activity.id ? 'text-red-500 bg-red-500/10' : 'text-text-muted hover:text-red-500 hover:bg-bg'}`}
+                              title={pendingDeleteId === activity.id ? 'Tap again to delete' : 'Delete'}
                             >
                               <svg
                                 width="13"

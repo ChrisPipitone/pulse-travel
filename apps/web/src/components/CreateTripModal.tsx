@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
 import type { Member } from '@pulse/types'
@@ -35,6 +35,26 @@ export function CreateTripModal({
   members, ownerId, onRemoveMember, removingMemberId, removeError,
 }: Props) {
   const [fields, setFields] = useState<Fields>({ name: '', destination: '', start_date: '', end_date: '' })
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null)
+  const pendingRemoveRef = useRef<string | null>(null)
+  const removeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function handleRemoveClick(memberId: string) {
+    if (pendingRemoveRef.current === memberId) {
+      clearTimeout(removeTimerRef.current!)
+      pendingRemoveRef.current = null
+      setPendingRemoveId(null)
+      onRemoveMember?.(memberId)
+      return
+    }
+    clearTimeout(removeTimerRef.current!)
+    pendingRemoveRef.current = memberId
+    setPendingRemoveId(memberId)
+    removeTimerRef.current = setTimeout(() => {
+      pendingRemoveRef.current = null
+      setPendingRemoveId(null)
+    }, 3000)
+  }
 
   useEffect(() => {
     if (open) setFields({
@@ -153,11 +173,11 @@ export function CreateTripModal({
                     ) : (
                       <button
                         type="button"
-                        onClick={() => onRemoveMember(m.id)}
+                        onClick={() => handleRemoveClick(m.id)}
                         disabled={isRemoving}
                         className="text-xs text-red-500 hover:text-red-600 transition-colors disabled:opacity-40 px-1 py-0.5"
                       >
-                        {isRemoving ? 'Removing…' : 'Remove'}
+                        {isRemoving ? 'Removing…' : pendingRemoveId === m.id ? 'Confirm?' : 'Remove'}
                       </button>
                     )}
                   </div>
