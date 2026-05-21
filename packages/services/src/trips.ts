@@ -32,6 +32,26 @@ export async function createTrip(
   return data as Trip
 }
 
+export async function updateTrip(
+  client: SupabaseClient,
+  tripId: string,
+  fields: Pick<Trip, 'name' | 'destination'> & { start_date?: string | null; end_date?: string | null }
+): Promise<Trip> {
+  const { data, error } = await client
+    .from('trips')
+    .update(fields)
+    .eq('id', tripId)
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data as Trip
+}
+
+export async function deleteTrip(client: SupabaseClient, tripId: string): Promise<void> {
+  const { error } = await client.from('trips').delete().eq('id', tripId)
+  if (error) throw new Error(error.message)
+}
+
 export async function getTrip(client: SupabaseClient, id: string): Promise<Trip | null> {
   const { data, error } = await client.from('trips').select('*').eq('id', id).single()
   if (error && error.code !== 'PGRST116') throw new Error(error.message)

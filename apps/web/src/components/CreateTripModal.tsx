@@ -13,20 +13,26 @@ type Fields = {
 
 type Props = {
   open: boolean
+  title?: string
+  initial?: Partial<Fields>
+  submitLabel?: string
   loading: boolean
   error: string | null
   onClose: () => void
   onSubmit: (fields: Fields) => void
 }
 
-const empty: Fields = { name: '', destination: '', start_date: '', end_date: '' }
-
-export function CreateTripModal({ open, loading, error, onClose, onSubmit }: Props) {
-  const [fields, setFields] = useState<Fields>(empty)
+export function CreateTripModal({ open, title = 'New trip', initial, submitLabel = 'Create trip', loading, error, onClose, onSubmit }: Props) {
+  const [fields, setFields] = useState<Fields>({ name: '', destination: '', start_date: '', end_date: '' })
 
   useEffect(() => {
-    if (open) setFields(empty)
-  }, [open])
+    if (open) setFields({
+      name: initial?.name ?? '',
+      destination: initial?.destination ?? '',
+      start_date: initial?.start_date ?? '',
+      end_date: initial?.end_date ?? '',
+    })
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open) return null
 
@@ -57,7 +63,7 @@ export function CreateTripModal({ open, loading, error, onClose, onSubmit }: Pro
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-text-primary">New trip</h2>
+          <h2 className="text-base font-semibold text-text-primary">{title}</h2>
           <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors text-xl leading-none">×</button>
         </div>
 
@@ -103,7 +109,7 @@ export function CreateTripModal({ open, loading, error, onClose, onSubmit }: Pro
               Cancel
             </Button>
             <Button type="submit" className="flex-1" disabled={!canSubmit}>
-              {loading ? 'Creating…' : 'Create trip'}
+              {loading ? 'Saving…' : submitLabel}
             </Button>
           </div>
         </form>

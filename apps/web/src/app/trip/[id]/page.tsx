@@ -1,13 +1,15 @@
 'use client'
 
 import { use, useState } from 'react'
-import { useTripData, useSession, useAddActivity, useActivityActions, useRateActivity, useUpdateMemberDates } from '@pulse/hooks'
+import { useTripData, useSession, useAddActivity, useActivityActions, useRateActivity, useUpdateMemberDates, useUpdateTrip, useDeleteTrip } from '@pulse/hooks'
 import { useTripStore } from '@pulse/store'
 import { Button } from '@pulse/ui'
 import { ActivityFormModal } from '@/components/ActivityFormModal'
 import { ActivityDetailModal } from '@/components/ActivityDetailModal'
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix'
 import { MemberDatesModal } from '@/components/MemberDatesModal'
+import { CreateTripModal } from '@/components/CreateTripModal'
+import { useRouter } from 'next/navigation'
 import type { Rating, Activity } from '@pulse/types'
 
 type Tab = 'activities' | 'matrix'
@@ -55,10 +57,15 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
   const { updateActivity, deleteActivity, loading: acting, error: actError } = useActivityActions()
   const { rateActivity, loading: rating } = useRateActivity()
   const { updateDates, loading: datesLoading, error: datesError } = useUpdateMemberDates()
+  const { updateTrip, loading: updating, error: updateError } = useUpdateTrip()
+  const { deleteTrip, loading: deleting } = useDeleteTrip()
+  const router = useRouter()
 
-  const [modal, setModal]           = useState<ModalState>({ mode: 'closed' })
-  const [showDatesModal, setShowDatesModal] = useState(false)
-  const [tab, setTab]               = useState<Tab>('activities')
+  const [modal, setModal]                   = useState<ModalState>({ mode: 'closed' })
+  const [showDatesModal, setShowDatesModal]  = useState(false)
+  const [showEditTrip, setShowEditTrip]      = useState(false)
+  const [copied, setCopied]                  = useState(false)
+  const [tab, setTab]                        = useState<Tab>('activities')
 
   const userId  = session?.user.id
   const isOwner = !!userId && trip?.created_by === userId
@@ -97,6 +104,29 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
     await deleteActivity(activity.id)
   }
 
+  async function handleEditTrip(fields: { name: string; destination: string; start_date: string; end_date: string }) {
+    await updateTrip({
+      name: fields.name,
+      destination: fields.destination,
+      start_date: fields.start_date || null,
+      end_date: fields.end_date || null,
+    })
+    setShowEditTrip(false)
+  }
+
+  async function handleDeleteTrip() {
+    if (!confirm(`Delete "${trip?.name}"? This cannot be undone.`)) return
+    await deleteTrip(trip!.id, () => router.replace('/'))
+  }
+
+  function handleCopyInvite() {
+    const url = `${window.location.origin}/join?code=${trip!.invite_code}`
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen bg-bg flex items-center justify-center">
@@ -118,13 +148,50 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
 
         {/* Trip header */}
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold text-text-primary">{trip.name}</h1>
-          <p className="text-text-muted text-sm">
-            {trip.destination}
-            {trip.start_date && trip.end_date && <> · {formatDateRange(trip.start_date, trip.end_date)}</>}
-            {' · '}{members.length} {members.length === 1 ? 'person' : 'people'}
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-1 min-w-0">
+            <h1 className="text-2xl font-semibold text-text-primary truncate">{trip.name}</h1>
+            <p className="text-text-muted text-sm">
+              {trip.destination}
+              {trip.start_date && trip.end_date && <> · {formatDateRange(trip.start_date, trip.end_date)}</>}
+              {' · '}{members.length} {members.length === 1 ? 'person' : 'people'}
+            </p>
+          </div>
+          {isOwner && (
+            <div className="flex items-center gap-1 shrink-0 mt-1">
+              <button
+                onClick={() => setShowEditTrip(true)}
+                className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
+                title="Edit trip"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
+                </svg>
+              </button>
+              <button
+                onClick={handleDeleteTrip}
+                disabled={deleting}
+                className="p-1.5 rounded text-text-muted hover:text-red-500 hover:bg-bg transition-colors disabled:opacity-40"
+                title="Delete trip"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5"/>
+                </svg>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Invite bar */}
+        <div className="flex items-center gap-2 bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2">
+          <span className="text-xs text-text-muted shrink-0">Invite code</span>
+          <code className="text-xs font-mono text-text-primary flex-1 truncate">{trip.invite_code}</code>
+          <button
+            onClick={handleCopyInvite}
+            className="text-xs font-medium text-accent hover:opacity-80 transition-opacity shrink-0"
+          >
+            {copied ? 'Copied!' : 'Copy link'}
+          </button>
         </div>
 
         {/* Tab bar */}
@@ -291,6 +358,22 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
         canEdit={modal.mode === 'view' ? canEdit(modal.activity) : false}
         onClose={() => setModal({ mode: 'closed' })}
         onEdit={() => modal.mode === 'view' && setModal({ mode: 'edit', activity: modal.activity })}
+      />
+
+      <CreateTripModal
+        open={showEditTrip}
+        title="Edit trip"
+        initial={{
+          name: trip.name,
+          destination: trip.destination,
+          start_date: trip.start_date ?? '',
+          end_date: trip.end_date ?? '',
+        }}
+        submitLabel="Save"
+        loading={updating}
+        error={updateError}
+        onClose={() => setShowEditTrip(false)}
+        onSubmit={handleEditTrip}
       />
 
       <ActivityFormModal
