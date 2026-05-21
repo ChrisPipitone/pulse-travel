@@ -1,7 +1,7 @@
 'use client'
 
 import { use, useState } from 'react'
-import { useTripData, useSession, useAddActivity, useActivityActions, useRateActivity, useUpdateMemberDates, useUpdateTrip, useDeleteTrip } from '@pulse/hooks'
+import { useTripData, useSession, useAddActivity, useActivityActions, useRateActivity, useUpdateMemberDates, useUpdateTrip, useDeleteTrip, useRemoveMember } from '@pulse/hooks'
 import { useTripStore } from '@pulse/store'
 import { Button } from '@pulse/ui'
 import { ActivityFormModal } from '@/components/ActivityFormModal'
@@ -59,6 +59,7 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
   const { updateDates, loading: datesLoading, error: datesError } = useUpdateMemberDates()
   const { updateTrip, loading: updating, error: updateError } = useUpdateTrip()
   const { deleteTrip, loading: deleting } = useDeleteTrip()
+  const { removeMember, removingId, error: removeError } = useRemoveMember()
   const router = useRouter()
 
   const [modal, setModal]                   = useState<ModalState>({ mode: 'closed' })
@@ -374,6 +375,11 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
         error={updateError}
         onClose={() => setShowEditTrip(false)}
         onSubmit={handleEditTrip}
+        members={members}
+        ownerId={trip.created_by}
+        onRemoveMember={removeMember}
+        removingMemberId={removingId}
+        removeError={removeError}
       />
 
       <ActivityFormModal

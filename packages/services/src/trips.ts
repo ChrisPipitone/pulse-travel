@@ -153,6 +153,15 @@ export async function deleteRating(client: SupabaseClient, activityId: string, u
   if (error) throw new Error(error.message)
 }
 
+export async function removeTripMember(client: SupabaseClient, tripId: string, userId: string): Promise<void> {
+  const { error } = await client
+    .from('trip_members')
+    .delete()
+    .eq('trip_id', tripId)
+    .eq('user_id', userId)
+  if (error) throw new Error(error.message)
+}
+
 export async function joinTrip(client: SupabaseClient, tripId: string, userId: string): Promise<void> {
   const { error } = await client
     .from('trip_members')

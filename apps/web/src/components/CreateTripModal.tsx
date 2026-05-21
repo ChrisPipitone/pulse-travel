@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
+import type { Member } from '@pulse/types'
 
 type Fields = {
   name: string
@@ -20,9 +21,19 @@ type Props = {
   error: string | null
   onClose: () => void
   onSubmit: (fields: Fields) => void
+  // member management — only provided in edit mode
+  members?: Member[]
+  ownerId?: string
+  onRemoveMember?: (userId: string) => void
+  removingMemberId?: string | null
+  removeError?: string | null
 }
 
-export function CreateTripModal({ open, title = 'New trip', initial, submitLabel = 'Create trip', loading, error, onClose, onSubmit }: Props) {
+export function CreateTripModal({
+  open, title = 'New trip', initial, submitLabel = 'Create trip',
+  loading, error, onClose, onSubmit,
+  members, ownerId, onRemoveMember, removingMemberId, removeError,
+}: Props) {
   const [fields, setFields] = useState<Fields>({ name: '', destination: '', start_date: '', end_date: '' })
 
   useEffect(() => {
@@ -61,7 +72,7 @@ export function CreateTripModal({ open, title = 'New trip', initial, submitLabel
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl">
+      <div className="relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">{title}</h2>
           <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors text-xl leading-none">×</button>
@@ -75,6 +86,7 @@ export function CreateTripModal({ open, title = 'New trip', initial, submitLabel
             onChange={set('name')}
             required
             autoFocus
+            maxLength={100}
           />
           <Input
             label="Destination"
@@ -82,6 +94,7 @@ export function CreateTripModal({ open, title = 'New trip', initial, submitLabel
             value={fields.destination}
             onChange={set('destination')}
             required
+            maxLength={100}
           />
           <div className="flex flex-col gap-1.5">
             <div className="grid grid-cols-2 gap-3">
@@ -113,6 +126,40 @@ export function CreateTripModal({ open, title = 'New trip', initial, submitLabel
             </Button>
           </div>
         </form>
+
+        {/* Member management — edit mode only */}
+        {members && onRemoveMember && (
+          <div className="flex flex-col gap-3 border-t border-border pt-5">
+            <h3 className="text-sm font-semibold text-text-primary">Members</h3>
+            <div className="flex flex-col gap-1">
+              {members.map((m) => {
+                const isOwner = m.id === ownerId
+                const isRemoving = removingMemberId === m.id
+                return (
+                  <div key={m.id} className="flex items-center gap-3 py-1">
+                    <span className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-text-subtle font-medium text-xs shrink-0">
+                      {m.name.charAt(0).toUpperCase()}
+                    </span>
+                    <span className="text-sm text-text-primary flex-1 truncate">{m.name}</span>
+                    {isOwner ? (
+                      <span className="text-xs text-text-subtle px-1">Owner</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => onRemoveMember(m.id)}
+                        disabled={isRemoving}
+                        className="text-xs text-text-muted hover:text-red-500 transition-colors disabled:opacity-40 px-1 py-0.5"
+                      >
+                        {isRemoving ? 'Removing…' : 'Remove'}
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+            {removeError && <p className="text-xs text-red-500">{removeError}</p>}
+          </div>
+        )}
       </div>
     </div>
   )
