@@ -60,4 +60,42 @@ describe('useRateActivity', () => {
 
     expect(client.from).toHaveBeenCalledWith('activity_ratings')
   })
+
+  it('optimistically removes rating when tapping the active rating', async () => {
+    let resolve!: () => void
+    const pending = new Promise<{ data: null; error: null }>((r) => { resolve = () => r({ data: null, error: null }) })
+    vi.mocked(client.from).mockReturnValue({ delete: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue(pending) }) }) } as never)
+
+    const { result } = renderHookWithClient(() => useRateActivity(), client)
+
+    // 'MEH' is the existing rating — tapping it again should toggle off
+    act(() => { result.current.rateActivity('a1', 'MEH') })
+
+    expect(useTripStore.getState().ratings.find((r) => r.activity_id === 'a1')).toBeUndefined()
+
+    await act(async () => { resolve() })
+  })
+
+  it('calls deleteRating when toggling off', async () => {
+    const deleteMock = vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: null, error: null }) }) })
+    vi.mocked(client.from).mockReturnValue({ delete: deleteMock } as never)
+
+    const { result } = renderHookWithClient(() => useRateActivity(), client)
+    await act(async () => { await result.current.rateActivity('a1', 'MEH') })
+
+    expect(deleteMock).toHaveBeenCalled()
+  })
+
+  it('rolls back on deleteRating failure', async () => {
+    vi.mocked(client.from).mockReturnValue({
+      delete: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockRejectedValue(new Error('network error')) }) }),
+    } as never)
+
+    const { result } = renderHookWithClient(() => useRateActivity(), client)
+    await act(async () => { await result.current.rateActivity('a1', 'MEH') })
+
+    const stored = useTripStore.getState().ratings.find((r) => r.activity_id === 'a1')
+    expect(stored?.rating).toBe('MEH')
+    expect(result.current.error).toBeTruthy()
+  })
 })

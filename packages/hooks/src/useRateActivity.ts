@@ -3,7 +3,7 @@ import type { Rating } from '@pulse/types'
 import { useSupabase } from './SupabaseContext'
 import { useSession } from './useSession'
 import { useTripStore } from '@pulse/store'
-import { upsertRating } from '@pulse/services'
+import { upsertRating, deleteRating } from '@pulse/services'
 
 type RateActivityState = {
   rateActivity: (activityId: string, rating: Rating) => Promise<void>
@@ -23,27 +23,37 @@ export function useRateActivity(): RateActivityState {
 
   const ratings = useTripStore((s) => s.ratings)
   const upsertRatingInStore = useTripStore((s) => s.upsertRating)
+  const removeRatingFromStore = useTripStore((s) => s.removeRating)
   const setRatings = useTripStore((s) => s.setRatings)
 
   async function rateActivity(activityId: string, rating: Rating): Promise<void> {
     setError(null)
     if (!user) return
 
+    const existing = ratings.find((r) => r.activity_id === activityId && r.user_id === user!.id)
+    const isToggleOff = existing?.rating === rating
+
     // Snapshot before the optimistic update — needed to roll back on failure.
     const previousRatings = ratings
 
-    // Apply to the store immediately so the UI responds without waiting for
-    // the network. If the request fails we roll back below.
-    upsertRatingInStore({
-      id: crypto.randomUUID(), // placeholder — real-time or next fetch will correct it
-      activity_id: activityId,
-      user_id: user!.id,
-      rating,
-    })
+    if (isToggleOff) {
+      removeRatingFromStore(activityId, user!.id)
+    } else {
+      upsertRatingInStore({
+        id: crypto.randomUUID(), // placeholder — real-time or next fetch will correct it
+        activity_id: activityId,
+        user_id: user!.id,
+        rating,
+      })
+    }
 
     setLoading(true)
     try {
-      await upsertRating(client, { activity_id: activityId, user_id: user!.id, rating })
+      if (isToggleOff) {
+        await deleteRating(client, activityId, user!.id)
+      } else {
+        await upsertRating(client, { activity_id: activityId, user_id: user!.id, rating })
+      }
     } catch (e) {
       // Network failed — restore the state the user saw before they tapped.
       setRatings(previousRatings)

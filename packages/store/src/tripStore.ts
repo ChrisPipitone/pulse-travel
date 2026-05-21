@@ -14,6 +14,7 @@ interface TripStore {
   updateActivity: (activity: Activity) => void
   removeActivity: (id: string) => void
   upsertRating: (rating: ActivityRating) => void
+  removeRating: (activityId: string, userId: string) => void
   reset: () => void
 }
 
@@ -47,6 +48,12 @@ export const useTripStore = create<TripStore>((set) => ({
               : r
           )
         : [...state.ratings, rating],
+    })),
+  removeRating: (activityId, userId) =>
+    set((state) => ({
+      ratings: state.ratings.filter(
+        (r) => !(r.activity_id === activityId && r.user_id === userId)
+      ),
     })),
   reset: () => set(initialState),
 }))
