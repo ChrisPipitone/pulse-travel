@@ -5,11 +5,42 @@ import { useTripStore } from '@pulse/store'
 import { useCompatibilityMatrix } from '@pulse/hooks'
 import type { Activity, Member, Rating, CompatibilityScore } from '@pulse/types'
 
-const ACT_PER_PAGE   = 10
-const MEM_PER_PAGE   = 8
-const ROSTER_CAP     = 9   // avatars shown per roster cell before +N
+const ACT_PER_PAGE = 10
+const MEM_PER_PAGE = 8
+const ROSTER_CAP   = 9
 
-type Orientation = 'activities-rows' | 'members-rows' | 'roster'
+type Orientation = 'activities-rows' | 'members-rows' | 'roster' | 'crew' | 'twin'
+
+interface ViewMeta { id: Orientation; label: string; description: string }
+const VIEWS: ViewMeta[] = [
+  {
+    id: 'crew',
+    label: 'Rundown',
+    description: 'Every activity at a glance — who\'s a MUST, who\'s a WANT, who\'s a MEH. Ranked by excitement.',
+  },
+  {
+    id: 'twin',
+    label: 'Travel twin',
+    description: 'Pairwise compatibility based on shared MUST + WANT overlap. Higher % = more similar vacation style. MEH is ignored — it means "I\'ll go either way."',
+  },
+  {
+    id: 'activities-rows',
+    label: 'By activity',
+    description: "Each activity's ratings across the whole group, sorted by group enthusiasm score.",
+  },
+  {
+    id: 'members-rows',
+    label: 'By member',
+    description: "Each member's full rating list side by side — spot who has strong opinions and where they align.",
+  },
+  {
+    id: 'roster',
+    label: "Who's in",
+    description: "For every activity: exactly who's excited, who's neutral, and who hasn't responded yet.",
+  },
+]
+
+// ── Styles ────────────────────────────────────────────────────────────────
 
 const cellStyle: Record<Rating, string> = {
   MUST: 'bg-cell-must text-must-text',
@@ -17,8 +48,8 @@ const cellStyle: Record<Rating, string> = {
   MEH:  'bg-cell-meh text-meh-text',
 }
 
-// Stable per-member colors — same person = same color across all activity rows
-const AVATAR_PALETTE: Array<{ bg: string; fg: string }> = [
+// Stable per-member colors — same person = same color in every view
+const PALETTE: Array<{ bg: string; fg: string }> = [
   { bg: '#ef4444', fg: '#fff' },
   { bg: '#f97316', fg: '#fff' },
   { bg: '#eab308', fg: '#000' },
@@ -31,7 +62,9 @@ const AVATAR_PALETTE: Array<{ bg: string; fg: string }> = [
   { bg: '#a16207', fg: '#fff' },
 ]
 
-// ── Shared sub-components ──────────────────────────────────────────────────
+function paletteFor(idx: number) { return PALETTE[idx % PALETTE.length] }
+
+// ── Shared primitives ─────────────────────────────────────────────────────
 
 function Cell({ rating }: { rating?: Rating }) {
   const base = 'w-8 h-8 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold mx-auto select-none'
@@ -83,51 +116,36 @@ function Paginator({ page, total, perPage, onChange }: {
   )
 }
 
-// ── Roster view: avatar with stable color + visible first name ─────────────
-
-function MemberAvatar({
-  member,
-  colorIdx,
-}: {
-  member: Member
-  colorIdx: number
-}) {
-  const color = AVATAR_PALETTE[colorIdx % AVATAR_PALETTE.length]
-  const firstName = member.name.split(' ')[0]
+// Compact avatar circle + first-name label — consistent color per member
+function MemberAvatar({ member, colorIdx }: { member: Member; colorIdx: number }) {
+  const c = paletteFor(colorIdx)
   return (
     <div className="flex flex-col items-center gap-0.5 w-9">
       <div
         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold select-none shrink-0"
-        style={{ backgroundColor: color.bg, color: color.fg }}
+        style={{ backgroundColor: c.bg, color: c.fg }}
         title={member.name}
       >
         {member.name.charAt(0).toUpperCase()}
       </div>
-      <span
-        className="text-[9px] text-text-muted leading-none text-center w-full truncate"
-        title={member.name}
-      >
-        {firstName}
+      <span className="text-[9px] text-text-muted leading-none text-center w-full truncate" title={member.name}>
+        {member.name.split(' ')[0]}
       </span>
     </div>
   )
 }
 
-function AvatarGroup({
-  members,
-  colorMap,
-}: {
+function AvatarGroup({ members, colorMap, cap = ROSTER_CAP }: {
   members: Member[]
   colorMap: Map<string, number>
+  cap?: number
 }) {
-  if (members.length === 0) {
-    return <span className="text-[10px] text-text-subtle select-none">—</span>
-  }
-  const shown    = members.slice(0, ROSTER_CAP)
-  const overflow = members.length - ROSTER_CAP
+  if (members.length === 0) return <span className="text-[10px] text-text-subtle select-none">—</span>
+  const shown    = members.slice(0, cap)
+  const overflow = members.length - cap
   return (
     <div className="flex flex-wrap gap-x-1 gap-y-2">
-      {shown.map((m) => (
+      {shown.map(m => (
         <MemberAvatar key={m.id} member={m} colorIdx={colorMap.get(m.id) ?? 0} />
       ))}
       {overflow > 0 && (
@@ -142,7 +160,7 @@ function AvatarGroup({
   )
 }
 
-// ── Grid: activities as rows, members as columns ───────────────────────────
+// ── View 1: By activity — activities × members, colored rating cells ───────
 
 function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
   activities: Activity[]
@@ -157,12 +175,9 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
           <th className="sticky left-0 z-10 bg-bg-card text-left px-4 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[160px] max-w-[200px]">
             Activity
           </th>
-          {members.map((m) => (
+          {members.map(m => (
             <th key={m.id} className="px-1.5 py-2.5 text-center w-12">
-              <div
-                className="w-8 h-8 mx-auto rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle"
-                title={m.name}
-              >
+              <div className="w-8 h-8 mx-auto rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle" title={m.name}>
                 {m.name.charAt(0).toUpperCase()}
               </div>
               <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-8 mx-auto">
@@ -170,9 +185,7 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
               </span>
             </th>
           ))}
-          <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[96px]">
-            Score
-          </th>
+          <th className="px-4 py-2.5 text-left text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[96px]">Score</th>
         </tr>
       </thead>
       <tbody>
@@ -181,14 +194,10 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
           return (
             <tr key={activity.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
               <td className="sticky left-0 z-10 bg-bg-card px-4 py-2.5 align-middle">
-                <p className="text-xs font-medium text-text-primary truncate max-w-[148px]" title={activity.name}>
-                  {activity.name}
-                </p>
-                {activity.location && (
-                  <p className="text-[10px] text-text-muted truncate max-w-[148px]">{activity.location}</p>
-                )}
+                <p className="text-xs font-medium text-text-primary truncate max-w-[148px]" title={activity.name}>{activity.name}</p>
+                {activity.location && <p className="text-[10px] text-text-muted truncate max-w-[148px]">{activity.location}</p>}
               </td>
-              {members.map((m) => (
+              {members.map(m => (
                 <td key={m.id} className="px-1.5 py-2 align-middle">
                   <Cell rating={score?.ratings[m.id]} />
                 </td>
@@ -204,7 +213,7 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
   )
 }
 
-// ── Grid: members as rows, activities as columns ───────────────────────────
+// ── View 2: By member — members × activities, colored rating cells ─────────
 
 function MembersRowsTable({ members, activities, scores, maxScore }: {
   members: Member[]
@@ -219,26 +228,22 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
           <th className="sticky left-0 z-10 bg-bg-card text-left px-4 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[120px]">
             Member
           </th>
-          {activities.map((a) => (
+          {activities.map(a => (
             <th key={a.id} className="px-1.5 py-2.5 text-center w-16">
-              <p className="text-[10px] font-medium text-text-muted truncate w-14 mx-auto" title={a.name}>
-                {a.name}
-              </p>
+              <p className="text-[10px] font-medium text-text-muted truncate w-14 mx-auto" title={a.name}>{a.name}</p>
             </th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {members.map((m) => (
+        {members.map(m => (
           <tr key={m.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
             <td className="sticky left-0 z-10 bg-bg-card px-4 py-2.5 align-middle">
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle shrink-0">
                   {m.name.charAt(0).toUpperCase()}
                 </div>
-                <span className="text-xs font-medium text-text-primary truncate max-w-[80px]">
-                  {m.name.split(' ')[0]}
-                </span>
+                <span className="text-xs font-medium text-text-primary truncate max-w-[80px]">{m.name.split(' ')[0]}</span>
               </div>
             </td>
             {scores.map((score, i) => (
@@ -251,17 +256,12 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
       </tbody>
       <tfoot className="border-t-2 border-border">
         <tr>
-          <td className="sticky left-0 z-10 bg-bg-card px-4 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide align-middle">
-            Score
-          </td>
+          <td className="sticky left-0 z-10 bg-bg-card px-4 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide align-middle">Score</td>
           {scores.map((score, i) => (
             <td key={activities[i]?.id ?? i} className="px-1.5 py-2.5 align-middle">
               <div className="flex flex-col items-center gap-1">
                 <div className="w-10 h-1.5 bg-border rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-accent rounded-full transition-[width]"
-                    style={{ width: maxScore > 0 ? `${Math.round((score.score / maxScore) * 100)}%` : '0%' }}
-                  />
+                  <div className="h-full bg-accent rounded-full" style={{ width: maxScore > 0 ? `${Math.round((score.score / maxScore) * 100)}%` : '0%' }} />
                 </div>
                 <span className="text-[10px] text-text-muted tabular-nums">{score.score}</span>
               </div>
@@ -273,11 +273,10 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
   )
 }
 
-// ── Roster: activities as rows, rating columns, member avatars in cells ────
+// ── View 3: Who's in — activities × rating buckets, member avatars in cells
 
 const ROSTER_RATINGS: Rating[] = ['MUST', 'WANT', 'MEH']
-
-const rosterHeaderStyle: Record<Rating, string> = {
+const rosterBadge: Record<Rating, string> = {
   MUST: 'bg-cell-must text-must-text',
   WANT: 'bg-cell-want text-want-text',
   MEH:  'bg-cell-meh text-meh-text',
@@ -294,22 +293,14 @@ function RosterTable({ activities, scores, members, maxScore, colorMap }: {
     <table className="w-full border-collapse text-sm">
       <thead>
         <tr className="border-b border-border">
-          <th className="sticky left-0 z-10 bg-bg-card text-left px-4 py-3 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[160px] max-w-[200px]">
-            Activity
-          </th>
-          {ROSTER_RATINGS.map((r) => (
+          <th className="sticky left-0 z-10 bg-bg-card text-left px-4 py-3 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[160px] max-w-[200px]">Activity</th>
+          {ROSTER_RATINGS.map(r => (
             <th key={r} className="px-4 py-3 text-left align-bottom min-w-[120px]">
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold ${rosterHeaderStyle[r]}`}>
-                {r}
-              </span>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold ${rosterBadge[r]}`}>{r}</span>
             </th>
           ))}
-          <th className="px-4 py-3 text-left align-bottom text-[10px] font-semibold text-text-subtle uppercase tracking-wide min-w-[100px]">
-            Unrated
-          </th>
-          <th className="px-4 py-3 text-left align-bottom text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[96px]">
-            Score
-          </th>
+          <th className="px-4 py-3 text-left align-bottom text-[10px] font-semibold text-text-subtle uppercase tracking-wide min-w-[100px]">Unrated</th>
+          <th className="px-4 py-3 text-left align-bottom text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[96px]">Score</th>
         </tr>
       </thead>
       <tbody>
@@ -317,24 +308,18 @@ function RosterTable({ activities, scores, members, maxScore, colorMap }: {
           const score = scores[i]
           const byRating: Record<Rating, Member[]> = { MUST: [], WANT: [], MEH: [] }
           const unrated: Member[] = []
-
           for (const m of members) {
             const r = score?.ratings[m.id] as Rating | undefined
             if (r) byRating[r].push(m)
             else unrated.push(m)
           }
-
           return (
             <tr key={activity.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
               <td className="sticky left-0 z-10 bg-bg-card px-4 py-3 align-top">
-                <p className="text-xs font-medium text-text-primary truncate max-w-[148px]" title={activity.name}>
-                  {activity.name}
-                </p>
-                {activity.location && (
-                  <p className="text-[10px] text-text-muted truncate max-w-[148px]">{activity.location}</p>
-                )}
+                <p className="text-xs font-medium text-text-primary truncate max-w-[148px]" title={activity.name}>{activity.name}</p>
+                {activity.location && <p className="text-[10px] text-text-muted truncate max-w-[148px]">{activity.location}</p>}
               </td>
-              {ROSTER_RATINGS.map((r) => (
+              {ROSTER_RATINGS.map(r => (
                 <td key={r} className="px-4 py-3 align-top">
                   <AvatarGroup members={byRating[r]} colorMap={colorMap} />
                 </td>
@@ -353,43 +338,248 @@ function RosterTable({ activities, scores, members, maxScore, colorMap }: {
   )
 }
 
-// ── Orientation toggle ─────────────────────────────────────────────────────
+// ── View 4: Find your crew — activities ranked by excited count ────────────
 
-const ORIENTATIONS: Array<{ id: Orientation; label: string }> = [
-  { id: 'activities-rows', label: 'By activity' },
-  { id: 'members-rows',    label: 'By member'   },
-  { id: 'roster',          label: "Who's in"    },
-]
+interface CrewRow {
+  activity: Activity
+  score: CompatibilityScore | undefined
+  mustMembers: Member[]
+  wantMembers: Member[]
+  mehMembers: Member[]
+  excitedCount: number
+}
+
+function CrewCards({ rows, maxScore, colorMap }: {
+  rows: CrewRow[]
+  maxScore: number
+  colorMap: Map<string, number>
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      {rows.map(({ activity, score, mustMembers, wantMembers, mehMembers, excitedCount }) => {
+        const isEmpty = excitedCount === 0
+        return (
+          <div
+            key={activity.id}
+            className={`bg-bg-card rounded-[var(--radius-card)] border border-border px-5 py-4 flex flex-col gap-3 transition-opacity ${isEmpty ? 'opacity-40' : ''}`}
+          >
+            {/* Header: name + excited count */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-text-primary leading-snug">{activity.name}</p>
+                {activity.location && <p className="text-xs text-text-muted mt-0.5">{activity.location}</p>}
+              </div>
+              <span className={`shrink-0 text-xs font-semibold tabular-nums px-2.5 py-0.5 rounded-full ${
+                excitedCount > 0 ? 'bg-accent/10 text-accent' : 'bg-border text-text-subtle'
+              }`}>
+                {excitedCount} excited
+              </span>
+            </div>
+
+            {/* Crew rows */}
+            {isEmpty ? (
+              <p className="text-xs text-text-subtle">Nobody's excited yet.</p>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {mustMembers.length > 0 && (
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-must text-must-text">
+                      MUST
+                    </span>
+                    <AvatarGroup members={mustMembers} colorMap={colorMap} />
+                  </div>
+                )}
+                {wantMembers.length > 0 && (
+                  <div className="flex items-start gap-3">
+                    <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-want text-want-text">
+                      WANT
+                    </span>
+                    <AvatarGroup members={wantMembers} colorMap={colorMap} />
+                  </div>
+                )}
+                {mehMembers.length > 0 && (
+                  <div className="flex items-start gap-3 opacity-50">
+                    <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-meh text-meh-text">
+                      MEH
+                    </span>
+                    <AvatarGroup members={mehMembers} colorMap={colorMap} />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Score footer */}
+            <div className="flex items-center gap-2 pt-2 border-t border-border">
+              <span className="text-[10px] text-text-subtle uppercase tracking-wide shrink-0">Enthusiasm</span>
+              <ScoreBar score={score?.score ?? 0} max={maxScore} />
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── View 5: Travel twin — N×N Jaccard compatibility heatmap ──────────────
+
+function TwinGrid({ members, jaccardMatrix, colorMap }: {
+  members: Member[]
+  jaccardMatrix: Map<string, Map<string, number | null>>
+  colorMap: Map<string, number>
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-border">
+            {/* empty corner cell */}
+            <th className="sticky left-0 z-10 bg-bg-card min-w-[112px] w-28" />
+            {members.map(m => {
+              const c = paletteFor(colorMap.get(m.id) ?? 0)
+              return (
+                <th key={m.id} className="px-1.5 py-3 text-center min-w-[52px]">
+                  <div
+                    className="w-8 h-8 mx-auto rounded-full flex items-center justify-center text-xs font-bold select-none"
+                    style={{ backgroundColor: c.bg, color: c.fg }}
+                    title={m.name}
+                  >
+                    {m.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-10 mx-auto">
+                    {m.name.split(' ')[0]}
+                  </span>
+                </th>
+              )
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {members.map(rowMember => {
+            const c = paletteFor(colorMap.get(rowMember.id) ?? 0)
+            return (
+              <tr key={rowMember.id} className="border-b border-border last:border-0">
+                <td className="sticky left-0 z-10 bg-bg-card px-3 py-2 align-middle">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold select-none shrink-0"
+                      style={{ backgroundColor: c.bg, color: c.fg }}
+                    >
+                      {rowMember.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-xs font-medium text-text-primary truncate max-w-[72px]">
+                      {rowMember.name.split(' ')[0]}
+                    </span>
+                  </div>
+                </td>
+                {members.map(colMember => {
+                  const val = jaccardMatrix.get(rowMember.id)?.get(colMember.id) ?? null
+                  const isSelf = rowMember.id === colMember.id
+
+                  if (isSelf || val === null) {
+                    return (
+                      <td key={colMember.id} className="px-1.5 py-2 text-center align-middle">
+                        <div className="w-10 h-8 mx-auto rounded flex items-center justify-center bg-border/50 text-text-subtle text-xs font-medium select-none">
+                          {isSelf ? '·' : '?'}
+                        </div>
+                      </td>
+                    )
+                  }
+
+                  const pct = Math.round(val * 100)
+                  return (
+                    <td key={colMember.id} className="px-1.5 py-2 text-center align-middle">
+                      <div
+                        className="w-10 h-8 mx-auto rounded flex items-center justify-center text-xs font-bold select-none tabular-nums"
+                        style={{
+                          backgroundColor: `color-mix(in srgb, var(--accent) ${Math.round(val * 80)}%, var(--bg-card))`,
+                          color: 'var(--text-primary)',
+                        }}
+                        title={`${rowMember.name.split(' ')[0]} ↔ ${colMember.name.split(' ')[0]}: ${pct}% overlap`}
+                      >
+                        {pct}%
+                      </div>
+                    </td>
+                  )
+                })}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
 
 // ── Main component ─────────────────────────────────────────────────────────
 
 export function CompatibilityMatrix() {
-  const activities = useTripStore((s) => s.activities)
-  const members    = useTripStore((s) => s.members)
+  const activities = useTripStore(s => s.activities)
+  const members    = useTripStore(s => s.members)
+  const ratings    = useTripStore(s => s.ratings)
   const { matrix } = useCompatibilityMatrix()
 
   const [orientation, setOrientation] = useState<Orientation>('activities-rows')
   const [actPage, setActPage] = useState(0)
   const [memPage, setMemPage] = useState(0)
 
-  // Activities in score-sorted order (from matrix)
+  // Activities in score-sorted order (from useCompatibilityMatrix)
   const orderedActivities = useMemo(
-    () => matrix
-      .map((s) => activities.find((a) => a.id === s.activity_id))
-      .filter((a): a is Activity => !!a),
+    () => matrix.map(s => activities.find(a => a.id === s.activity_id)).filter((a): a is Activity => !!a),
     [matrix, activities]
   )
 
-  // Stable color index per member (index in the full members array)
-  const colorMap = useMemo(
-    () => new Map(members.map((m, idx) => [m.id, idx])),
-    [members]
+  // Stable color index per member — index in full members array
+  const colorMap = useMemo(() => new Map(members.map((m, i) => [m.id, i])), [members])
+
+  // View 4: re-sort activities by excited-member count (MUST + WANT), score as tiebreaker
+  const crewRows = useMemo((): CrewRow[] =>
+    orderedActivities
+      .map(activity => {
+        const score = matrix.find(s => s.activity_id === activity.id)
+        const mustMembers = members.filter(m => score?.ratings[m.id] === 'MUST')
+        const wantMembers = members.filter(m => score?.ratings[m.id] === 'WANT')
+        const mehMembers  = members.filter(m => score?.ratings[m.id] === 'MEH')
+        return { activity, score, mustMembers, wantMembers, mehMembers, excitedCount: mustMembers.length + wantMembers.length }
+      })
+      .sort((a, b) => b.excitedCount - a.excitedCount || (b.score?.score ?? 0) - (a.score?.score ?? 0)),
+    [orderedActivities, matrix, members]
   )
 
-  const maxScore   = matrix[0]?.score ?? 0
-  const isActRows  = orientation === 'activities-rows'
-  const isMemRows  = orientation === 'members-rows'
-  const isRoster   = orientation === 'roster'
+  // View 5: Jaccard similarity — excited set = MUST + WANT only, MEH excluded
+  const jaccardMatrix = useMemo((): Map<string, Map<string, number | null>> => {
+    const excitedSets = new Map<string, Set<string>>()
+    for (const m of members) {
+      excitedSets.set(
+        m.id,
+        new Set(
+          ratings
+            .filter(r => r.user_id === m.id && (r.rating === 'MUST' || r.rating === 'WANT'))
+            .map(r => r.activity_id)
+        )
+      )
+    }
+    const result = new Map<string, Map<string, number | null>>()
+    for (const a of members) {
+      const row = new Map<string, number | null>()
+      const aSet = excitedSets.get(a.id)!
+      for (const b of members) {
+        if (a.id === b.id) { row.set(b.id, null); continue }
+        const bSet  = excitedSets.get(b.id)!
+        const inter = [...aSet].filter(x => bSet.has(x)).length
+        const union = new Set([...aSet, ...bSet]).size
+        row.set(b.id, union > 0 ? inter / union : null)
+      }
+      result.set(a.id, row)
+    }
+    return result
+  }, [members, ratings])
+
+  const maxScore  = matrix[0]?.score ?? 0
+  const isActRows = orientation === 'activities-rows'
+  const isMemRows = orientation === 'members-rows'
+  const isRoster  = orientation === 'roster'
+  const isCrew    = orientation === 'crew'
+  const isTwin    = orientation === 'twin'
 
   // Paginated slices
   const actStart   = actPage * ACT_PER_PAGE
@@ -397,20 +587,25 @@ export function CompatibilityMatrix() {
   const scoreSlice = matrix.slice(actStart, actStart + ACT_PER_PAGE)
   const memStart   = memPage * MEM_PER_PAGE
   const memSlice   = members.slice(memStart, memStart + MEM_PER_PAGE)
+  const crewSlice  = crewRows.slice(actStart, actStart + ACT_PER_PAGE)
 
-  // Horizontal axis config (columns that can be paginated)
+  // Horizontal axis — only activities-rows (members) and members-rows (activities)
+  const showHPaginator = isActRows || isMemRows
   const hLabel   = isActRows ? 'Members' : 'Activities'
   const hTotal   = isActRows ? members.length : orderedActivities.length
   const hPerPage = isActRows ? MEM_PER_PAGE : ACT_PER_PAGE
   const hPage    = isActRows ? memPage : actPage
   const setHPage = isActRows ? setMemPage : setActPage
 
-  // Vertical axis config (rows that can be paginated)
+  // Vertical axis — all views except twin
+  const showVPaginator = !isTwin
   const vLabel   = isMemRows ? 'Members' : 'Activities'
-  const vTotal   = isMemRows ? members.length : orderedActivities.length
+  const vTotal   = isMemRows ? members.length : isCrew ? crewRows.length : orderedActivities.length
   const vPerPage = isMemRows ? MEM_PER_PAGE : ACT_PER_PAGE
   const vPage    = isMemRows ? memPage : actPage
   const setVPage = isMemRows ? setMemPage : setActPage
+
+  const currentView = VIEWS.find(v => v.id === orientation)!
 
   if (activities.length === 0 || members.length === 0) {
     return (
@@ -423,77 +618,71 @@ export function CompatibilityMatrix() {
   return (
     <div className="flex flex-col gap-3">
 
-      {/* Controls: orientation selector + horizontal paginator */}
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-
-        {/* 3-way orientation toggle */}
-        <div className="inline-flex items-center border border-border rounded-[var(--radius-btn)] overflow-hidden">
-          {ORIENTATIONS.map(({ id, label }) => (
-            <button
-              key={id}
-              onClick={() => setOrientation(id)}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors border-l first:border-l-0 border-border ${
-                orientation === id
-                  ? 'bg-accent text-white'
-                  : 'bg-bg-card text-text-muted hover:text-text-primary'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+      {/* View selector + description + horizontal paginator */}
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div className="flex flex-col gap-1.5 min-w-0">
+          {/* 5-way segmented control */}
+          <div className="inline-flex items-center border border-border rounded-[var(--radius-btn)] overflow-hidden overflow-x-auto max-w-full">
+            {VIEWS.map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => { setOrientation(id); setActPage(0); setMemPage(0) }}
+                className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors border-l first:border-l-0 border-border ${
+                  orientation === id
+                    ? 'bg-accent text-white'
+                    : 'bg-bg-card text-text-muted hover:text-text-primary'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {/* Per-view description */}
+          <p className="text-[11px] text-text-subtle leading-snug max-w-sm">{currentView.description}</p>
         </div>
 
-        {/* Horizontal paginator (not used by roster — fixed columns) */}
-        {!isRoster && hTotal > hPerPage && (
-          <div className="flex items-center gap-1.5 text-xs text-text-muted">
+        {/* Horizontal axis paginator */}
+        {showHPaginator && hTotal > hPerPage && (
+          <div className="flex items-center gap-1.5 text-xs text-text-muted mt-0.5 shrink-0">
             <span className="opacity-60">{hLabel}</span>
             <Paginator page={hPage} total={hTotal} perPage={hPerPage} onChange={setHPage} />
           </div>
         )}
       </div>
 
-      {/* Matrix table */}
-      <div className="overflow-x-auto rounded-[var(--radius-card)] border border-border bg-bg-card">
-        {isActRows && (
-          <ActivitiesRowsTable
-            activities={actSlice}
-            scores={scoreSlice}
-            members={memSlice}
-            maxScore={maxScore}
-          />
-        )}
-        {isMemRows && (
-          <MembersRowsTable
-            members={memSlice}
-            activities={actSlice}
-            scores={scoreSlice}
-            maxScore={maxScore}
-          />
-        )}
-        {isRoster && (
-          <RosterTable
-            activities={actSlice}
-            scores={scoreSlice}
-            members={members}
-            maxScore={maxScore}
-            colorMap={colorMap}
-          />
-        )}
-      </div>
+      {/* Matrix — crew gets card layout, all others get table-in-box */}
+      {isCrew ? (
+        <CrewCards rows={crewSlice} maxScore={maxScore} colorMap={colorMap} />
+      ) : (
+        <div className="overflow-x-auto rounded-[var(--radius-card)] border border-border bg-bg-card">
+          {isActRows && (
+            <ActivitiesRowsTable activities={actSlice} scores={scoreSlice} members={memSlice} maxScore={maxScore} />
+          )}
+          {isMemRows && (
+            <MembersRowsTable members={memSlice} activities={actSlice} scores={scoreSlice} maxScore={maxScore} />
+          )}
+          {isRoster && (
+            <RosterTable activities={actSlice} scores={scoreSlice} members={members} maxScore={maxScore} colorMap={colorMap} />
+          )}
+          {isTwin && (
+            <TwinGrid members={members} jaccardMatrix={jaccardMatrix} colorMap={colorMap} />
+          )}
+        </div>
+      )}
 
-      {/* Bottom: vertical paginator + legend */}
+      {/* Vertical paginator + legend */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        {vTotal > vPerPage ? (
+        {showVPaginator && vTotal > vPerPage ? (
           <div className="flex items-center gap-1.5 text-xs text-text-muted">
             <span className="opacity-60">{vLabel}</span>
             <Paginator page={vPage} total={vTotal} perPage={vPerPage} onChange={setVPage} />
           </div>
         ) : <div />}
 
-        {/* Legend — rating cells only, not shown for roster (avatars are self-explanatory) */}
-        {!isRoster && (
+        {/* Legend: adapts to view */}
+        {(isActRows || isMemRows) && (
           <div className="flex items-center gap-3">
-            {(['MUST', 'WANT', 'MEH'] as Rating[]).map((r) => (
+            {(['MUST', 'WANT', 'MEH'] as Rating[]).map(r => (
               <div key={r} className="flex items-center gap-1">
                 <div className={`w-3 h-3 rounded-sm ${cellStyle[r]}`} />
                 <span className="text-[10px] text-text-muted">{r}</span>
@@ -506,18 +695,27 @@ export function CompatibilityMatrix() {
           </div>
         )}
 
-        {/* Roster legend: member color swatches */}
-        {isRoster && members.length <= 10 && (
+        {(isRoster || isCrew) && members.length <= 10 && (
           <div className="flex items-center gap-2 flex-wrap">
             {members.map((m, idx) => {
-              const color = AVATAR_PALETTE[idx % AVATAR_PALETTE.length]
+              const c = paletteFor(idx)
               return (
                 <div key={m.id} className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color.bg }} />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: c.bg }} />
                   <span className="text-[10px] text-text-muted">{m.name.split(' ')[0]}</span>
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {isTwin && (
+          <div className="flex items-center gap-2">
+            <div
+              className="w-16 h-3 rounded"
+              style={{ background: 'linear-gradient(to right, var(--bg-card), color-mix(in srgb, var(--accent) 80%, var(--bg-card)))' }}
+            />
+            <span className="text-[10px] text-text-muted">0% → 100% shared excitement</span>
           </div>
         )}
       </div>
