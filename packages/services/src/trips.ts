@@ -1,6 +1,37 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Trip, Activity, ActivityRating, Member } from '@pulse/types'
 
+export async function getUserTrips(client: SupabaseClient): Promise<Array<Trip & { member_count: number }>> {
+  const { data, error } = await client
+    .from('trips')
+    .select('*, trip_members(count)')
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((t: Trip & { trip_members: { count: number }[] }) => ({
+    ...t,
+    member_count: t.trip_members?.[0]?.count ?? 0,
+    trip_members: undefined,
+  })) as Array<Trip & { member_count: number }>
+}
+
+export async function createTrip(
+  client: SupabaseClient,
+  fields: Pick<Trip, 'name' | 'destination'> & { start_date?: string | null; end_date?: string | null },
+  userId: string
+): Promise<Trip> {
+  const { data, error } = await client
+    .from('trips')
+    .insert({ ...fields, created_by: userId })
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  const { error: memberError } = await client
+    .from('trip_members')
+    .insert({ trip_id: (data as Trip).id, user_id: userId })
+  if (memberError) throw new Error(memberError.message)
+  return data as Trip
+}
+
 export async function getTrip(client: SupabaseClient, id: string): Promise<Trip | null> {
   const { data, error } = await client.from('trips').select('*').eq('id', id).single()
   if (error && error.code !== 'PGRST116') throw new Error(error.message)
@@ -8,9 +39,11 @@ export async function getTrip(client: SupabaseClient, id: string): Promise<Trip 
 }
 
 export async function getTripByInviteCode(client: SupabaseClient, code: string): Promise<Trip | null> {
-  const { data, error } = await client.from('trips').select('*').eq('invite_code', code).single()
-  if (error && error.code !== 'PGRST116') throw new Error(error.message)
-  return data
+  // Direct table query fails for non-members (trips SELECT RLS requires membership).
+  // RPC calls the SECURITY DEFINER function which bypasses RLS for this lookup only.
+  const { data, error } = await client.rpc('get_trip_by_invite_code', { p_code: code })
+  if (error) throw new Error(error.message)
+  return (data as Trip[] | null)?.[0] ?? null
 }
 
 export async function getMembers(client: SupabaseClient, tripId: string): Promise<Member[]> {
@@ -77,6 +110,13 @@ export async function upsertRating(client: SupabaseClient, rating: Omit<Activity
 }
 
 export async function joinTrip(client: SupabaseClient, tripId: string, userId: string): Promise<void> {
-  // ignoreDuplicates: member clicking the invite link twice is not an error
-  await client.from('trip_members').upsert({ trip_id: tripId, user_id: userId }, { onConflict: 'trip_id,user_id', ignoreDuplicates: true })
+  const { error } = await client
+    .from('trip_members')
+    .upsert({ trip_id: tripId, user_id: userId }, { onConflict: 'trip_id,user_id', ignoreDuplicates: true })
+  if (error) {
+    if (error.message.includes('maximum of 50 members')) {
+      throw new Error('This trip is full — the 50-member limit has been reached.')
+    }
+    throw new Error(error.message)
+  }
 }

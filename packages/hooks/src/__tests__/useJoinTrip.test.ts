@@ -20,10 +20,11 @@ describe('useJoinTrip', () => {
   })
 
   it('returns the trip on success', async () => {
-    // getTripByInviteCode returns fakeTrip; joinTrip upsert succeeds
-    vi.mocked(client.from)
-      .mockReturnValueOnce({ select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), single: vi.fn().mockResolvedValue({ data: fakeTrip, error: null }) } as never)
-      .mockReturnValueOnce({ upsert: vi.fn().mockResolvedValue({ data: null, error: null }) } as never)
+    // getTripByInviteCode now uses client.rpc; joinTrip uses client.from
+    vi.mocked(client.rpc).mockResolvedValue({ data: [fakeTrip], error: null } as never)
+    vi.mocked(client.from).mockReturnValue({
+      upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
+    } as never)
 
     const { result } = renderHookWithClient(() => useJoinTrip(), client)
     let returned: Trip | null = null
@@ -34,10 +35,7 @@ describe('useJoinTrip', () => {
   })
 
   it('sets error and returns null for invalid invite code', async () => {
-    vi.mocked(client.from).mockReturnValue({
-      select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: null, error: null }),
-    } as never)
+    vi.mocked(client.rpc).mockResolvedValue({ data: [], error: null } as never)
 
     const { result } = renderHookWithClient(() => useJoinTrip(), client)
     let returned: Trip | null = fakeTrip as Trip
@@ -49,9 +47,8 @@ describe('useJoinTrip', () => {
 
   it('upserts with ignoreDuplicates so re-joining is safe', async () => {
     const upsertMock = vi.fn().mockResolvedValue({ data: null, error: null })
-    vi.mocked(client.from)
-      .mockReturnValueOnce({ select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), single: vi.fn().mockResolvedValue({ data: fakeTrip, error: null }) } as never)
-      .mockReturnValueOnce({ upsert: upsertMock } as never)
+    vi.mocked(client.rpc).mockResolvedValue({ data: [fakeTrip], error: null } as never)
+    vi.mocked(client.from).mockReturnValue({ upsert: upsertMock } as never)
 
     const { result } = renderHookWithClient(() => useJoinTrip(), client)
     await act(async () => { await result.current.joinTrip('italy25') })

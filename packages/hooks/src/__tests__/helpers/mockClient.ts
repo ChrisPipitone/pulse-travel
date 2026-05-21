@@ -42,6 +42,7 @@ export function createMockClient(): SupabaseClient {
       signOut:             vi.fn().mockResolvedValue({ error: null }),
     },
     from:          vi.fn().mockReturnValue(mockQueryBuilder()),
+    rpc:           vi.fn().mockResolvedValue({ data: [], error: null }),
     channel:       vi.fn().mockReturnValue(mockChannel()),
     removeChannel: vi.fn().mockResolvedValue(undefined),
   } as unknown as SupabaseClient
