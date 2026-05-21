@@ -147,9 +147,9 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
                   )}
                 </div>
 
-                {/* Per-member rating chips */}
+                {/* Per-member rating chips — capped at 5, overflow shown as +N */}
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {members.map((member) => {
+                  {members.slice(0, 5).map((member) => {
                     const r = activityRatings.find((r) => r.user_id === member.id)
                     return (
                       <div
@@ -163,6 +163,14 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
                       </div>
                     )
                   })}
+                  {members.length > 5 && (
+                    <div
+                      title={`${members.length - 5} more members`}
+                      className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-muted"
+                    >
+                      +{members.length - 5}
+                    </div>
+                  )}
                 </div>
 
                 {/* Current user's rating badge */}

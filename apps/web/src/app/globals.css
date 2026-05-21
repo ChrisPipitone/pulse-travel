@@ -17,12 +17,12 @@
   --must-text:    #FFFFFF;
   --want-bg:      #00C9A7;
   --want-text:    #FFFFFF;
-  --meh-bg:       #E8E6E0;
-  --meh-text:     #8B8779;
+  --meh-bg:       #FFF0A0;
+  --meh-text:     #8B7400;
 
   --cell-must:    #FF5C35;
   --cell-want:    #00C9A7;
-  --cell-meh:     #D9D6CE;
+  --cell-meh:     #FFE566;
   --cell-empty:   #ECEAE4;
 
   --radius-card:  16px;
@@ -49,12 +49,12 @@
   --must-text:    #FFFFFF;
   --want-bg:      #D4A96A;
   --want-text:    #FFFFFF;
-  --meh-bg:       #E8E2D9;
-  --meh-text:     #8B7355;
+  --meh-bg:       #FFF0A0;
+  --meh-text:     #8B7400;
 
   --cell-must:    #C4603A;
   --cell-want:    #EFC98A;
-  --cell-meh:     #F0EBE3;
+  --cell-meh:     #FFE566;
   --cell-empty:   #F7F4F0;
 
   --radius-card:  8px;

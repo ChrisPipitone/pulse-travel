@@ -1,4 +1,4 @@
-.PHONY: up down reset status logs studio types migration link push seed reseed clear
+.PHONY: up down reset migrate status logs studio types migration link push seed reseed clear
 
 PSQL := $(shell which psql 2>/dev/null || echo /opt/homebrew/opt/postgresql@15/bin/psql)
 DB   := postgresql://postgres:postgres@127.0.0.1:54322/postgres
@@ -45,6 +45,12 @@ studio:
 	@xdg-open http://localhost:54323 2>/dev/null || true
 
 # ── Migrations ───────────────────────────────────────────────────────────────
+
+# Apply pending migrations to the running local DB without resetting data.
+# Use this to apply new migration files without losing your current data.
+# Use `make reset` if you want a full wipe + replay + seed.
+migrate:
+	supabase migration up
 
 # Usage: make migration name=create_trips_table
 migration:

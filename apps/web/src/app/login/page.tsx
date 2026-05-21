@@ -3,16 +3,29 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSignIn } from '@pulse/hooks'
+import { supabase } from '@/lib/supabase'
 import { Input } from '@pulse/ui'
 import { Button } from '@pulse/ui'
 import { Card } from '@pulse/ui'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [otp, setOtp] = useState('')
   const [sent, setSent] = useState(false)
+  const [pwLoading, setPwLoading] = useState(false)
+  const [pwError, setPwError] = useState<string | null>(null)
   const { sendOtp, verifyOtp, signInWithGoogle, loading, error } = useSignIn()
   const router = useRouter()
+
+  async function handlePasswordSignIn(e: React.FormEvent) {
+    e.preventDefault()
+    setPwLoading(true)
+    setPwError(null)
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) { setPwError(error.message); setPwLoading(false); return }
+    router.replace('/')
+  }
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -37,8 +50,7 @@ export default function LoginPage() {
   }
 
   function handleGoogleSignIn() {
-    const redirectTo = `${window.location.origin}/auth/callback`
-    signInWithGoogle(redirectTo)
+    signInWithGoogle(`${window.location.origin}/auth/callback`)
   }
 
   if (sent) {
@@ -68,7 +80,7 @@ export default function LoginPage() {
                 inputMode="numeric"
                 autoFocus
               />
-              <Button type="submit" variant="primary" disabled={loading || otp.length < 6}>
+              <Button type="submit" disabled={loading || otp.length < 6}>
                 {loading ? 'Verifying…' : 'Sign in'}
               </Button>
             </form>
@@ -95,24 +107,34 @@ export default function LoginPage() {
           <p className="mt-2 text-text-muted text-sm">Group vacation planner</p>
         </div>
 
-        <Card className="flex flex-col gap-4">
+        <Card className="flex flex-col gap-5">
           <div>
             <h2 className="text-base font-medium text-text-primary">Sign in</h2>
-            <p className="text-sm text-text-muted mt-0.5">Enter your email — we'll send a code.</p>
           </div>
 
-          <form onSubmit={handleSend} className="flex flex-col gap-3">
+          {/* Email + password */}
+          <form onSubmit={handlePasswordSignIn} className="flex flex-col gap-3">
             <Input
               type="email"
+              label="Email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoFocus
             />
-            <Button type="submit" variant="primary" disabled={loading}>
-              {loading ? 'Sending…' : 'Send code'}
+            <Input
+              type="password"
+              label="Password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <Button type="submit" disabled={pwLoading || loading}>
+              {pwLoading ? 'Signing in…' : 'Sign in'}
             </Button>
+            {pwError && <p className="text-xs text-red-500">{pwError}</p>}
           </form>
 
           <div className="flex items-center gap-3">
@@ -121,8 +143,15 @@ export default function LoginPage() {
             <div className="flex-1 h-px bg-border" />
           </div>
 
-          <Button variant="outline" disabled={loading} onClick={handleGoogleSignIn}>
-            {loading ? 'Redirecting…' : 'Continue with Google'}
+          {/* OTP */}
+          <form onSubmit={handleSend} className="flex flex-col gap-2">
+            <Button type="submit" variant="outline" disabled={loading || !email}>
+              {loading ? 'Sending…' : 'Send email code'}
+            </Button>
+          </form>
+
+          <Button variant="outline" disabled={pwLoading || loading} onClick={handleGoogleSignIn}>
+            Continue with Google
           </Button>
 
           {error && <p className="text-xs text-red-500 text-center">{error}</p>}
