@@ -24,10 +24,30 @@ Italy trip — family + friends. Some attend a wedding for a subset of days. Eve
 - **MEH** — indifferent / skip
 
 ### Compatibility Matrix
-- Visual matrix: people × activities, colored by rating
-- Group score per activity (weighted: MUST=3, WANT=1, MEH=0)
-- Cluster view: who should do what together
-- Conflict view: activities where people diverge
+The core differentiator. **Not** just a rating grid — the goal is to answer "who should do what together?"
+
+#### Compatibility Model
+- **Excited set** per member = activities they rated MUST or WANT
+- **MEH = neutral**, not a conflict. MEH means "I'll go or skip — doesn't define my trip." MEH is excluded from compatibility calculations entirely.
+- **Jaccard similarity** between two members = `|shared excited activities| / |union of excited activities|`
+  - Example: Sara excited about 5, Marco about 5, share 3 → `3/7 = 43%`
+- Multi-person Jaccard: `|intersection of all excited sets| / |union of all excited sets|`
+- Unrated activities are excluded (not enough signal)
+
+#### Five Matrix Views
+All five views are always available. Multiple views exist because different people parse data differently — more views = more likely someone finds their ideal read.
+
+| View | Key question answered | Description shown in UI |
+|---|---|---|
+| **By activity** | What did everyone rate each activity? | "See each activity's ratings across the whole group. Sorted by group enthusiasm score." |
+| **By member** | What did this person rate across all activities? | "See each member's ratings side by side. Spot who has the most opinions and where they align." |
+| **Who's in** | For each activity, which rating bucket did each member land in? | "See exactly who's excited, neutral, or unresponsive for every activity at a glance." |
+| **Find your crew** | For each activity, who's excited enough to do it together? | "Activities sorted by excitement breadth. See your natural sub-group for each experience — who to invite." |
+| **Travel twin** | Which members have the most overlapping excitement across all activities? | "Pairwise compatibility scores based on shared excitement (MUST + WANT overlap). Higher = more similar vacation style." |
+
+#### Group Score (existing, unchanged)
+- Per-activity group score: MUST×3 + WANT×1, MEH=0
+- Used for sort order in "By activity" and "Find your crew" views
 
 ### Date / Availability Layer
 - Each member sets arrival + departure dates
@@ -70,6 +90,27 @@ Italy trip — family + friends. Some attend a wedding for a subset of days. Eve
 - Technical complexity: medium-low MVP, medium with real-time collab
 - Revenue ceiling: modest standalone; strong with ***REMOVED*** + freemium
 - Verdict: solid side project / passive income vehicle
+
+---
+
+## UI/UX Design Philosophy
+
+> **Eyes-only information density** — every key fact should be readable at a glance. No clicking around, no deduction, no hovering to reveal hidden state.
+
+Principles:
+- Names are always visible, not just on hover. If a face/avatar appears, its name label appears with it.
+- Color encodes meaning consistently — the same member has the same color across all views; the same rating has the same color in every context.
+- Empty/unrated state is visible and explicit, not just the absence of something. Show "unrated" as a column or cell so gaps are obvious.
+- Pagination is a last resort — prefer showing more with scrolling. When pagination is unavoidable, label both axes clearly.
+- Multiple views of the same data are additive — each view should surface something the others don't. No view should exist purely as a layout variant.
+- Progressive disclosure only for actions (edit, delete), not for information.
+
+Applied examples:
+- **By activity / By member**: colored cells + score bars give rank and distribution simultaneously — no hover needed to see who's excited vs indifferent.
+- **Who's in**: member avatars with name labels always visible in rating-column cells. Consistent avatar colors let you track a person across activity rows without searching.
+- **Find your crew**: activities sorted by excited-member count. The sub-group is immediately visible — no inference needed. MUST avatars distinguished from WANT avatars so commitment level is clear.
+- **Travel twin**: N×N member grid with compatibility % in each cell, color-coded from low to high. You can read "Marco and Sara are 85% compatible" in one glance without clicking into anything.
+- **Activity list**: per-member rating chips visible on the list row itself — no click required to see who rated what.
 
 ---
 
@@ -188,7 +229,7 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] Technical docs — AUTH.md, DATA_MODEL.md, TRIP_FLOW.md, RATING_MATRIX.md, DEPLOYMENT.md (all Mermaid)
 - [x] Profile creation trigger — on_auth_user_created fires AFTER INSERT on auth.users, display_name from meta or email prefix
 - [x] Auth config — enable_confirmations = true, max_frequency = "60s" (config.toml + supabase restart)
-- [ ] Compatibility matrix UI — grid component on trip page (useCompatibilityMatrix hook + CompatibilityScore type exist)
+- [~] Compatibility matrix UI — 3 views built (By activity, By member, Who's in). Missing: Find your crew + Travel twin. Also: all views lack in-UI description text. Compatibility model needs rethink — current views show rating grids, not person-to-person Jaccard compatibility.
 - [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs + push migrations
 
 ## Dev Setup
