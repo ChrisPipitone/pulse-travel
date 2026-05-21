@@ -11,6 +11,11 @@ import type { Rating, Activity } from '@pulse/types'
 
 type Tab = 'activities' | 'matrix'
 
+const TAB_LABELS: Record<Tab, string> = {
+  activities: 'Activities',
+  matrix: 'Find your crew',
+}
+
 const ratingColor: Record<Rating, string> = {
   MUST: 'bg-must text-must-text',
   WANT: 'bg-want text-want-text',
@@ -117,13 +122,13 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 text-sm font-medium capitalize transition-colors border-b-2 -mb-px ${
+              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
                 tab === t
                   ? 'text-text-primary border-accent'
                   : 'text-text-muted border-transparent hover:text-text-primary'
               }`}
             >
-              {t}
+              {TAB_LABELS[t]}
             </button>
           ))}
         </div>
