@@ -147,7 +147,7 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
   return (
     <main className="min-h-screen bg-bg">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        <div className="flex flex-col lg:flex-row gap-8 lg:items-start">
 
           {/* ── Sidebar ─────────────────────────────────────────── */}
           <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6 lg:sticky lg:top-[5rem]">
