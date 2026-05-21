@@ -85,7 +85,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-text-primary">Your trips</h1>
-              <p className="text-sm text-text-muted mt-0.5">Plan, rate, and explore with your group.</p>
+              <p className="hidden sm:block text-sm text-text-muted mt-0.5">Plan, rate, and explore with your group.</p>
             </div>
             <Button onClick={() => setShowCreate(true)}>+ New trip</Button>
           </div>
