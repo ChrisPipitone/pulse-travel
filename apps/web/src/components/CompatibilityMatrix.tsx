@@ -790,10 +790,10 @@ export function CompatibilityMatrix() {
     <div className="flex flex-col gap-3">
 
       {/* View selector + description + horizontal paginator */}
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div className="flex flex-col gap-1.5 min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+        <div className="flex flex-col gap-1.5 min-w-0 w-full sm:w-auto">
           {/* 5-way segmented control — scrollable on mobile */}
-          <div className="overflow-x-auto pb-px">
+          <div className="w-full overflow-x-auto pb-px">
             <div className="inline-flex items-center border border-border rounded-[var(--radius-btn)] overflow-hidden min-w-max">
               {VIEWS.map(({ id, label }) => (
                 <button
