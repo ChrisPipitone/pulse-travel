@@ -25,6 +25,9 @@
   --cell-meh:     #FFE566;
   --cell-empty:   #ECEAE4;
 
+  --bg-overlay:   #1A1916;
+  --text-overlay: #F5F4F0;
+
   --radius-card:  16px;
   --radius-badge: 20px;
   --radius-btn:   20px;
@@ -57,6 +60,9 @@
   --cell-meh:     #FFE566;
   --cell-empty:   #F7F4F0;
 
+  --bg-overlay:   #2C1810;
+  --text-overlay: #FAFAF8;
+
   --radius-card:  8px;
   --radius-badge: 4px;
   --radius-btn:   8px;
@@ -69,9 +75,11 @@
 @theme inline {
   --color-bg:           var(--bg);
   --color-bg-card:      var(--bg-card);
+  --color-bg-overlay:   var(--bg-overlay);
   --color-text-primary: var(--text-primary);
   --color-text-muted:   var(--text-muted);
   --color-text-subtle:  var(--text-subtle);
+  --color-text-overlay: var(--text-overlay);
   --color-accent:       var(--accent);
   --color-accent-2:     var(--accent-2);
   --color-border:       var(--border);
