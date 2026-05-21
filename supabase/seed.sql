@@ -55,6 +55,8 @@ insert into auth.identities (provider_id, user_id, identity_data, provider, crea
 
 -- ── Profiles ──────────────────────────────────────────────────────────────────
 
+-- on_auth_user_created trigger fires on auth.users INSERT above, creating profiles
+-- with email-prefix names. Override with proper display names here.
 insert into profiles (id, display_name) values
   ('00000000-0000-0000-0000-000000000001', 'Marco'),
   ('00000000-0000-0000-0000-000000000002', 'Sara'),
@@ -65,7 +67,8 @@ insert into profiles (id, display_name) values
   ('00000000-0000-0000-0000-000000000007', 'Kai'),
   ('00000000-0000-0000-0000-000000000008', 'Nadia'),
   ('00000000-0000-0000-0000-000000000009', 'Tom'),
-  ('00000000-0000-0000-0000-000000000010', 'Yuki');
+  ('00000000-0000-0000-0000-000000000010', 'Yuki')
+on conflict (id) do update set display_name = excluded.display_name;
 
 -- ── Trip ─────────────────────────────────────────────────────────────────────
 
