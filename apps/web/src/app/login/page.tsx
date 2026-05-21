@@ -18,18 +18,21 @@ export default function LoginPage() {
   const { sendOtp, verifyOtp, signInWithGoogle, loading, error } = useSignIn()
   const router = useRouter()
 
+  const trimmedEmail = email.trim()
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)
+
   async function handlePasswordSignIn(e: React.FormEvent) {
     e.preventDefault()
     setPwLoading(true)
     setPwError(null)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password })
     if (error) { setPwError(error.message); setPwLoading(false); return }
     router.replace('/')
   }
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
-    await sendOtp(email)
+    await sendOtp(trimmedEmail)
     setSent(true)
   }
 
@@ -131,7 +134,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <Button type="submit" disabled={pwLoading || loading}>
+            <Button type="submit" disabled={pwLoading || loading || !emailValid || !password}>
               {pwLoading ? 'Signing in…' : 'Sign in'}
             </Button>
             {pwError && <p className="text-xs text-red-500">{pwError}</p>}
@@ -145,7 +148,7 @@ export default function LoginPage() {
 
           {/* OTP */}
           <form onSubmit={handleSend} className="flex flex-col gap-2">
-            <Button type="submit" variant="outline" disabled={loading || !email}>
+            <Button type="submit" variant="outline" disabled={loading || !emailValid}>
               {loading ? 'Sending…' : 'Send email code'}
             </Button>
           </form>

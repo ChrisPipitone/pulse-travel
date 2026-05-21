@@ -132,6 +132,10 @@ export default function Home() {
               placeholder="Invite code"
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value)}
+              maxLength={50}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               className="flex-1 bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
             />
             <Button type="submit" variant="outline" disabled={!joinCode.trim()}>
