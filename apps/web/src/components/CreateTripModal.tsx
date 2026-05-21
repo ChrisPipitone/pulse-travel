@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
+import { useToast } from '@/components/ToastProvider'
 import type { Member } from '@pulse/types'
 
 type Fields = {
@@ -34,17 +35,35 @@ export function CreateTripModal({
   loading, error, onClose, onSubmit,
   members, ownerId, onRemoveMember, removingMemberId, removeError,
 }: Props) {
+  const { showToast } = useToast()
   const [fields, setFields] = useState<Fields>({ name: '', destination: '', start_date: '', end_date: '' })
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null)
   const pendingRemoveRef = useRef<string | null>(null)
   const removeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [hiddenMemberIds, setHiddenMemberIds] = useState<Set<string>>(new Set())
+  const undoMemberTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   function handleRemoveClick(memberId: string) {
     if (pendingRemoveRef.current === memberId) {
       clearTimeout(removeTimerRef.current!)
       pendingRemoveRef.current = null
       setPendingRemoveId(null)
-      onRemoveMember?.(memberId)
+      setHiddenMemberIds(prev => new Set(prev).add(memberId))
+      const timer = setTimeout(() => {
+        undoMemberTimersRef.current.delete(memberId)
+        setHiddenMemberIds(prev => { const s = new Set(prev); s.delete(memberId); return s })
+        onRemoveMember?.(memberId)
+      }, 4000)
+      undoMemberTimersRef.current.set(memberId, timer)
+      showToast(
+        'Member removed',
+        () => {
+          clearTimeout(undoMemberTimersRef.current.get(memberId))
+          undoMemberTimersRef.current.delete(memberId)
+          setHiddenMemberIds(prev => { const s = new Set(prev); s.delete(memberId); return s })
+        },
+        4000,
+      )
       return
     }
     clearTimeout(removeTimerRef.current!)
@@ -159,7 +178,7 @@ export function CreateTripModal({
           <div className="flex flex-col gap-3 border-t border-border pt-5">
             <h3 className="text-sm font-semibold text-text-primary">Members</h3>
             <div className="flex flex-col gap-1">
-              {members.map((m) => {
+              {members.filter(m => !hiddenMemberIds.has(m.id)).map((m) => {
                 const isOwner = m.id === ownerId
                 const isRemoving = removingMemberId === m.id
                 return (

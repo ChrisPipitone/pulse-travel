@@ -20,6 +20,7 @@ import { CompatibilityMatrix } from "@/components/CompatibilityMatrix";
 import { MemberDatesModal } from "@/components/MemberDatesModal";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ToastProvider";
 import type { Rating, Activity } from "@pulse/types";
 
 type Tab = "activities" | "matrix";
@@ -96,6 +97,8 @@ export default function TripPage({
   const { removeMember, removingId, error: removeError } = useRemoveMember();
   const router = useRouter();
 
+  const { showToast } = useToast();
+
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
   const [showDatesModal, setShowDatesModal] = useState(false);
   const [showEditTrip, setShowEditTrip] = useState(false);
@@ -104,6 +107,8 @@ export default function TripPage({
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const pendingDeleteRef = useRef<string | null>(null);
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(new Set());
+  const undoTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   function requestDelete(key: string, ms = 3000) {
     if (pendingDeleteRef.current === key) {
@@ -166,7 +171,22 @@ export default function TripPage({
 
   async function handleDelete(activity: Activity) {
     if (!requestDelete(activity.id, 3000)) return;
-    await deleteActivity(activity.id);
+    setHiddenActivityIds(prev => new Set(prev).add(activity.id));
+    const timer = setTimeout(async () => {
+      undoTimersRef.current.delete(activity.id);
+      setHiddenActivityIds(prev => { const s = new Set(prev); s.delete(activity.id); return s; });
+      await deleteActivity(activity.id);
+    }, 4000);
+    undoTimersRef.current.set(activity.id, timer);
+    showToast(
+      `"${activity.name}" deleted`,
+      () => {
+        clearTimeout(undoTimersRef.current.get(activity.id));
+        undoTimersRef.current.delete(activity.id);
+        setHiddenActivityIds(prev => { const s = new Set(prev); s.delete(activity.id); return s; });
+      },
+      4000,
+    );
   }
 
   async function handleEditTrip(fields: {
@@ -186,7 +206,19 @@ export default function TripPage({
 
   async function handleDeleteTrip() {
     if (!requestDelete('trip', 5000)) return;
-    await deleteTrip(trip!.id, () => router.replace("/"));
+    const timer = setTimeout(async () => {
+      undoTimersRef.current.delete('trip');
+      await deleteTrip(trip!.id, () => router.replace("/"));
+    }, 5000);
+    undoTimersRef.current.set('trip', timer);
+    showToast(
+      `Trip "${trip!.name}" deleted`,
+      () => {
+        clearTimeout(undoTimersRef.current.get('trip'));
+        undoTimersRef.current.delete('trip');
+      },
+      5000,
+    );
   }
 
   function handleCopyInvite() {
@@ -402,12 +434,14 @@ export default function TripPage({
             </div>
 
             {/* Activities tab */}
-            {tab === "activities" && (
+            {tab === "activities" && (() => {
+              const visibleActivities = activities.filter(a => !hiddenActivityIds.has(a.id));
+              return (
               <>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-text-muted">
-                    {activities.length}{" "}
-                    {activities.length === 1 ? "activity" : "activities"}
+                    {visibleActivities.length}{" "}
+                    {visibleActivities.length === 1 ? "activity" : "activities"}
                   </p>
                   <Button size="sm" onClick={() => setModal({ mode: "add" })}>
                     + Add activity
@@ -415,7 +449,7 @@ export default function TripPage({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  {activities.length === 0 && (
+                  {visibleActivities.length === 0 && (
                     <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
                       <p className="text-sm font-medium text-text-primary">
                         No activities yet
@@ -425,7 +459,7 @@ export default function TripPage({
                       </p>
                     </div>
                   )}
-                  {activities.map((activity) => {
+                  {visibleActivities.map((activity) => {
                     const activityRatings = ratings.filter(
                       (r) => r.activity_id === activity.id,
                     );
@@ -541,7 +575,8 @@ export default function TripPage({
                   })}
                 </div>
               </>
-            )}
+              );
+            })()}
 
             {/* Matrix tab */}
             {tab === "matrix" && <CompatibilityMatrix />}
