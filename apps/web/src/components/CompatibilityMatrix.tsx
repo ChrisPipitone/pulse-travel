@@ -75,7 +75,7 @@ function Cell({ rating }: { rating?: Rating }) {
 function ScoreBar({ score, max }: { score: number; max: number }) {
   const pct = max > 0 ? Math.round((score / max) * 100) : 0
   return (
-    <div className="flex items-center gap-2 min-w-[72px]">
+    <div className="flex items-center gap-2 min-w-[56px]">
       <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
         <div className="h-full bg-accent rounded-full transition-[width]" style={{ width: `${pct}%` }} />
       </div>
@@ -175,7 +175,7 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
         {activities.map((activity, i) => {
           const score = scores[i]
           return (
-            <div key={activity.id} className="px-4 py-3 flex flex-col gap-2">
+            <div key={activity.id} className="px-3 py-3 flex flex-col gap-2">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-xs font-medium text-text-primary">{activity.name}</p>
@@ -265,7 +265,7 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
       {/* Mobile: one card per member, activities as rows */}
       <div className="sm:hidden flex flex-col divide-y divide-border">
         {members.map(m => (
-          <div key={m.id} className="px-4 py-3 flex flex-col gap-2">
+          <div key={m.id} className="px-3 py-3 flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle shrink-0">
                 {m.name.charAt(0).toUpperCase()}
@@ -372,7 +372,7 @@ function RosterCards({ activities, scores, members, maxScore, colorMap }: {
           else unrated.push(m)
         }
         return (
-          <div key={activity.id} className="px-4 py-3 flex flex-col gap-2">
+          <div key={activity.id} className="px-3 py-3 flex flex-col gap-2">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <p className="text-xs font-medium text-text-primary">{activity.name}</p>
@@ -487,7 +487,7 @@ function CrewCards({ rows, maxScore, colorMap }: {
         return (
           <div
             key={activity.id}
-            className={`bg-bg-card rounded-[var(--radius-card)] border border-border px-5 py-4 flex flex-col gap-3 transition-opacity ${isEmpty ? 'opacity-40' : ''}`}
+            className={`bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-4 flex flex-col gap-3 transition-opacity ${isEmpty ? 'opacity-40' : ''}`}
           >
             {/* Header: name + excited count */}
             <div className="flex items-start justify-between gap-3">
