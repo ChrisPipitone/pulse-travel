@@ -109,6 +109,21 @@ export async function upsertRating(client: SupabaseClient, rating: Omit<Activity
   await client.from('activity_ratings').upsert(rating, { onConflict: 'activity_id,user_id' })
 }
 
+export async function updateMemberDates(
+  client: SupabaseClient,
+  tripId: string,
+  userId: string,
+  arrival: string | null,
+  departure: string | null
+): Promise<void> {
+  const { error } = await client
+    .from('trip_members')
+    .update({ arrival_date: arrival, departure_date: departure })
+    .eq('trip_id', tripId)
+    .eq('user_id', userId)
+  if (error) throw new Error(error.message)
+}
+
 export async function deleteRating(client: SupabaseClient, activityId: string, userId: string): Promise<void> {
   const { error } = await client
     .from('activity_ratings')

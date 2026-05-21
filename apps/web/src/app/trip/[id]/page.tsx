@@ -1,12 +1,13 @@
 'use client'
 
 import { use, useState } from 'react'
-import { useTripData, useSession, useAddActivity, useActivityActions, useRateActivity } from '@pulse/hooks'
+import { useTripData, useSession, useAddActivity, useActivityActions, useRateActivity, useUpdateMemberDates } from '@pulse/hooks'
 import { useTripStore } from '@pulse/store'
 import { Button } from '@pulse/ui'
 import { ActivityFormModal } from '@/components/ActivityFormModal'
 import { ActivityDetailModal } from '@/components/ActivityDetailModal'
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix'
+import { MemberDatesModal } from '@/components/MemberDatesModal'
 import type { Rating, Activity } from '@pulse/types'
 
 type Tab = 'activities' | 'matrix'
@@ -23,8 +24,16 @@ const ratingColor: Record<Rating, string> = {
 }
 
 function formatDateRange(start: string, end: string) {
-  const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  const fmt = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   return `${fmt(start)} – ${fmt(end)}`
+}
+
+function formatMemberDates(arrival?: string, departure?: string): string | null {
+  const fmt = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  if (arrival && departure) return `${fmt(arrival)} – ${fmt(departure)}`
+  if (arrival) return `From ${fmt(arrival)}`
+  if (departure) return `Until ${fmt(departure)}`
+  return null
 }
 
 type ModalState =
@@ -45,9 +54,11 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
   const { addActivity, loading: adding, error: addError } = useAddActivity()
   const { updateActivity, deleteActivity, loading: acting, error: actError } = useActivityActions()
   const { rateActivity, loading: rating } = useRateActivity()
+  const { updateDates, loading: datesLoading, error: datesError } = useUpdateMemberDates()
 
-  const [modal, setModal] = useState<ModalState>({ mode: 'closed' })
-  const [tab, setTab]     = useState<Tab>('activities')
+  const [modal, setModal]           = useState<ModalState>({ mode: 'closed' })
+  const [showDatesModal, setShowDatesModal] = useState(false)
+  const [tab, setTab]               = useState<Tab>('activities')
 
   const userId  = session?.user.id
   const isOwner = !!userId && trip?.created_by === userId
@@ -137,15 +148,33 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
         {tab === 'activities' && (
           <>
             {/* Member legend */}
-            <div className="flex flex-wrap gap-2">
-              {members.map((m) => (
-                <div key={m.id} className="flex items-center gap-1.5 text-xs text-text-muted">
-                  <span className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-text-subtle font-medium text-xs">
-                    {m.name.charAt(0).toUpperCase()}
-                  </span>
-                  {m.name.split(' ')[0]}
-                </div>
-              ))}
+            <div className="flex flex-wrap gap-x-4 gap-y-2">
+              {members.map((m) => {
+                const isMe = m.id === userId
+                const dateStr = formatMemberDates(m.arrival_date, m.departure_date)
+                return (
+                  <div key={m.id} className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-text-subtle font-medium text-xs shrink-0">
+                      {m.name.charAt(0).toUpperCase()}
+                    </span>
+                    <div className="flex flex-col leading-tight">
+                      <span className="text-xs font-medium text-text-primary">{m.name.split(' ')[0]}</span>
+                      <span className="text-xs text-text-muted">{dateStr ?? (isMe ? 'Full trip' : 'Full trip')}</span>
+                    </div>
+                    {isMe && (
+                      <button
+                        onClick={() => setShowDatesModal(true)}
+                        className="p-1 text-text-muted hover:text-text-primary transition-colors"
+                        title="Edit my dates"
+                      >
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
             </div>
 
             {/* Activity list header */}
@@ -273,6 +302,26 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
         onClose={() => setModal({ mode: 'closed' })}
         onSubmit={handleAdd}
       />
+
+      {(() => {
+        const me = members.find((m) => m.id === userId)
+        return (
+          <MemberDatesModal
+            open={showDatesModal}
+            tripStart={trip.start_date ?? null}
+            tripEnd={trip.end_date ?? null}
+            initialArrival={me?.arrival_date ?? null}
+            initialDeparture={me?.departure_date ?? null}
+            loading={datesLoading}
+            error={datesError}
+            onClose={() => setShowDatesModal(false)}
+            onSubmit={async (arrival, departure) => {
+              await updateDates(arrival, departure)
+              setShowDatesModal(false)
+            }}
+          />
+        )
+      })()}
 
       <ActivityFormModal
         open={modal.mode === 'edit'}
