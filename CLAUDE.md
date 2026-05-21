@@ -172,14 +172,23 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] RLS policies: `supabase/rls.sql` — 27 policies, no security definer, inline subqueries only
 - [x] Migrations: `supabase/migrations/` — init_schema + init_rls + revoke_anon_select, applied local + hosted
 - [x] Hosted Supabase: project `qphuglkhzdwqamslekyc` (West US Oregon), linked, migrations pushed
-- [x] 9 hooks in `packages/hooks/src/` — 37 tests passing
 - [x] SupabaseProvider wired into `apps/web/src/app/layout.tsx` via `Providers.tsx`
-- [x] Auth flow: OTP sign-in (`/login`), protected home route, sign out
-- [ ] Trip page — activity list with per-member ratings (`/trip/[id]`)
-- [ ] Rating tap interaction — MUST/WANT/MEH on activity row
-- [ ] Compatibility matrix component
-- [ ] Trip create + join flow (home page post-auth)
-- [ ] Add activity UI
+- [x] Auth flow: email+password, OTP, Google OAuth (`/login`), protected routes, sign out
+- [x] Seed: 10 users, 3 trips (Italy/Barcelona/Tokyo), activities, ratings — password login works
+- [x] RLS: is_trip_member() SECURITY DEFINER breaks trips↔trip_members recursion
+- [x] Trip page `/trip/[id]` — activity list, per-member rating chips (capped at 5+N), real-time
+- [x] Activity CRUD — add/edit/delete with modal, RLS enforced (adder or trip owner)
+- [x] Activity detail modal — MUST/WANT/MEH chip rating, group ratings, optimistic update + rollback
+- [x] 11 hooks, 49 tests passing
+- [x] Trip member limit — 50-member cap via BEFORE INSERT trigger
+- [x] Invite code lookup — SECURITY DEFINER RPC (non-member safe)
+- [x] Home page — trip list with member count, create trip modal, join via invite code
+- [x] Trip create flow — insert trip + add creator as first member
+- [x] Join flow — `/join?code=<code>` page, trip preview, redirect on success
+- [x] Technical docs — AUTH.md, DATA_MODEL.md, TRIP_FLOW.md, RATING_MATRIX.md, DEPLOYMENT.md (all Mermaid)
+- [ ] Compatibility matrix UI — grid component on trip page (hook + scoring logic exists)
+- [ ] Profile creation trigger — auth.users INSERT → public.profiles row (gap: display name breaks on new signup)
+- [ ] Auth config for prod — enable_confirmations = true, max_frequency = "60s"
 - [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs
 
 ## Dev Setup
