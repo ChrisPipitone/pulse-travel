@@ -155,7 +155,7 @@ export function CreateTripModal({
                         type="button"
                         onClick={() => onRemoveMember(m.id)}
                         disabled={isRemoving}
-                        className="text-xs text-text-muted hover:text-red-500 transition-colors disabled:opacity-40 px-1 py-0.5"
+                        className="text-xs text-red-500 hover:text-red-600 transition-colors disabled:opacity-40 px-1 py-0.5"
                       >
                         {isRemoving ? 'Removing…' : 'Remove'}
                       </button>
