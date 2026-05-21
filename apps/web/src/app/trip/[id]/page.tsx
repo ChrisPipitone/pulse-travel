@@ -9,7 +9,6 @@ import { ActivityDetailModal } from '@/components/ActivityDetailModal'
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix'
 import { MemberDatesModal } from '@/components/MemberDatesModal'
 import { CreateTripModal } from '@/components/CreateTripModal'
-import { AppHeader } from '@/components/AppHeader'
 import { useRouter } from 'next/navigation'
 import type { Rating, Activity } from '@pulse/types'
 
@@ -147,204 +146,233 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
 
   return (
     <main className="min-h-screen bg-bg">
-      <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+      <div className="max-w-screen-xl mx-auto px-6 py-8">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
 
-        <AppHeader back={{ label: 'Trips', href: '/' }} />
+          {/* ── Sidebar ─────────────────────────────────────────── */}
+          <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6 lg:sticky lg:top-22">
 
-        {/* Trip header */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-col gap-1 min-w-0">
-            <h1 className="text-2xl font-semibold text-text-primary truncate">{trip.name}</h1>
-            <p className="text-text-muted text-sm">
-              {trip.destination}
-              {trip.start_date && trip.end_date && <> · {formatDateRange(trip.start_date, trip.end_date)}</>}
-              {' · '}{members.length} {members.length === 1 ? 'person' : 'people'}
-            </p>
-          </div>
-          {isOwner && (
-            <div className="flex items-center gap-1 shrink-0 mt-1">
-              <button
-                onClick={() => setShowEditTrip(true)}
-                className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
-                title="Edit trip"
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
-                </svg>
-              </button>
-              <button
-                onClick={handleDeleteTrip}
-                disabled={deleting}
-                className="p-1.5 rounded text-text-muted hover:text-red-500 hover:bg-bg transition-colors disabled:opacity-40"
-                title="Delete trip"
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5"/>
-                </svg>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Invite bar */}
-        <div className="flex items-center gap-2 bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2">
-          <span className="text-xs text-text-muted shrink-0">Invite code</span>
-          <code className="text-xs font-mono text-text-primary flex-1 truncate">{trip.invite_code}</code>
-          <button
-            onClick={handleCopyInvite}
-            className="text-xs font-medium text-accent hover:opacity-80 transition-opacity shrink-0"
-          >
-            {copied ? 'Copied!' : 'Copy link'}
-          </button>
-        </div>
-
-        {/* Member schedule */}
-        <div className="flex flex-wrap gap-x-4 gap-y-2">
-          {members.map((m) => {
-            const isMe = m.id === userId
-            const dateStr = formatMemberDates(m.arrival_date, m.departure_date)
-            return (
-              <div key={m.id} className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-text-subtle font-medium text-xs shrink-0">
-                  {m.name.charAt(0).toUpperCase()}
-                </span>
-                <div className="flex flex-col leading-tight">
-                  <span className="text-xs font-medium text-text-primary">{m.name.split(' ')[0]}</span>
-                  <span className="text-xs text-text-muted">{dateStr ?? 'Full trip'}</span>
+            {/* Trip identity */}
+            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex flex-col gap-0.5 min-w-0">
+                  <h1 className="text-lg font-semibold text-text-primary leading-tight">{trip.name}</h1>
+                  <p className="text-sm text-text-muted truncate">{trip.destination}</p>
                 </div>
-                {isMe && (
-                  <button
-                    onClick={() => setShowDatesModal(true)}
-                    className="p-1 text-text-muted hover:text-text-primary transition-colors"
-                    title="Edit my dates"
-                  >
-                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
-                    </svg>
-                  </button>
+                {isOwner && (
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={() => setShowEditTrip(true)}
+                      className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
+                      title="Edit trip"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
+                      </svg>
+                    </button>
+                    <button
+                      onClick={handleDeleteTrip}
+                      disabled={deleting}
+                      className="p-1.5 rounded-lg text-text-muted hover:text-red-500 hover:bg-bg transition-colors disabled:opacity-40"
+                      title="Delete trip"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5"/>
+                      </svg>
+                    </button>
+                  </div>
                 )}
               </div>
-            )
-          })}
-        </div>
 
-        {/* Tab bar */}
-        <div className="flex border-b border-border -mb-2">
-          {(['activities', 'matrix'] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                tab === t
-                  ? 'text-text-primary border-accent'
-                  : 'text-text-muted border-transparent hover:text-text-primary'
-              }`}
-            >
-              {TAB_LABELS[t]}
-            </button>
-          ))}
-        </div>
+              {trip.start_date && trip.end_date && (
+                <div className="flex items-center gap-2 text-xs text-text-muted">
+                  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="1.5" y="2.5" width="11" height="10" rx="1.5"/>
+                    <path d="M1.5 6h11M4.5 1v3M9.5 1v3"/>
+                  </svg>
+                  {formatDateRange(trip.start_date, trip.end_date)}
+                </div>
+              )}
 
-        {/* Activities tab */}
-        {tab === 'activities' && (
-          <>
-            {/* Activity list header */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wide">Activities</h2>
-              <Button size="sm" onClick={() => setModal({ mode: 'add' })}>+ Add</Button>
+              <div className="flex items-center gap-2 text-xs text-text-muted">
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="5" cy="4.5" r="2"/>
+                  <path d="M1.5 12c0-2.21 1.567-4 3.5-4s3.5 1.79 3.5 4"/>
+                  <circle cx="10" cy="4.5" r="2"/>
+                  <path d="M10 8.5c1.2.3 2.5 1.5 2.5 3.5"/>
+                </svg>
+                {members.length} {members.length === 1 ? 'person' : 'people'}
+              </div>
             </div>
 
-            {/* Activity list */}
-            <div className="flex flex-col gap-2">
-              {activities.length === 0 && (
-                <p className="text-text-muted text-sm">No activities yet.</p>
-              )}
-              {activities.map((activity) => {
-                const activityRatings = ratings.filter((r) => r.activity_id === activity.id)
-                const myRating = activityRatings.find((r) => r.user_id === session?.user.id)
-                const editable = canEdit(activity)
-
-                return (
-                  <div
-                    key={activity.id}
-                    className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3 flex items-center gap-4 cursor-pointer hover:border-border/80 transition-colors"
-                    onClick={() => setModal({ mode: 'view', activity })}
-                  >
-                    {/* Activity name */}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-text-primary truncate">{activity.name}</p>
-                      {activity.location && (
-                        <p className="text-xs text-text-muted truncate">{activity.location}</p>
-                      )}
-                    </div>
-
-                    {/* Per-member rating chips — capped at 5, overflow shown as +N */}
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {members.slice(0, 5).map((member) => {
-                        const r = activityRatings.find((r) => r.user_id === member.id)
-                        return (
-                          <div
-                            key={member.id}
-                            title={`${member.name.split(' ')[0]}: ${r?.rating ?? 'no rating'}`}
-                            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
-                              r ? ratingColor[r.rating] : 'bg-border text-text-subtle'
-                            }`}
-                          >
-                            {member.name.charAt(0).toUpperCase()}
-                          </div>
-                        )
-                      })}
-                      {members.length > 5 && (
-                        <div
-                          title={`${members.length - 5} more members`}
-                          className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-muted"
-                        >
-                          +{members.length - 5}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Current user's rating badge */}
-                    {myRating && (
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] ${ratingColor[myRating.rating]}`}>
-                        {myRating.rating}
+            {/* Member schedule */}
+            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
+              <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">Members</h2>
+              <div className="flex flex-col gap-2">
+                {members.map((m) => {
+                  const isMe = m.id === userId
+                  const dateStr = formatMemberDates(m.arrival_date, m.departure_date)
+                  return (
+                    <div key={m.id} className="flex items-center gap-2.5">
+                      <span className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-text-subtle font-semibold text-xs shrink-0">
+                        {m.name.charAt(0).toUpperCase()}
                       </span>
-                    )}
-
-                    {/* Edit / delete */}
-                    {editable && (
-                      <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex flex-col leading-tight min-w-0 flex-1">
+                        <span className="text-xs font-medium text-text-primary">{m.name.split(' ')[0]}</span>
+                        <span className="text-[11px] text-text-muted">{dateStr ?? 'Full trip'}</span>
+                      </div>
+                      {isMe && (
                         <button
-                          onClick={() => setModal({ mode: 'edit', activity })}
-                          className="p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
-                          title="Edit"
+                          onClick={() => setShowDatesModal(true)}
+                          className="p-1 text-text-muted hover:text-text-primary transition-colors shrink-0"
+                          title="Edit my dates"
                         >
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
                           </svg>
                         </button>
-                        <button
-                          onClick={() => handleDelete(activity)}
-                          disabled={acting}
-                          className="p-1.5 rounded text-text-muted hover:text-red-500 hover:bg-bg transition-colors disabled:opacity-40"
-                          title="Delete"
-                        >
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5"/>
-                          </svg>
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          </>
-        )}
 
-        {/* Matrix tab */}
-        {tab === 'matrix' && <CompatibilityMatrix />}
+            {/* Invite code */}
+            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
+              <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">Invite</h2>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 bg-bg text-xs font-mono text-text-primary px-2.5 py-1.5 rounded-lg border border-border truncate">
+                  {trip.invite_code}
+                </code>
+                <button
+                  onClick={handleCopyInvite}
+                  className="shrink-0 text-xs font-medium text-accent hover:opacity-75 transition-opacity px-2.5 py-1.5 rounded-lg border border-accent/30 bg-accent/5"
+                >
+                  {copied ? 'Copied!' : 'Copy link'}
+                </button>
+              </div>
+            </div>
 
+          </aside>
+
+          {/* ── Main content ─────────────────────────────────────── */}
+          <div className="flex-1 min-w-0 flex flex-col gap-5">
+
+            {/* Tab bar */}
+            <div className="flex border-b border-border">
+              {(['activities', 'matrix'] as Tab[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                    tab === t
+                      ? 'text-text-primary border-accent'
+                      : 'text-text-muted border-transparent hover:text-text-primary'
+                  }`}
+                >
+                  {TAB_LABELS[t]}
+                </button>
+              ))}
+            </div>
+
+            {/* Activities tab */}
+            {tab === 'activities' && (
+              <>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-text-muted">{activities.length} {activities.length === 1 ? 'activity' : 'activities'}</p>
+                  <Button size="sm" onClick={() => setModal({ mode: 'add' })}>+ Add activity</Button>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  {activities.length === 0 && (
+                    <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
+                      <p className="text-sm font-medium text-text-primary">No activities yet</p>
+                      <p className="text-xs text-text-muted">Add the first one for the group to rate.</p>
+                    </div>
+                  )}
+                  {activities.map((activity) => {
+                    const activityRatings = ratings.filter((r) => r.activity_id === activity.id)
+                    const myRating = activityRatings.find((r) => r.user_id === session?.user.id)
+                    const editable = canEdit(activity)
+
+                    return (
+                      <div
+                        key={activity.id}
+                        className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-border/60 hover:shadow-sm transition-all"
+                        onClick={() => setModal({ mode: 'view', activity })}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-text-primary truncate">{activity.name}</p>
+                          {activity.location && (
+                            <p className="text-xs text-text-muted truncate mt-0.5">{activity.location}</p>
+                          )}
+                        </div>
+
+                        {/* Per-member rating chips — capped at 5 */}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {members.slice(0, 5).map((member) => {
+                            const r = activityRatings.find((r) => r.user_id === member.id)
+                            return (
+                              <div
+                                key={member.id}
+                                title={`${member.name.split(' ')[0]}: ${r?.rating ?? 'unrated'}`}
+                                className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold ${
+                                  r ? ratingColor[r.rating] : 'bg-border text-text-subtle'
+                                }`}
+                              >
+                                {member.name.charAt(0).toUpperCase()}
+                              </div>
+                            )
+                          })}
+                          {members.length > 5 && (
+                            <div className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-[11px] font-semibold text-text-muted">
+                              +{members.length - 5}
+                            </div>
+                          )}
+                        </div>
+
+                        {myRating && (
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}>
+                            {myRating.rating}
+                          </span>
+                        )}
+
+                        {editable && (
+                          <div className="flex items-center gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => setModal({ mode: 'edit', activity })}
+                              className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
+                              title="Edit"
+                            >
+                              <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(activity)}
+                              disabled={acting}
+                              className="p-1.5 rounded-lg text-text-muted hover:text-red-500 hover:bg-bg transition-colors disabled:opacity-40"
+                              title="Delete"
+                            >
+                              <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5"/>
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+
+            {/* Matrix tab */}
+            {tab === 'matrix' && <CompatibilityMatrix />}
+
+          </div>
+        </div>
       </div>
 
       <ActivityDetailModal
