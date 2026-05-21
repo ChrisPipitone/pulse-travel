@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession, useSignOut, useUserTrips, useCreateTrip } from '@pulse/hooks'
+import { useSession, useUserTrips, useCreateTrip } from '@pulse/hooks'
 import { Button } from '@pulse/ui'
+import { AppHeader } from '@/components/AppHeader'
 import { CreateTripModal } from '@/components/CreateTripModal'
 import type { Trip } from '@pulse/types'
 
@@ -19,7 +20,6 @@ function formatDateRange(start?: string | null, end?: string | null) {
 
 export default function Home() {
   const { session, loading: sessionLoading } = useSession()
-  const { signOut, loading: signingOut } = useSignOut()
   const { trips, loading: tripsLoading, refresh } = useUserTrips()
   const { createTrip, loading: creating, error: createError } = useCreateTrip()
   const router = useRouter()
@@ -30,11 +30,6 @@ export default function Home() {
   useEffect(() => {
     if (!sessionLoading && !session) router.replace('/login')
   }, [session, sessionLoading, router])
-
-  async function handleSignOut() {
-    await signOut()
-    router.replace('/login')
-  }
 
   async function handleCreate(fields: { name: string; destination: string; start_date: string; end_date: string }) {
     const trip = await createTrip({
@@ -68,17 +63,7 @@ export default function Home() {
     <main className="min-h-screen bg-bg">
       <div className="max-w-lg mx-auto px-4 py-8 flex flex-col gap-8">
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-text-primary">Pulse</h1>
-          <button
-            onClick={handleSignOut}
-            disabled={signingOut}
-            className="text-xs text-text-muted hover:text-text-primary transition-colors disabled:opacity-40"
-          >
-            {signingOut ? 'Signing out…' : 'Sign out'}
-          </button>
-        </div>
+        <AppHeader />
 
         {/* Trips */}
         <section className="flex flex-col gap-3">

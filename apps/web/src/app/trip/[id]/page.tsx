@@ -9,6 +9,7 @@ import { ActivityDetailModal } from '@/components/ActivityDetailModal'
 import { CompatibilityMatrix } from '@/components/CompatibilityMatrix'
 import { MemberDatesModal } from '@/components/MemberDatesModal'
 import { CreateTripModal } from '@/components/CreateTripModal'
+import { AppHeader } from '@/components/AppHeader'
 import { useRouter } from 'next/navigation'
 import type { Rating, Activity } from '@pulse/types'
 
@@ -147,6 +148,8 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
   return (
     <main className="min-h-screen bg-bg">
       <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+
+        <AppHeader back={{ label: 'Trips', href: '/' }} />
 
         {/* Trip header */}
         <div className="flex items-start justify-between gap-3">
