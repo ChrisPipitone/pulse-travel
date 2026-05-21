@@ -150,7 +150,7 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
         <div className="flex flex-col lg:flex-row gap-8 items-start">
 
           {/* ── Sidebar ─────────────────────────────────────────── */}
-          <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6 lg:sticky lg:top-22">
+          <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6 lg:sticky lg:top-[5rem]">
 
             {/* Trip identity */}
             <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
