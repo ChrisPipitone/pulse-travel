@@ -195,6 +195,36 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
           </button>
         </div>
 
+        {/* Member schedule */}
+        <div className="flex flex-wrap gap-x-4 gap-y-2">
+          {members.map((m) => {
+            const isMe = m.id === userId
+            const dateStr = formatMemberDates(m.arrival_date, m.departure_date)
+            return (
+              <div key={m.id} className="flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-text-subtle font-medium text-xs shrink-0">
+                  {m.name.charAt(0).toUpperCase()}
+                </span>
+                <div className="flex flex-col leading-tight">
+                  <span className="text-xs font-medium text-text-primary">{m.name.split(' ')[0]}</span>
+                  <span className="text-xs text-text-muted">{dateStr ?? 'Full trip'}</span>
+                </div>
+                {isMe && (
+                  <button
+                    onClick={() => setShowDatesModal(true)}
+                    className="p-1 text-text-muted hover:text-text-primary transition-colors"
+                    title="Edit my dates"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
         {/* Tab bar */}
         <div className="flex border-b border-border -mb-2">
           {(['activities', 'matrix'] as Tab[]).map((t) => (
@@ -215,36 +245,6 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
         {/* Activities tab */}
         {tab === 'activities' && (
           <>
-            {/* Member legend */}
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {members.map((m) => {
-                const isMe = m.id === userId
-                const dateStr = formatMemberDates(m.arrival_date, m.departure_date)
-                return (
-                  <div key={m.id} className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-text-subtle font-medium text-xs shrink-0">
-                      {m.name.charAt(0).toUpperCase()}
-                    </span>
-                    <div className="flex flex-col leading-tight">
-                      <span className="text-xs font-medium text-text-primary">{m.name.split(' ')[0]}</span>
-                      <span className="text-xs text-text-muted">{dateStr ?? (isMe ? 'Full trip' : 'Full trip')}</span>
-                    </div>
-                    {isMe && (
-                      <button
-                        onClick={() => setShowDatesModal(true)}
-                        className="p-1 text-text-muted hover:text-text-primary transition-colors"
-                        title="Edit my dates"
-                      >
-                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z"/>
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
             {/* Activity list header */}
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-text-primary uppercase tracking-wide">Activities</h2>
