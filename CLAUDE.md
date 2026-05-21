@@ -216,11 +216,13 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] SupabaseProvider wired into `apps/web/src/app/layout.tsx` via `Providers.tsx`
 - [x] Auth flow: email+password, OTP, Google OAuth (`/login`), protected routes, sign out
 - [x] Seed: 10 users, 3 trips (Italy/Barcelona/Tokyo), activities, ratings — password login works
-- [x] RLS: is_trip_member() SECURITY DEFINER breaks trips↔trip_members recursion
+- [x] RLS: is_trip_member() SECURITY DEFINER fixes trips↔trip_members recursion (migration 0000)
+- [x] RLS: trips SELECT policy allows created_by = auth.uid() so INSERT→SELECT works before membership (migration 0005)
 - [x] Trip page `/trip/[id]` — activity list, per-member rating chips (capped at 5+N), real-time
 - [x] Activity CRUD — add/edit/delete with modal, RLS enforced (adder or trip owner)
 - [x] Activity detail modal — MUST/WANT/MEH chip rating, group ratings, optimistic update + rollback
-- [x] 11 hooks, 49 tests passing
+- [x] Toggle-to-unrate — tapping active rating removes it; optimistic remove + rollback; deleteRating service + removeRating store action
+- [x] 11 hooks, 52 tests passing
 - [x] Trip member limit — 50-member cap via BEFORE INSERT trigger
 - [x] Invite code lookup — SECURITY DEFINER RPC (non-member safe)
 - [x] Home page — trip list with member count, create trip modal, join via invite code
@@ -229,8 +231,10 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] Technical docs — AUTH.md, DATA_MODEL.md, TRIP_FLOW.md, RATING_MATRIX.md, DEPLOYMENT.md (all Mermaid)
 - [x] Profile creation trigger — on_auth_user_created fires AFTER INSERT on auth.users, display_name from meta or email prefix
 - [x] Auth config — enable_confirmations = true, max_frequency = "60s" (config.toml + supabase restart)
-- [~] Compatibility matrix UI — 3 views built (By activity, By member, Who's in). Missing: Find your crew + Travel twin. Also: all views lack in-UI description text. Compatibility model needs rethink — current views show rating grids, not person-to-person Jaccard compatibility.
-- [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs + push migrations
+- [x] Input validation — all forms: trim, maxLength, URL format, date order, email regex; DB CHECK constraints on all tables (migration 0006)
+- [x] Hosted Supabase — all migrations (0000–0006) applied and in sync with local
+- [x] Compatibility matrix UI — 5 views: Rundown (card layout), Travel twin (Jaccard heatmap), By activity, By member, Who's in. Jaccard model (MUST+WANT excited set, MEH excluded). Per-view descriptions. Pagination.
+- [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs
 
 ## Dev Setup
 ```bash
