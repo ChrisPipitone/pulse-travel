@@ -19,17 +19,27 @@ export async function createTrip(
   fields: Pick<Trip, 'name' | 'destination'> & { start_date?: string | null; end_date?: string | null },
   userId: string
 ): Promise<Trip> {
-  const { data, error } = await client
-    .from('trips')
-    .insert({ ...fields, created_by: userId })
-    .select()
-    .single()
-  if (error) throw new Error(error.message)
+  let trip: Trip | null = null
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data, error } = await client
+      .from('trips')
+      .insert({ ...fields, created_by: userId })
+      .select()
+      .single()
+    if (error) {
+      // 23505 = unique_violation — invite_code collision, retry with new DB-generated code
+      if (error.code === '23505' && error.message.includes('invite_code')) continue
+      throw new Error(error.message)
+    }
+    trip = data as Trip
+    break
+  }
+  if (!trip) throw new Error('Failed to generate unique invite code — please try again')
   const { error: memberError } = await client
     .from('trip_members')
-    .insert({ trip_id: (data as Trip).id, user_id: userId })
+    .insert({ trip_id: trip.id, user_id: userId })
   if (memberError) throw new Error(memberError.message)
-  return data as Trip
+  return trip
 }
 
 export async function updateTrip(
