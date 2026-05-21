@@ -281,7 +281,7 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
               <>
                 <div className="flex items-center justify-between">
                   <p className="text-sm text-text-muted">{activities.length} {activities.length === 1 ? 'activity' : 'activities'}</p>
-                  <Button size="sm" onClick={() => setModal({ mode: 'add' })}>+ Add activity</Button>
+                  <Button onClick={() => setModal({ mode: 'add' })}>+ Add activity</Button>
                 </div>
 
                 <div className="flex flex-col gap-2">
