@@ -309,8 +309,8 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
                           )}
                         </div>
 
-                        {/* Per-member rating chips — capped at 5 */}
-                        <div className="flex items-center gap-1 shrink-0">
+                        {/* Per-member rating chips — hidden on mobile, shown sm+ */}
+                        <div className="hidden sm:flex items-center gap-1 shrink-0">
                           {members.slice(0, 5).map((member) => {
                             const r = activityRatings.find((r) => r.user_id === member.id)
                             return (
@@ -331,6 +331,10 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
                             </div>
                           )}
                         </div>
+                        {/* Mobile: compact rated count */}
+                        <span className="flex sm:hidden text-xs text-text-muted tabular-nums shrink-0">
+                          {activityRatings.length}/{members.length}
+                        </span>
 
                         {myRating && (
                           <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}>
