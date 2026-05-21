@@ -35,9 +35,21 @@ export function CreateTripModal({ open, loading, error, onClose, onSubmit }: Pro
       setFields((f) => ({ ...f, [key]: e.target.value }))
   }
 
+  const dateError =
+    fields.start_date && fields.end_date && fields.end_date < fields.start_date
+      ? 'End date must be after start date'
+      : null
+
+  const canSubmit =
+    !!fields.name.trim() &&
+    !!fields.destination.trim() &&
+    !dateError &&
+    !loading
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    onSubmit(fields)
+    if (!canSubmit) return
+    onSubmit({ ...fields, name: fields.name.trim(), destination: fields.destination.trim() })
   }
 
   return (
@@ -65,19 +77,23 @@ export function CreateTripModal({ open, loading, error, onClose, onSubmit }: Pro
             onChange={set('destination')}
             required
           />
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Start date"
-              type="date"
-              value={fields.start_date}
-              onChange={set('start_date')}
-            />
-            <Input
-              label="End date"
-              type="date"
-              value={fields.end_date}
-              onChange={set('end_date')}
-            />
+          <div className="flex flex-col gap-1.5">
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="Start date"
+                type="date"
+                value={fields.start_date}
+                onChange={set('start_date')}
+              />
+              <Input
+                label="End date"
+                type="date"
+                value={fields.end_date}
+                min={fields.start_date || undefined}
+                onChange={set('end_date')}
+              />
+            </div>
+            {dateError && <p className="text-xs text-red-500">{dateError}</p>}
           </div>
 
           {error && <p className="text-xs text-red-500">{error}</p>}
@@ -86,7 +102,7 @@ export function CreateTripModal({ open, loading, error, onClose, onSubmit }: Pro
             <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1" disabled={loading || !fields.name || !fields.destination}>
+            <Button type="submit" className="flex-1" disabled={!canSubmit}>
               {loading ? 'Creating…' : 'Create trip'}
             </Button>
           </div>
