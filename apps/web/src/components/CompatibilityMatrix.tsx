@@ -169,47 +169,86 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
   maxScore: number
 }) {
   return (
-    <table className="border-collapse text-sm w-full">
-      <thead>
-        <tr className="border-b border-border">
-          <th className="sticky left-0 z-10 bg-bg-card text-left px-3 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[120px]">
-            Activity
-          </th>
-          {members.map(m => (
-            <th key={m.id} className="px-1 py-2.5 text-center min-w-[36px]">
-              <div className="w-7 h-7 mx-auto rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle" title={m.name}>
-                {m.name.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-7 mx-auto">
-                {m.name.split(' ')[0]}
-              </span>
-            </th>
-          ))}
-          <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[80px]">Score</th>
-        </tr>
-      </thead>
-      <tbody>
+    <>
+      {/* Mobile: one card per activity, members as rows */}
+      <div className="sm:hidden flex flex-col divide-y divide-border">
         {activities.map((activity, i) => {
           const score = scores[i]
           return (
-            <tr key={activity.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
-              <td className="sticky left-0 z-10 bg-bg-card px-3 py-2.5 align-middle">
-                <p className="text-xs font-medium text-text-primary truncate max-w-[116px]" title={activity.name}>{activity.name}</p>
-                {activity.location && <p className="text-[10px] text-text-muted truncate max-w-[116px]">{activity.location}</p>}
-              </td>
-              {members.map(m => (
-                <td key={m.id} className="px-1 py-2 align-middle">
-                  <Cell rating={score?.ratings[m.id]} />
-                </td>
-              ))}
-              <td className="px-3 py-2.5 align-middle">
+            <div key={activity.id} className="px-4 py-3 flex flex-col gap-2">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-xs font-medium text-text-primary">{activity.name}</p>
+                  {activity.location && <p className="text-[10px] text-text-muted">{activity.location}</p>}
+                </div>
                 <ScoreBar score={score?.score ?? 0} max={maxScore} />
-              </td>
-            </tr>
+              </div>
+              <div className="flex flex-col gap-1">
+                {members.map(m => {
+                  const r = score?.ratings[m.id] as Rating | undefined
+                  return (
+                    <div key={m.id} className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-5 h-5 rounded-full bg-border flex items-center justify-center text-[10px] font-semibold text-text-subtle shrink-0">
+                          {m.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-[11px] text-text-muted">{m.name.split(' ')[0]}</span>
+                      </div>
+                      <div className="w-7 h-7 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold shrink-0 select-none">
+                        {r ? <div className={`w-full h-full rounded-[var(--radius-cell)] flex items-center justify-center ${cellStyle[r]}`}>{r[0]}</div>
+                            : <div className="w-full h-full rounded-[var(--radius-cell)] flex items-center justify-center bg-cell-empty text-text-subtle">–</div>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           )
         })}
-      </tbody>
-    </table>
+      </div>
+      {/* Desktop: full table */}
+      <table className="hidden sm:table border-collapse text-sm w-full">
+        <thead>
+          <tr className="border-b border-border">
+            <th className="sticky left-0 z-10 bg-bg-card text-left px-3 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[120px]">
+              Activity
+            </th>
+            {members.map(m => (
+              <th key={m.id} className="px-1 py-2.5 text-center min-w-[36px]">
+                <div className="w-7 h-7 mx-auto rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle" title={m.name}>
+                  {m.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-7 mx-auto">
+                  {m.name.split(' ')[0]}
+                </span>
+              </th>
+            ))}
+            <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[80px]">Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {activities.map((activity, i) => {
+            const score = scores[i]
+            return (
+              <tr key={activity.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
+                <td className="sticky left-0 z-10 bg-bg-card px-3 py-2.5 align-middle">
+                  <p className="text-xs font-medium text-text-primary truncate max-w-[116px]" title={activity.name}>{activity.name}</p>
+                  {activity.location && <p className="text-[10px] text-text-muted truncate max-w-[116px]">{activity.location}</p>}
+                </td>
+                {members.map(m => (
+                  <td key={m.id} className="px-1 py-2 align-middle">
+                    <Cell rating={score?.ratings[m.id]} />
+                  </td>
+                ))}
+                <td className="px-3 py-2.5 align-middle">
+                  <ScoreBar score={score?.score ?? 0} max={maxScore} />
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </>
   )
 }
 
@@ -222,54 +261,86 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
   maxScore: number
 }) {
   return (
-    <table className="border-collapse text-sm w-full">
-      <thead>
-        <tr className="border-b border-border">
-          <th className="sticky left-0 z-10 bg-bg-card text-left px-3 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[100px]">
-            Member
-          </th>
-          {activities.map(a => (
-            <th key={a.id} className="px-1 py-2.5 text-center min-w-[52px]">
-              <p className="text-[10px] font-medium text-text-muted truncate w-12 mx-auto" title={a.name}>{a.name}</p>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
+    <>
+      {/* Mobile: one card per member, activities as rows */}
+      <div className="sm:hidden flex flex-col divide-y divide-border">
         {members.map(m => (
-          <tr key={m.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
-            <td className="sticky left-0 z-10 bg-bg-card px-3 py-2.5 align-middle">
-              <div className="flex items-center gap-1.5">
-                <div className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle shrink-0">
-                  {m.name.charAt(0).toUpperCase()}
-                </div>
-                <span className="text-xs font-medium text-text-primary truncate max-w-[60px]">{m.name.split(' ')[0]}</span>
+          <div key={m.id} className="px-4 py-3 flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle shrink-0">
+                {m.name.charAt(0).toUpperCase()}
               </div>
-            </td>
+              <span className="text-xs font-semibold text-text-primary">{m.name.split(' ')[0]}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              {scores.map((score, i) => {
+                const a = activities[i]
+                if (!a) return null
+                const r = score.ratings[m.id] as Rating | undefined
+                return (
+                  <div key={a.id} className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] text-text-muted truncate">{a.name}</span>
+                    <div className="w-7 h-7 shrink-0 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold select-none">
+                      {r ? <div className={`w-full h-full rounded-[var(--radius-cell)] flex items-center justify-center ${cellStyle[r]}`}>{r[0]}</div>
+                          : <div className="w-full h-full rounded-[var(--radius-cell)] flex items-center justify-center bg-cell-empty text-text-subtle">–</div>}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* Desktop: full table */}
+      <table className="hidden sm:table border-collapse text-sm w-full">
+        <thead>
+          <tr className="border-b border-border">
+            <th className="sticky left-0 z-10 bg-bg-card text-left px-3 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[100px]">
+              Member
+            </th>
+            {activities.map(a => (
+              <th key={a.id} className="px-1 py-2.5 text-center min-w-[52px]">
+                <p className="text-[10px] font-medium text-text-muted truncate w-12 mx-auto" title={a.name}>{a.name}</p>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {members.map(m => (
+            <tr key={m.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
+              <td className="sticky left-0 z-10 bg-bg-card px-3 py-2.5 align-middle">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle shrink-0">
+                    {m.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-xs font-medium text-text-primary truncate max-w-[60px]">{m.name.split(' ')[0]}</span>
+                </div>
+              </td>
+              {scores.map((score, i) => (
+                <td key={activities[i]?.id ?? i} className="px-1 py-2 align-middle">
+                  <Cell rating={score.ratings[m.id]} />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+        <tfoot className="border-t-2 border-border">
+          <tr>
+            <td className="sticky left-0 z-10 bg-bg-card px-3 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide align-middle">Score</td>
             {scores.map((score, i) => (
-              <td key={activities[i]?.id ?? i} className="px-1 py-2 align-middle">
-                <Cell rating={score.ratings[m.id]} />
+              <td key={activities[i]?.id ?? i} className="px-1 py-2.5 align-middle">
+                <div className="flex flex-col items-center gap-1">
+                  <div className="w-8 h-1.5 bg-border rounded-full overflow-hidden">
+                    <div className="h-full bg-accent rounded-full" style={{ width: maxScore > 0 ? `${Math.round((score.score / maxScore) * 100)}%` : '0%' }} />
+                  </div>
+                  <span className="text-[10px] text-text-muted tabular-nums">{score.score}</span>
+                </div>
               </td>
             ))}
           </tr>
-        ))}
-      </tbody>
-      <tfoot className="border-t-2 border-border">
-        <tr>
-          <td className="sticky left-0 z-10 bg-bg-card px-3 py-2.5 text-[10px] font-semibold text-text-muted uppercase tracking-wide align-middle">Score</td>
-          {scores.map((score, i) => (
-            <td key={activities[i]?.id ?? i} className="px-1 py-2.5 align-middle">
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-8 h-1.5 bg-border rounded-full overflow-hidden">
-                  <div className="h-full bg-accent rounded-full" style={{ width: maxScore > 0 ? `${Math.round((score.score / maxScore) * 100)}%` : '0%' }} />
-                </div>
-                <span className="text-[10px] text-text-muted tabular-nums">{score.score}</span>
-              </div>
-            </td>
-          ))}
-        </tr>
-      </tfoot>
-    </table>
+        </tfoot>
+      </table>
+    </>
   )
 }
 
@@ -482,86 +553,131 @@ function TwinGrid({ members, jaccardMatrix, colorMap }: {
   jaccardMatrix: Map<string, Map<string, number | null>>
   colorMap: Map<string, number>
 }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-border">
-            {/* empty corner cell */}
-            <th className="sticky left-0 z-10 bg-bg-card min-w-[112px] w-28" />
-            {members.map(m => {
-              const c = paletteFor(colorMap.get(m.id) ?? 0)
-              return (
-                <th key={m.id} className="px-1.5 py-3 text-center min-w-[52px]">
-                  <div
-                    className="w-8 h-8 mx-auto rounded-full flex items-center justify-center text-xs font-bold select-none"
-                    style={{ backgroundColor: c.bg, color: c.fg }}
-                    title={m.name}
-                  >
-                    {m.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-10 mx-auto">
-                    {m.name.split(' ')[0]}
-                  </span>
-                </th>
-              )
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {members.map(rowMember => {
-            const c = paletteFor(colorMap.get(rowMember.id) ?? 0)
-            return (
-              <tr key={rowMember.id} className="border-b border-border last:border-0">
-                <td className="sticky left-0 z-10 bg-bg-card px-3 py-2 align-middle">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold select-none shrink-0"
-                      style={{ backgroundColor: c.bg, color: c.fg }}
-                    >
-                      {rowMember.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-xs font-medium text-text-primary truncate max-w-[72px]">
-                      {rowMember.name.split(' ')[0]}
-                    </span>
-                  </div>
-                </td>
-                {members.map(colMember => {
-                  const val = jaccardMatrix.get(rowMember.id)?.get(colMember.id) ?? null
-                  const isSelf = rowMember.id === colMember.id
+  // Build unique pairs sorted by compatibility for mobile list
+  const pairs = useMemo(() => {
+    const result: { a: Member; b: Member; pct: number | null }[] = []
+    for (let i = 0; i < members.length; i++) {
+      for (let j = i + 1; j < members.length; j++) {
+        const val = jaccardMatrix.get(members[i].id)?.get(members[j].id) ?? null
+        result.push({ a: members[i], b: members[j], pct: val !== null ? Math.round(val * 100) : null })
+      }
+    }
+    return result.sort((x, y) => (y.pct ?? -1) - (x.pct ?? -1))
+  }, [members, jaccardMatrix])
 
-                  if (isSelf || val === null) {
+  return (
+    <>
+      {/* Mobile: sorted pair list */}
+      <div className="sm:hidden flex flex-col divide-y divide-border">
+        {pairs.map(({ a, b, pct }) => {
+          const ca = paletteFor(colorMap.get(a.id) ?? 0)
+          const cb = paletteFor(colorMap.get(b.id) ?? 0)
+          return (
+            <div key={`${a.id}-${b.id}`} className="px-4 py-3 flex items-center gap-3">
+              <div className="flex items-center gap-1 shrink-0">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: ca.bg, color: ca.fg }}>
+                  {a.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-[10px] text-text-muted">↔</span>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: cb.bg, color: cb.fg }}>
+                  {b.name.charAt(0).toUpperCase()}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <span className="text-xs text-text-muted truncate">{a.name.split(' ')[0]} & {b.name.split(' ')[0]}</span>
+              </div>
+              {pct !== null ? (
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="w-20 h-1.5 bg-border rounded-full overflow-hidden">
+                    <div className="h-full bg-accent rounded-full" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-xs font-semibold text-text-primary tabular-nums w-9 text-right">{pct}%</span>
+                </div>
+              ) : (
+                <span className="text-xs text-text-subtle">?</span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+      {/* Desktop: N×N heatmap grid */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="sticky left-0 z-10 bg-bg-card min-w-[112px] w-28" />
+              {members.map(m => {
+                const c = paletteFor(colorMap.get(m.id) ?? 0)
+                return (
+                  <th key={m.id} className="px-1.5 py-3 text-center min-w-[52px]">
+                    <div
+                      className="w-8 h-8 mx-auto rounded-full flex items-center justify-center text-xs font-bold select-none"
+                      style={{ backgroundColor: c.bg, color: c.fg }}
+                      title={m.name}
+                    >
+                      {m.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-10 mx-auto">
+                      {m.name.split(' ')[0]}
+                    </span>
+                  </th>
+                )
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {members.map(rowMember => {
+              const c = paletteFor(colorMap.get(rowMember.id) ?? 0)
+              return (
+                <tr key={rowMember.id} className="border-b border-border last:border-0">
+                  <td className="sticky left-0 z-10 bg-bg-card px-3 py-2 align-middle">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold select-none shrink-0"
+                        style={{ backgroundColor: c.bg, color: c.fg }}
+                      >
+                        {rowMember.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-xs font-medium text-text-primary truncate max-w-[72px]">
+                        {rowMember.name.split(' ')[0]}
+                      </span>
+                    </div>
+                  </td>
+                  {members.map(colMember => {
+                    const val = jaccardMatrix.get(rowMember.id)?.get(colMember.id) ?? null
+                    const isSelf = rowMember.id === colMember.id
+                    if (isSelf || val === null) {
+                      return (
+                        <td key={colMember.id} className="px-1.5 py-2 text-center align-middle">
+                          <div className="w-10 h-8 mx-auto rounded flex items-center justify-center bg-border/50 text-text-subtle text-xs font-medium select-none">
+                            {isSelf ? '·' : '?'}
+                          </div>
+                        </td>
+                      )
+                    }
+                    const pct = Math.round(val * 100)
                     return (
                       <td key={colMember.id} className="px-1.5 py-2 text-center align-middle">
-                        <div className="w-10 h-8 mx-auto rounded flex items-center justify-center bg-border/50 text-text-subtle text-xs font-medium select-none">
-                          {isSelf ? '·' : '?'}
+                        <div
+                          className="w-10 h-8 mx-auto rounded flex items-center justify-center text-xs font-bold select-none tabular-nums"
+                          style={{
+                            backgroundColor: `color-mix(in srgb, var(--accent) ${Math.round(val * 80)}%, var(--bg-card))`,
+                            color: 'var(--text-primary)',
+                          }}
+                          title={`${rowMember.name.split(' ')[0]} ↔ ${colMember.name.split(' ')[0]}: ${pct}% overlap`}
+                        >
+                          {pct}%
                         </div>
                       </td>
                     )
-                  }
-
-                  const pct = Math.round(val * 100)
-                  return (
-                    <td key={colMember.id} className="px-1.5 py-2 text-center align-middle">
-                      <div
-                        className="w-10 h-8 mx-auto rounded flex items-center justify-center text-xs font-bold select-none tabular-nums"
-                        style={{
-                          backgroundColor: `color-mix(in srgb, var(--accent) ${Math.round(val * 80)}%, var(--bg-card))`,
-                          color: 'var(--text-primary)',
-                        }}
-                        title={`${rowMember.name.split(' ')[0]} ↔ ${colMember.name.split(' ')[0]}: ${pct}% overlap`}
-                      >
-                        {pct}%
-                      </div>
-                    </td>
-                  )
-                })}
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
+                  })}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
   )
 }
 
