@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-full flex flex-col overflow-x-hidden">
+      <body className="min-h-full">
         <Providers>{children}</Providers>
       </body>
     </html>

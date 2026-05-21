@@ -77,7 +77,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-bg">
+    <main className="min-h-screen bg-bg overflow-x-clip">
       <div className="max-w-screen-xl mx-auto px-6 py-10 flex flex-col gap-10">
 
         {/* Trips section */}
