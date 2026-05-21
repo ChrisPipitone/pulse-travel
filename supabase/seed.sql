@@ -21,33 +21,37 @@ delete from auth.users;
 -- crypt() requires pgcrypto (enabled by default in Supabase local dev)
 
 insert into auth.users (
-  id, email, encrypted_password, email_confirmed_at,
-  created_at, updated_at, role, aud
+  instance_id, id, email, encrypted_password,
+  email_confirmed_at, created_at, updated_at,
+  role, aud,
+  raw_app_meta_data, raw_user_meta_data,
+  is_super_admin, confirmation_token, recovery_token,
+  email_change, email_change_token_new
 ) values
-  (
-    '00000000-0000-0000-0000-000000000001',
-    'marco@example.com',
-    crypt('password123', gen_salt('bf')),
-    now(), now(), now(), 'authenticated', 'authenticated'
-  ),
-  (
-    '00000000-0000-0000-0000-000000000002',
-    'sara@example.com',
-    crypt('password123', gen_salt('bf')),
-    now(), now(), now(), 'authenticated', 'authenticated'
-  ),
-  (
-    '00000000-0000-0000-0000-000000000003',
-    'lena@example.com',
-    crypt('password123', gen_salt('bf')),
-    now(), now(), now(), 'authenticated', 'authenticated'
-  ),
-  (
-    '00000000-0000-0000-0000-000000000004',
-    'chris@example.com',
-    crypt('password123', gen_salt('bf')),
-    now(), now(), now(), 'authenticated', 'authenticated'
-  );
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000001', 'marco@example.com',  crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000002', 'sara@example.com',   crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000003', 'lena@example.com',   crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000004', 'chris@example.com',  crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000005', 'alex@example.com',   crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000006', 'priya@example.com',  crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000007', 'kai@example.com',    crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000008', 'nadia@example.com',  crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000009', 'tom@example.com',    crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '00000000-0000-0000-0000-000000000010', 'yuki@example.com',   crypt('password123', gen_salt('bf')), now(), now(), now(), 'authenticated', 'authenticated', '{"provider":"email","providers":["email"]}', '{}', false, '', '', '', '');
+
+-- ── Auth identities (required for email+password login) ──────────────────────
+
+insert into auth.identities (provider_id, user_id, identity_data, provider, created_at, updated_at) values
+  ('marco@example.com',  '00000000-0000-0000-0000-000000000001', '{"sub":"00000000-0000-0000-0000-000000000001","email":"marco@example.com"}',  'email', now(), now()),
+  ('sara@example.com',   '00000000-0000-0000-0000-000000000002', '{"sub":"00000000-0000-0000-0000-000000000002","email":"sara@example.com"}',   'email', now(), now()),
+  ('lena@example.com',   '00000000-0000-0000-0000-000000000003', '{"sub":"00000000-0000-0000-0000-000000000003","email":"lena@example.com"}',   'email', now(), now()),
+  ('chris@example.com',  '00000000-0000-0000-0000-000000000004', '{"sub":"00000000-0000-0000-0000-000000000004","email":"chris@example.com"}',  'email', now(), now()),
+  ('alex@example.com',   '00000000-0000-0000-0000-000000000005', '{"sub":"00000000-0000-0000-0000-000000000005","email":"alex@example.com"}',   'email', now(), now()),
+  ('priya@example.com',  '00000000-0000-0000-0000-000000000006', '{"sub":"00000000-0000-0000-0000-000000000006","email":"priya@example.com"}',  'email', now(), now()),
+  ('kai@example.com',    '00000000-0000-0000-0000-000000000007', '{"sub":"00000000-0000-0000-0000-000000000007","email":"kai@example.com"}',    'email', now(), now()),
+  ('nadia@example.com',  '00000000-0000-0000-0000-000000000008', '{"sub":"00000000-0000-0000-0000-000000000008","email":"nadia@example.com"}',  'email', now(), now()),
+  ('tom@example.com',    '00000000-0000-0000-0000-000000000009', '{"sub":"00000000-0000-0000-0000-000000000009","email":"tom@example.com"}',    'email', now(), now()),
+  ('yuki@example.com',   '00000000-0000-0000-0000-000000000010', '{"sub":"00000000-0000-0000-0000-000000000010","email":"yuki@example.com"}',   'email', now(), now());
 
 -- ── Profiles ──────────────────────────────────────────────────────────────────
 
@@ -55,7 +59,13 @@ insert into profiles (id, display_name) values
   ('00000000-0000-0000-0000-000000000001', 'Marco'),
   ('00000000-0000-0000-0000-000000000002', 'Sara'),
   ('00000000-0000-0000-0000-000000000003', 'Lena'),
-  ('00000000-0000-0000-0000-000000000004', 'Chris');
+  ('00000000-0000-0000-0000-000000000004', 'Chris'),
+  ('00000000-0000-0000-0000-000000000005', 'Alex'),
+  ('00000000-0000-0000-0000-000000000006', 'Priya'),
+  ('00000000-0000-0000-0000-000000000007', 'Kai'),
+  ('00000000-0000-0000-0000-000000000008', 'Nadia'),
+  ('00000000-0000-0000-0000-000000000009', 'Tom'),
+  ('00000000-0000-0000-0000-000000000010', 'Yuki');
 
 -- ── Trip ─────────────────────────────────────────────────────────────────────
 
@@ -250,3 +260,90 @@ insert into activity_ratings (activity_id, user_id, rating) values
   ('cccccccc-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000002', 'WANT'),
   ('cccccccc-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000003', 'MEH'),
   ('cccccccc-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000004', 'MEH');
+
+-- ════════════════════════════════════════════════════════════════════════════
+-- Trip 2: Barcelona Weekend — 8 members (medium group)
+-- Owner: Alex. Members: all 10 users except Nadia and Tom.
+-- ════════════════════════════════════════════════════════════════════════════
+
+insert into trips (id, name, destination, start_date, end_date, created_by, invite_code) values
+  ('aaaaaaaa-0000-0000-0000-000000000002', 'Barcelona Weekend', 'Barcelona, Spain', '2025-09-12', '2025-09-15', '00000000-0000-0000-0000-000000000005', 'bcn25');
+
+insert into trip_members (trip_id, user_id, arrival_date, departure_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000005', '2025-09-12', '2025-09-15'), -- Alex: full
+  ('aaaaaaaa-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000006', '2025-09-12', '2025-09-15'), -- Priya: full
+  ('aaaaaaaa-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000007', '2025-09-12', '2025-09-15'), -- Kai: full
+  ('aaaaaaaa-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', '2025-09-12', '2025-09-15'), -- Marco: full
+  ('aaaaaaaa-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', '2025-09-13', '2025-09-15'), -- Sara: arrives day 2
+  ('aaaaaaaa-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003', '2025-09-12', '2025-09-15'), -- Lena: full
+  ('aaaaaaaa-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000010', '2025-09-12', '2025-09-14'), -- Yuki: leaves early
+  ('aaaaaaaa-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000004', '2025-09-12', '2025-09-15'); -- Chris: full
+
+insert into activities (id, trip_id, name, description, location, duration_hours, added_by) values
+  ('dddddddd-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000002', 'Sagrada Família', 'Gaudí''s iconic basilica — book skip-the-line tickets in advance.', 'Eixample, Barcelona', 2, '00000000-0000-0000-0000-000000000005'),
+  ('dddddddd-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000002', 'La Boqueria Market', 'Famous covered market on Las Ramblas — go early to avoid crowds.', 'La Rambla, Barcelona', 1, '00000000-0000-0000-0000-000000000006'),
+  ('dddddddd-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000002', 'Park Güell', 'Gaudí''s mosaic-covered park with sweeping city views.', 'Gràcia, Barcelona', 2, '00000000-0000-0000-0000-000000000001'),
+  ('dddddddd-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000002', 'Barceloneta Beach', 'Afternoon at the city beach — swimming, sangria, people-watching.', 'Barceloneta, Barcelona', 4, '00000000-0000-0000-0000-000000000007'),
+  ('dddddddd-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000002', 'Flamenco Show', 'Intimate tablao performance in the Gothic Quarter.', 'Barri Gòtic, Barcelona', 2, '00000000-0000-0000-0000-000000000002');
+
+insert into activity_ratings (activity_id, user_id, rating) values
+  -- Sagrada Família: near-universal MUST
+  ('dddddddd-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000005', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000006', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000007', 'WANT'),
+  ('dddddddd-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000003', 'WANT'),
+  ('dddddddd-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000010', 'MEH'),
+  ('dddddddd-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000004', 'MUST'),
+  -- Boqueria: food lovers MUST, others WANT
+  ('dddddddd-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000005', 'WANT'),
+  ('dddddddd-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000006', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000007', 'WANT'),
+  ('dddddddd-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001', 'WANT'),
+  ('dddddddd-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000010', 'WANT'),
+  ('dddddddd-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000004', 'MEH'),
+  -- Beach: split — half MUST, half MEH
+  ('dddddddd-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000005', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000006', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000007', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001', 'MEH'),
+  ('dddddddd-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000002', 'WANT'),
+  ('dddddddd-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000003', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000010', 'MUST'),
+  ('dddddddd-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000004', 'MEH');
+
+-- ════════════════════════════════════════════════════════════════════════════
+-- Trip 3: Tokyo Solo-ish — 3 members (small group)
+-- Owner: Yuki.
+-- ════════════════════════════════════════════════════════════════════════════
+
+insert into trips (id, name, destination, start_date, end_date, created_by, invite_code) values
+  ('aaaaaaaa-0000-0000-0000-000000000003', 'Tokyo Deep Dive', 'Tokyo, Japan', '2026-03-01', '2026-03-10', '00000000-0000-0000-0000-000000000010', 'tokyo26');
+
+insert into trip_members (trip_id, user_id, arrival_date, departure_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000010', '2026-03-01', '2026-03-10'), -- Yuki: full
+  ('aaaaaaaa-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000007', '2026-03-03', '2026-03-10'), -- Kai: arrives late
+  ('aaaaaaaa-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000006', '2026-03-01', '2026-03-07'); -- Priya: leaves early
+
+insert into activities (id, trip_id, name, description, location, duration_hours, added_by) values
+  ('eeeeeeee-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000003', 'Tsukiji Outer Market', 'Fresh sushi breakfast at the outer market stalls.', 'Tsukiji, Tokyo', 2, '00000000-0000-0000-0000-000000000010'),
+  ('eeeeeeee-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000003', 'teamLab Borderless', 'Immersive digital art museum — book tickets weeks ahead.', 'Odaiba, Tokyo', 3, '00000000-0000-0000-0000-000000000006'),
+  ('eeeeeeee-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000003', 'Shibuya Crossing at night', 'Walk the world''s busiest pedestrian crossing after dark.', 'Shibuya, Tokyo', 1, '00000000-0000-0000-0000-000000000007'),
+  ('eeeeeeee-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000003', 'Kyoto Day Trip', 'Shinkansen to Kyoto — Fushimi Inari, Arashiyama bamboo grove.', 'Kyoto', 10, '00000000-0000-0000-0000-000000000010');
+
+insert into activity_ratings (activity_id, user_id, rating) values
+  ('eeeeeeee-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000010', 'MUST'),
+  ('eeeeeeee-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000006', 'MUST'),
+  ('eeeeeeee-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000007', 'WANT'),
+  ('eeeeeeee-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000010', 'WANT'),
+  ('eeeeeeee-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000006', 'MUST'),
+  ('eeeeeeee-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000007', 'MEH'),
+  ('eeeeeeee-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000010', 'WANT'),
+  ('eeeeeeee-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000006', 'WANT'),
+  ('eeeeeeee-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000007', 'MUST'),
+  ('eeeeeeee-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000010', 'MUST'),
+  ('eeeeeeee-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000006', 'WANT'),
+  ('eeeeeeee-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000007', 'MUST');
