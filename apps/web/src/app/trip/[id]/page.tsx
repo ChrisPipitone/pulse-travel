@@ -207,7 +207,7 @@ export default function TripPage({ params }: { params: Promise<{ id: string }> }
 
             {/* Member schedule */}
             <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
-              <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">Members</h2>
+              <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">Schedules</h2>
               <div className="flex flex-col gap-2">
                 {members.map((m) => {
                   const isMe = m.id === userId
