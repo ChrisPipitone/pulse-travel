@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import type { Activity, ActivityRating, Member, Rating } from '@pulse/types'
 
 // TODO(mobile): revisit rating UX for touch — consider long-press popover or
@@ -37,6 +38,13 @@ export function ActivityDetailModal({
   open, activity, members, activityRatings, myRating, ratingLoading,
   onRate, onClose, onEdit, canEdit,
 }: Props) {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
   if (!open || !activity) return null
 
   const addedBy = members.find((m) => m.id === activity.added_by)

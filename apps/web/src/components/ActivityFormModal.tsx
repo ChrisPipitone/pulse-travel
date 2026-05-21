@@ -35,6 +35,13 @@ export function ActivityFormModal({ open, title, initial, loading, error, submit
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
   if (!open) return null
 
   function set(field: keyof Fields) {
