@@ -73,7 +73,7 @@ export function ActivityFormModal({ open, title, initial, loading, error, submit
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div ref={modalRef} className="modal-panel relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md p-6 flex flex-col gap-5 shadow-lg">
+      <div ref={modalRef} className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-md p-6 flex flex-col gap-5 shadow-lg">
         <h2 className="text-base font-semibold text-text-primary">{title}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input label="Activity *" id="act-name" placeholder="Colosseum Tour" required autoFocus maxLength={100} value={fields.name} onChange={set('name')} />

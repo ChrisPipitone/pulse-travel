@@ -124,7 +124,11 @@ export function CreateTripModal({
       <div ref={modalRef} className="modal-panel relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">{title}</h2>
-          <button onClick={onClose} aria-label="Close" className="text-text-muted hover:text-text-primary transition-colors text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Close" className="shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M3 3l10 10M13 3L3 13"/>
+            </svg>
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

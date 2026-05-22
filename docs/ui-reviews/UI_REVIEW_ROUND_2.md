@@ -6,6 +6,7 @@ Work 1–3 items at a time. Check off as done.
 ---
 
 ## OPEN FROM ROUND 1
+
 None — all Round 1 items are done.
 
 ---
@@ -22,7 +23,7 @@ None — all Round 1 items are done.
 
 ### VISUAL — things that are clearly off
 
-- [x] **V1** — Activity card hover border direction is wrong. `hover:border-border/60` makes the border *lighter* — hover should signal activation, not fade. Change to `hover:border-accent/20 hover:shadow-sm`. One line. **[Impact: MED]**
+- [x] **V1** — Activity card hover border direction is wrong. `hover:border-border/60` makes the border _lighter_ — hover should signal activation, not fade. Change to `hover:border-accent/20 hover:shadow-sm`. One line. **[Impact: MED]**
 
 - [x] **V2** — "Rate" ghost badge needs more presence. `border-dashed border-border text-text-subtle` is so faint it defeats the nudge purpose. Change to `bg-accent/8 border border-accent/20 text-accent`. Still understated, but actually readable. **[Impact: MED]**
 
@@ -34,11 +35,11 @@ None — all Round 1 items are done.
 
 ### CONSISTENCY — things that don't match
 
-- [ ] **C1** — Modal inner container radius is hardcoded in ActivityDetailModal and ActivityFormModal (`rounded-t-2xl sm:rounded-2xl`) but uses `var(--radius-card)` correctly in CreateTripModal and MemberDatesModal. In the editorial theme (8px radius) the hardcoded modals will look wrong. Fix: replace with `rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)]` in both. **[Impact: MED]**
+- [x] **C1** — Modal inner container radius is hardcoded in ActivityDetailModal and ActivityFormModal (`rounded-t-2xl sm:rounded-2xl`) but uses `var(--radius-card)` correctly in CreateTripModal and MemberDatesModal. In the editorial theme (8px radius) the hardcoded modals will look wrong. Fix: replace with `rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)]` in both. **[Impact: MED]**
 
 - [ ] **C2** — Member avatar color is inconsistent. The matrix uses a per-member PALETTE (10 distinct colors). Sidebar schedule and activity row chips use gray for everyone. Same person should have the same color everywhere. Extract `buildColorMap(members: Member[])` from CompatibilityMatrix into a shared util (or the Zustand store) and use it in both places. **[Impact: MED]**
 
-- [ ] **C3** — Close button pattern is inconsistent. ActivityDetailModal uses an SVG icon (good — precise, controllable). CreateTripModal and MemberDatesModal use a raw `×` text character. Standardize all to the SVG pattern. Three lines each. **[Impact: LOW]**
+- [x] **C3** — Close button pattern is inconsistent. ActivityDetailModal uses an SVG icon (good — precise, controllable). CreateTripModal and MemberDatesModal use a raw `×` text character. Standardize all to the SVG pattern. Three lines each. **[Impact: LOW]**
 
 ### LOADING — the one gap that matters
 
@@ -88,20 +89,40 @@ Avoid Tailwind animate utilities here — Tailwind v4's built-ins may need plugi
 
 ```css
 @keyframes modal-overlay-in {
-  from { opacity: 0 }
-  to   { opacity: 1 }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes modal-sheet-in {
-  from { transform: translateY(100%) }
-  to   { transform: translateY(0) }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 @keyframes modal-dialog-in {
-  from { opacity: 0; transform: scale(0.96) }
-  to   { opacity: 1; transform: scale(1) }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
-.modal-overlay  { animation: modal-overlay-in 200ms ease-out }
-.modal-sheet    { animation: modal-sheet-in 220ms cubic-bezier(0.32, 0.72, 0, 1) }
-.modal-dialog   { animation: modal-dialog-in 180ms ease-out }
+.modal-overlay {
+  animation: modal-overlay-in 200ms ease-out;
+}
+.modal-sheet {
+  animation: modal-sheet-in 220ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.modal-dialog {
+  animation: modal-dialog-in 180ms ease-out;
+}
 ```
 
 Apply: overlay div → `modal-overlay`, mobile inner div → `modal-sheet`, `sm:modal-dialog`. The easing `cubic-bezier(0.32, 0.72, 0, 1)` on the sheet is the iOS sheet easing — snappy start, smooth landing.
@@ -112,10 +133,18 @@ Exit animation requires either CSS `animation-fill-mode` tricks or a small state
 
 ```css
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(12px) }
-  to   { opacity: 1; transform: translateY(0) }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.toast-enter { animation: toast-in 180ms ease-out }
+.toast-enter {
+  animation: toast-in 180ms ease-out;
+}
 ```
 
 Add `toast-enter` class to each toast `<div>`. No exit animation needed on first pass (same reasoning as AN1).
@@ -129,17 +158,22 @@ CompatibilityMatrix already has this logic inline. Extract it:
 ```typescript
 // apps/web/src/lib/memberColors.ts
 const PALETTE = [
-  { bg: '#ef4444', fg: '#fff' }, { bg: '#f97316', fg: '#fff' },
-  { bg: '#eab308', fg: '#000' }, { bg: '#22c55e', fg: '#fff' },
-  { bg: '#14b8a6', fg: '#fff' }, { bg: '#3b82f6', fg: '#fff' },
-  { bg: '#8b5cf6', fg: '#fff' }, { bg: '#ec4899', fg: '#fff' },
-  { bg: '#64748b', fg: '#fff' }, { bg: '#a16207', fg: '#fff' },
-]
+  { bg: "#ef4444", fg: "#fff" },
+  { bg: "#f97316", fg: "#fff" },
+  { bg: "#eab308", fg: "#000" },
+  { bg: "#22c55e", fg: "#fff" },
+  { bg: "#14b8a6", fg: "#fff" },
+  { bg: "#3b82f6", fg: "#fff" },
+  { bg: "#8b5cf6", fg: "#fff" },
+  { bg: "#ec4899", fg: "#fff" },
+  { bg: "#64748b", fg: "#fff" },
+  { bg: "#a16207", fg: "#fff" },
+];
 export function memberPalette(index: number) {
-  return PALETTE[index % PALETTE.length]
+  return PALETTE[index % PALETTE.length];
 }
 export function buildColorMap(members: { id: string }[]) {
-  return new Map(members.map((m, i) => [m.id, i]))
+  return new Map(members.map((m, i) => [m.id, i]));
 }
 ```
 
