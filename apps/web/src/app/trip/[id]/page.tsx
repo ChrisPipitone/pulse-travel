@@ -550,7 +550,7 @@ export default function TripPage({
                         return (
                           <div
                             key={activity.id}
-                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-border/60 hover:shadow-sm transition-all"
+                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-accent/20 hover:shadow-sm transition-all group"
                             onClick={() => setModal({ mode: "view", activity })}
                           >
                             <div className="flex-1 min-w-0">
@@ -602,22 +602,22 @@ export default function TripPage({
                                 {myRating.rating}
                               </span>
                             ) : (
-                              <span className="text-[11px] text-text-subtle px-2 py-0.5 rounded-[var(--radius-badge)] border border-dashed border-border shrink-0">
+                              <span className="text-[11px] px-2 py-0.5 rounded-[var(--radius-badge)] bg-accent/8 border border-accent/20 text-accent shrink-0">
                                 Rate
                               </span>
                             )}
 
                             {editable && (
                               <div
-                                className="flex items-center gap-0.5 shrink-0"
+                                className="flex items-center gap-0.5 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button
                                   onClick={() =>
                                     setModal({ mode: "edit", activity })
                                   }
-                                  className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
-                                  title="Edit"
+                                  className="p-2.5 sm:p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
+                                  aria-label="Edit activity"
                                 >
                                   <svg
                                     width="13"
@@ -635,12 +635,8 @@ export default function TripPage({
                                 <button
                                   onClick={() => handleDelete(activity)}
                                   disabled={acting}
-                                  className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === activity.id ? "text-red-500 bg-red-500/10" : "text-text-muted hover:text-red-500 hover:bg-bg"}`}
-                                  title={
-                                    pendingDeleteId === activity.id
-                                      ? "Tap again to delete"
-                                      : "Delete"
-                                  }
+                                  className={`p-2.5 sm:p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === activity.id ? "text-red-500 bg-red-500/10" : "text-text-muted hover:text-red-500 hover:bg-bg"}`}
+                                  aria-label={pendingDeleteId === activity.id ? "Confirm delete activity" : "Delete activity"}
                                 >
                                   <svg
                                     width="13"

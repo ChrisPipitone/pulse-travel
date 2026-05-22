@@ -22,13 +22,13 @@ None — all Round 1 items are done.
 
 ### VISUAL — things that are clearly off
 
-- [ ] **V1** — Activity card hover border direction is wrong. `hover:border-border/60` makes the border *lighter* — hover should signal activation, not fade. Change to `hover:border-accent/20 hover:shadow-sm`. One line. **[Impact: MED]**
+- [x] **V1** — Activity card hover border direction is wrong. `hover:border-border/60` makes the border *lighter* — hover should signal activation, not fade. Change to `hover:border-accent/20 hover:shadow-sm`. One line. **[Impact: MED]**
 
-- [ ] **V2** — "Rate" ghost badge needs more presence. `border-dashed border-border text-text-subtle` is so faint it defeats the nudge purpose. Change to `bg-accent/8 border border-accent/20 text-accent`. Still understated, but actually readable. **[Impact: MED]**
+- [x] **V2** — "Rate" ghost badge needs more presence. `border-dashed border-border text-text-subtle` is so faint it defeats the nudge purpose. Change to `bg-accent/8 border border-accent/20 text-accent`. Still understated, but actually readable. **[Impact: MED]**
 
-- [ ] **V3** — "Owner" badge on trip cards is invisible. `bg-border text-text-subtle` means it blends into the card. `bg-accent/10 text-accent` makes ownership scannable at a glance — consistent with how accent communicates "this is yours." **[Impact: MED]**
+- [x] **V3** — "Owner" badge on trip cards is invisible. `bg-border text-text-subtle` means it blends into the card. `bg-accent/10 text-accent` makes ownership scannable at a glance — consistent with how accent communicates "this is yours." **[Impact: MED]**
 
-- [ ] **V4** — Edit/delete icons on activity cards: desktop clutter + mobile touch target problem. Two fixes in one: (1) hide on desktop until hover (`sm:opacity-0 sm:group-hover:opacity-100`), keep always visible below `sm`. (2) Touch targets are `p-1.5` + 13px icon ≈ 25px square — below the 44px Apple HIG minimum. Change to `p-2.5 sm:p-1.5` so mobile gets a usable target while desktop stays compact. Both fixes go on the same buttons. **[Impact: MED]**
+- [x] **V4** — Edit/delete icons on activity cards: desktop clutter + mobile touch target problem. Two fixes in one: (1) hide on desktop until hover (`sm:opacity-0 sm:group-hover:opacity-100`), keep always visible below `sm`. (2) Touch targets are `p-1.5` + 13px icon ≈ 25px square — below the 44px Apple HIG minimum. Change to `p-2.5 sm:p-1.5` so mobile gets a usable target while desktop stays compact. Both fixes go on the same buttons. **[Impact: MED]**
 
 - [ ] **V5** — Trip identity sidebar card has equal visual weight to Schedules and Invite cards. It's the most important card on the page — trip name, destination, dates. Give it more presence: remove the border, use a slightly different background (`bg-bg` instead of `bg-bg-card`), or at minimum increase the trip name to `text-xl`. The three-card sidebar currently reads as three equals. **[Impact: MED]**
 

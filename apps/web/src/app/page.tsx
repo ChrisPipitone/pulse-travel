@@ -161,7 +161,7 @@ export default function Home() {
                         </span>
                       </div>
                       {isOwner && (
-                        <span className="shrink-0 text-[10px] font-semibold text-text-subtle bg-border rounded-full px-2.5 py-1 uppercase tracking-wide">
+                        <span className="shrink-0 text-[10px] font-semibold text-accent bg-accent/10 rounded-full px-2.5 py-1 uppercase tracking-wide">
                           Owner
                         </span>
                       )}
