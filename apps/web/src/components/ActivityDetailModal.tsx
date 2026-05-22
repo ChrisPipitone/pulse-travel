@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import type { Activity, ActivityRating, Member, Rating } from '@pulse/types'
 
 // TODO(mobile): revisit rating UX for touch — consider long-press popover or
@@ -44,12 +44,27 @@ export function ActivityDetailModal({
   open, activity, members, activityRatings, myRating, ratingLoading,
   onRate, onClose, onEdit, canEdit,
 }: Props) {
+  const [justRated, setJustRated] = useState(false)
+
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
+
+  useEffect(() => {
+    if (!justRated || ratingLoading) return
+    const timer = setTimeout(() => {
+      setJustRated(false)
+      onClose()
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [justRated, ratingLoading, onClose])
+
+  useEffect(() => {
+    if (!open) setJustRated(false)
+  }, [open])
 
   if (!open || !activity) return null
 
@@ -111,18 +126,19 @@ export function ActivityDetailModal({
             <div className="flex gap-2">
               {ratings.map((r) => {
                 const active = myRating === r
+                const showCheck = active && justRated && !ratingLoading
                 return (
                   <button
                     key={r}
                     disabled={ratingLoading}
-                    onClick={() => onRate(r)}
+                    onClick={() => { setJustRated(true); onRate(r) }}
                     className={`flex-1 py-2 rounded-[var(--radius-card)] text-sm font-semibold transition-all disabled:opacity-50 ${
                       active
                         ? `${ratingColor[r]} ring-2 ring-offset-2 ${ratingRing[r]}`
                         : 'bg-bg border border-border text-text-muted hover:border-accent/40 hover:text-text-primary'
                     }`}
                   >
-                    {ratingLabel[r]}
+                    {showCheck ? '✓' : ratingLabel[r]}
                   </button>
                 )
               })}

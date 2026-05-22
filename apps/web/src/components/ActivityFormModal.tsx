@@ -73,7 +73,7 @@ export function ActivityFormModal({ open, title, initial, loading, error, submit
       <div className="relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md p-6 flex flex-col gap-5 shadow-lg">
         <h2 className="text-base font-semibold text-text-primary">{title}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Activity *" id="act-name" placeholder="Colosseum Tour" required maxLength={100} value={fields.name} onChange={set('name')} />
+          <Input label="Activity *" id="act-name" placeholder="Colosseum Tour" required autoFocus maxLength={100} value={fields.name} onChange={set('name')} />
           <Input label="Location" id="act-location" placeholder="Rome" maxLength={100} value={fields.location} onChange={set('location')} />
           <Input label="Description" id="act-description" placeholder="Optional details" maxLength={500} value={fields.description} onChange={set('description')} />
           <div className="flex flex-col gap-1.5">

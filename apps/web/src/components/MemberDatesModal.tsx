@@ -80,6 +80,7 @@ export function MemberDatesModal({
                 min={tripStart ?? undefined}
                 max={tripEnd ?? undefined}
                 onChange={(e) => setArrival(e.target.value)}
+                autoFocus
               />
               <Input
                 label="Departure"

@@ -38,9 +38,9 @@ Work through these together, 1–3 at a time. Check off as done.
 
 ### UX FLOW
 
-- [ ] **U1** — Auto-focus first input when modal opens (autoFocus or useEffect + .focus())
-- [ ] **U2** — After rating in ActivityDetailModal: brief "Saved ✓" in chip, auto-close after 600ms (reduces friction for batch rating)
-- [ ] **U3** — Click backdrop closes modal: verify consistent across all 4 modals (some may already work)
+- [x] **U1** — Auto-focus first input when modal opens (autoFocus or useEffect + .focus())
+- [x] **U2** — After rating in ActivityDetailModal: brief "Saved ✓" in chip, auto-close after 600ms (reduces friction for batch rating)
+- [x] **U3** — Click backdrop closes modal: verify consistent across all 4 modals (some may already work)
 
 ### ACCESSIBILITY
 
