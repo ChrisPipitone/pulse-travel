@@ -76,8 +76,8 @@ export function ActivityDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div ref={modalRef} className="relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md shadow-lg overflow-hidden">
+      <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div ref={modalRef} className="modal-panel relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md shadow-lg overflow-hidden">
 
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-4">

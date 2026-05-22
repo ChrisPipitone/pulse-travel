@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTripStore } from '@pulse/store'
 import { useCompatibilityMatrix } from '@pulse/hooks'
 import type { Activity, Member, Rating, CompatibilityScore } from '@pulse/types'
@@ -78,11 +78,16 @@ function Cell({ rating, ariaLabel }: { rating?: Rating; ariaLabel?: string }) {
 }
 
 function ScoreBar({ score, max }: { score: number; max: number }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   const pct = max > 0 ? Math.round((score / max) * 100) : 0
   return (
     <div className="flex items-center gap-2 min-w-[56px]">
       <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
-        <div className="h-full bg-accent rounded-full transition-[width]" style={{ width: `${pct}%` }} />
+        <div
+          className="h-full bg-accent rounded-full transition-[width] duration-500 ease-out"
+          style={{ width: mounted ? `${pct}%` : '0%' }}
+        />
       </div>
       <span className="text-xs text-text-muted tabular-nums w-5 text-right">{score}</span>
     </div>

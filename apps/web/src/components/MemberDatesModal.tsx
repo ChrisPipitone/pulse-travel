@@ -60,8 +60,8 @@ export function MemberDatesModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div ref={modalRef} className="relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl">
+      <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div ref={modalRef} className="modal-panel relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">My trip dates</h2>
           <button onClick={onClose} aria-label="Close" className="text-text-muted hover:text-text-primary transition-colors text-xl leading-none">×</button>

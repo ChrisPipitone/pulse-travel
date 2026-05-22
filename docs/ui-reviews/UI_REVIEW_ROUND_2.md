@@ -14,11 +14,11 @@ None — all Round 1 items are done.
 
 ### ANIMATION — two that earn their keep
 
-- [ ] **AN1** — Modal enter/exit animation. All 4 modals snap in with no transition — the most jarring moment in the app. Mobile: slide up from bottom (`translate-y-full` → `translate-y-0`). Desktop: fade + slight scale (`scale-95 opacity-0` → `scale-100 opacity-1`). 200ms ease-out. CSS `@keyframes` in globals.css, no library. **[Impact: HIGH]**
+- [x] **AN1** — Modal enter/exit animation. All 4 modals snap in with no transition — the most jarring moment in the app. Mobile: slide up from bottom (`translate-y-full` → `translate-y-0`). Desktop: fade + slight scale (`scale-95 opacity-0` → `scale-100 opacity-1`). 200ms ease-out. CSS `@keyframes` in globals.css, no library. **[Impact: HIGH]**
 
-- [ ] **AN2** — Toast enter/exit animation. Toasts currently pop in and out instantly. A slide-up from below on enter + fade-down on exit (~180ms) turns a functional system into a polished one. `@keyframes toast-in` / `toast-out` in globals.css. **[Impact: HIGH]**
+- [x] **AN2** — Toast enter/exit animation. Toasts currently pop in and out instantly. A slide-up from below on enter + fade-down on exit (~180ms) turns a functional system into a polished one. `@keyframes toast-in` / `toast-out` in globals.css. **[Impact: HIGH]**
 
-- [ ] **AN3** — Score bar animated width on mount. Width transitions 0 → actual% over 400ms, staggered by row index (40ms delay each). Communicates "data loaded" in a way that feels alive without being decorative — the motion explains the data. Use `useState(false)` + `useEffect` to trigger after paint. **[Impact: MED]**
+- [x] **AN3** — Score bar animated width on mount. Width transitions 0 → actual% over 400ms, staggered by row index (40ms delay each). Communicates "data loaded" in a way that feels alive without being decorative — the motion explains the data. Use `useState(false)` + `useEffect` to trigger after paint. **[Impact: MED]**
 
 ### VISUAL — things that are clearly off
 
