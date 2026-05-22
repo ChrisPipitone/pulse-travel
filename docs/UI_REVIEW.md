@@ -15,7 +15,6 @@ Work through these together, 1–3 at a time. Check off as done.
 
 ### ADD — new features
 
-- [ ] **A1** — Profile pictures: show `<img src={avatar_url}>` where populated; initials fallback. Applies everywhere: member list, rating chips, matrix cells, crew cards, twin grid. _(Google OAuth only for now — see future notes)_
 - [x] **A2** — Lightweight toast system: "Activity added", "Removed Marco", "Failed — check connection". ~50 lines, no library, CSS slide-in, 3s auto-dismiss. _(See notes for details)_
 - [x] **A3** — Copy invite code button: clipboard icon next to code, "Copied!" flash for 2s
 - [x] **A4** — Empty state for matrix views: friendly prompt when 0 activities or 0 ratings exist
@@ -101,6 +100,7 @@ Owner-only. Edit (pencil) icon on sidebar trip info card → opens modal pre-fil
 
 ## FUTURE / POST-MVP
 
+- Profile pictures: `<img src={avatar_url}>` where populated, initials fallback everywhere (member list, chips, matrix, crew cards, twin grid). Google OAuth only; no upload UI for now.
 - Profile photo upload via Supabase Storage (manual upload, not OAuth)
 - Dark mode (CSS vars already support it — just add `[data-theme="dark"]` block)
 - Keyboard shortcuts: `n` for new activity, `/` for search
