@@ -28,7 +28,7 @@ None — all Round 1 items are done.
 
 - [ ] **V3** — "Owner" badge on trip cards is invisible. `bg-border text-text-subtle` means it blends into the card. `bg-accent/10 text-accent` makes ownership scannable at a glance — consistent with how accent communicates "this is yours." **[Impact: MED]**
 
-- [ ] **V4** — Edit/delete icons on activity cards visible at all times. On desktop this clutters every row. Add `group` to the card div, change icons to `opacity-0 group-hover:opacity-100 transition-opacity`. On mobile (`touch-action: none` doesn't apply), they stay visible — add `sm:opacity-0 sm:group-hover:opacity-100` to keep them always-visible on touch. **[Impact: MED]**
+- [ ] **V4** — Edit/delete icons on activity cards: desktop clutter + mobile touch target problem. Two fixes in one: (1) hide on desktop until hover (`sm:opacity-0 sm:group-hover:opacity-100`), keep always visible below `sm`. (2) Touch targets are `p-1.5` + 13px icon ≈ 25px square — below the 44px Apple HIG minimum. Change to `p-2.5 sm:p-1.5` so mobile gets a usable target while desktop stays compact. Both fixes go on the same buttons. **[Impact: MED]**
 
 - [ ] **V5** — Trip identity sidebar card has equal visual weight to Schedules and Invite cards. It's the most important card on the page — trip name, destination, dates. Give it more presence: remove the border, use a slightly different background (`bg-bg` instead of `bg-bg-card`), or at minimum increase the trip name to `text-xl`. The three-card sidebar currently reads as three equals. **[Impact: MED]**
 
@@ -47,6 +47,16 @@ None — all Round 1 items are done.
 ### ACCESSIBILITY — new gap
 
 - [ ] **AC1** — Edit and delete icon buttons on activity cards use `title="Edit"` / `title="Delete"` (tooltip only). Screen readers get nothing. Change to `aria-label="Edit activity"` / `aria-label="Delete activity"`. Two attributes, two minutes. **[Impact: MED]**
+
+### REACT NATIVE — component drift since Round 1
+
+The `.native.tsx` files in `packages/ui/src/` have not been updated since Round 1 web changes. Two real issues, one tracking note:
+
+- [ ] **RN1** — `Input.native.tsx` line 16: `placeholderTextColor="var(--text-subtle)"` is a bug. CSS custom properties are not valid React Native color values — this prop is silently ignored, placeholder text will use the system default color instead of the theme value. Fix: pass a hardcoded fallback for now (`#A8A49A` modern / `#A89178` editorial) or resolve via a theme context. **[Impact: MED — silent visual bug when RN app ships]**
+
+- [ ] **RN2** — `Button.native.tsx`: web Button now uses `rounded-lg` for `outline`/`ghost` variants (fixed, theme-agnostic) while primary uses `rounded-[var(--radius-btn)]`. Native still uses `rounded-[var(--radius-btn)]` for all three variants. Sync the radius split to match web intent. **[Impact: LOW — visual inconsistency when themes diverge]**
+
+- [ ] **RN3** — All four native components use `rounded-[var(--radius-*)]` arbitrary CSS vars. Verify NativeWind v4 resolves these correctly at runtime. If not, the border radius will silently fall back to 0 in the native app. Needs a test render. **[Impact: HIGH if broken, unknown until tested]**
 
 ---
 
