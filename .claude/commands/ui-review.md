@@ -77,8 +77,29 @@ Are there state transitions that would benefit from motion? Are there existing t
 ### 7. Empty and loading states
 Do empty states give the user clear context and a path forward? Are loading states appropriately skeletal (not just spinners)?
 
-### 8. Mobile experience
-Does the layout adapt gracefully? Are touch targets large enough? Is anything cut off or overflowing?
+### 8. Mobile experience — treat as a first-class surface, not an afterthought
+
+Pulse's primary success condition (per CLAUDE.md): non-technical family members onboarding on phones in under 60 seconds. Mobile is not a "responsive desktop" — it is a different context with different constraints.
+
+Evaluate both surfaces explicitly:
+
+**Layout breakpoints** — the app uses `sm:` for most switches and `lg:` for the sidebar/main split. Check:
+- Does the sidebar collapse correctly to stacked on mobile (`flex-col lg:flex-row`)?
+- Do all 5 matrix views have mobile card layouts (not just horizontal-scrolling tables)?
+- Does the tab bar label shortening (`sm:hidden` / `hidden sm:inline`) work at narrow widths?
+
+**Touch vs. hover** — hover states don't exist on touch. Flag any feature that is hover-only and therefore invisible on mobile:
+- `group-hover:opacity-100` patterns for revealing controls — if this is the only way to access an action, it's broken on touch
+- `title=""` tooltips — invisible on touch
+- Hover-dependent visual feedback that communicates state
+
+**Touch targets** — Apple HIG minimum is 44×44px. Flag any interactive element below ~36px total (padding + content). Icon buttons with `p-1.5` on a 13×13 icon = ~25px square. Too small.
+
+**Modal/sheet behavior** — modals use `items-end sm:items-center` (bottom sheet on mobile, centered on desktop). This is the right pattern. Check that it's applied consistently across all modals and that the sheet has enough height to be usable on small screens.
+
+**Keyboard and form UX on mobile** — virtual keyboards push the viewport up. Forms in modals should account for this. `max-h-[90dvh] overflow-y-auto` on the modal inner div is the right fix — verify it's applied where needed.
+
+**What to skip** — do not suggest making mobile a pixel-perfect clone of desktop. Different layouts for different contexts is correct. The goal is that mobile is fully functional and feels intentional, not that it matches the desktop layout.
 
 ### 9. Accessibility and keyboard UX
 Are there regressions from prior work? New interactive elements without aria-labels? Color-only information?
