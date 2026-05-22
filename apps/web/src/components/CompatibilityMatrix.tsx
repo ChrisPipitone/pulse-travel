@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTripStore } from '@pulse/store'
 import { useCompatibilityMatrix } from '@pulse/hooks'
 import type { Activity, Member, Rating, CompatibilityScore } from '@pulse/types'
+import { memberPalette, buildColorMap } from '@/lib/memberColors'
 
 const ACT_PER_PAGE = 10
 const MEM_PER_PAGE = 8
@@ -54,20 +55,7 @@ const cellStyle: Record<Rating, string> = {
 }
 
 // Stable per-member colors — same person = same color in every view
-const PALETTE: Array<{ bg: string; fg: string }> = [
-  { bg: '#ef4444', fg: '#fff' },
-  { bg: '#f97316', fg: '#fff' },
-  { bg: '#eab308', fg: '#000' },
-  { bg: '#22c55e', fg: '#fff' },
-  { bg: '#14b8a6', fg: '#fff' },
-  { bg: '#3b82f6', fg: '#fff' },
-  { bg: '#8b5cf6', fg: '#fff' },
-  { bg: '#ec4899', fg: '#fff' },
-  { bg: '#64748b', fg: '#fff' },
-  { bg: '#a16207', fg: '#fff' },
-]
-
-function paletteFor(idx: number) { return PALETTE[idx % PALETTE.length] }
+function paletteFor(idx: number) { return memberPalette(idx) }
 
 // ── Shared primitives ─────────────────────────────────────────────────────
 
@@ -78,11 +66,16 @@ function Cell({ rating, ariaLabel }: { rating?: Rating; ariaLabel?: string }) {
 }
 
 function ScoreBar({ score, max }: { score: number; max: number }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   const pct = max > 0 ? Math.round((score / max) * 100) : 0
   return (
     <div className="flex items-center gap-2 min-w-[56px]">
       <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
-        <div className="h-full bg-accent rounded-full transition-[width]" style={{ width: `${pct}%` }} />
+        <div
+          className="h-full bg-accent rounded-full transition-[width] duration-500 ease-out"
+          style={{ width: mounted ? `${pct}%` : '0%' }}
+        />
       </div>
       <span className="text-xs text-text-muted tabular-nums w-5 text-right">{score}</span>
     </div>
@@ -126,13 +119,22 @@ function MemberAvatar({ member, colorIdx }: { member: Member; colorIdx: number }
   const c = paletteFor(colorIdx)
   return (
     <div className="flex flex-col items-center gap-0.5 w-9">
-      <div
-        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold select-none shrink-0"
-        style={{ backgroundColor: c.bg, color: c.fg }}
-        title={member.name}
-      >
-        {member.name.charAt(0).toUpperCase()}
-      </div>
+      {member.avatar_url ? (
+        <img
+          src={member.avatar_url}
+          alt={member.name}
+          className="w-7 h-7 rounded-full object-cover select-none shrink-0"
+          title={member.name}
+        />
+      ) : (
+        <div
+          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold select-none shrink-0"
+          style={{ backgroundColor: c.bg, color: c.fg }}
+          title={member.name}
+        >
+          {member.name.charAt(0).toUpperCase()}
+        </div>
+      )}
       <span className="text-[9px] text-text-muted leading-none text-center w-full truncate" title={member.name}>
         {member.name.split(' ')[0]}
       </span>
@@ -167,9 +169,10 @@ function AvatarGroup({ members, colorMap, cap = ROSTER_CAP }: {
 
 // ── View 1: By activity — activities × members, colored rating cells ───────
 
-function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
+function ActivitiesRowsTable({ activities, scores, members, maxScore, colorMap }: {
   activities: Activity[]
   scores: CompatibilityScore[]
+  colorMap: Map<string, number>
   members: Member[]
   maxScore: number
 }) {
@@ -194,9 +197,13 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
                   return (
                     <div key={m.id} className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded-full bg-border flex items-center justify-center text-[10px] font-semibold text-text-subtle shrink-0">
-                          {m.name.charAt(0).toUpperCase()}
-                        </div>
+                        {m.avatar_url ? (
+                          <img src={m.avatar_url} alt={m.name} className="w-5 h-5 rounded-full object-cover shrink-0" />
+                        ) : (
+                          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0" style={{ backgroundColor: paletteFor(colorMap.get(m.id) ?? 0).bg, color: paletteFor(colorMap.get(m.id) ?? 0).fg }}>
+                            {m.name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <span className="text-[11px] text-text-muted">{m.name.split(' ')[0]}</span>
                       </div>
                       <div className="w-8 h-8 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold shrink-0 select-none">
@@ -220,9 +227,13 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
             </th>
             {members.map(m => (
               <th key={m.id} className="px-1 py-2.5 text-center min-w-[36px]">
-                <div className="w-7 h-7 mx-auto rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle" title={m.name}>
-                  {m.name.charAt(0).toUpperCase()}
-                </div>
+                {m.avatar_url ? (
+                  <img src={m.avatar_url} alt={m.name} className="w-7 h-7 mx-auto rounded-full object-cover" title={m.name} />
+                ) : (
+                  <div className="w-7 h-7 mx-auto rounded-full flex items-center justify-center text-xs font-semibold" style={{ backgroundColor: paletteFor(colorMap.get(m.id) ?? 0).bg, color: paletteFor(colorMap.get(m.id) ?? 0).fg }} title={m.name}>
+                    {m.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-7 mx-auto">
                   {m.name.split(' ')[0]}
                 </span>
@@ -259,11 +270,12 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
 
 // ── View 2: By member — members × activities, colored rating cells ─────────
 
-function MembersRowsTable({ members, activities, scores, maxScore }: {
+function MembersRowsTable({ members, activities, scores, maxScore, colorMap }: {
   members: Member[]
   activities: Activity[]
   scores: CompatibilityScore[]
   maxScore: number
+  colorMap: Map<string, number>
 }) {
   return (
     <>
@@ -272,9 +284,13 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
         {members.map(m => (
           <div key={m.id} className="px-3 py-3 flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle shrink-0">
-                {m.name.charAt(0).toUpperCase()}
-              </div>
+              {m.avatar_url ? (
+                <img src={m.avatar_url} alt={m.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
+              ) : (
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0" style={{ backgroundColor: paletteFor(colorMap.get(m.id) ?? 0).bg, color: paletteFor(colorMap.get(m.id) ?? 0).fg }}>
+                  {m.name.charAt(0).toUpperCase()}
+                </div>
+              )}
               <span className="text-xs font-semibold text-text-primary">{m.name.split(' ')[0]}</span>
             </div>
             <div className="flex flex-col gap-1">
@@ -315,9 +331,13 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
             <tr key={m.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
               <td className="sticky left-0 z-10 bg-bg-card px-3 py-2.5 align-middle">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-xs font-semibold text-text-subtle shrink-0">
-                    {m.name.charAt(0).toUpperCase()}
-                  </div>
+                  {m.avatar_url ? (
+                    <img src={m.avatar_url} alt={m.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0" style={{ backgroundColor: paletteFor(colorMap.get(m.id) ?? 0).bg, color: paletteFor(colorMap.get(m.id) ?? 0).fg }}>
+                      {m.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <span className="text-xs font-medium text-text-primary truncate max-w-[60px]">{m.name.split(' ')[0]}</span>
                 </div>
               </td>
@@ -705,7 +725,7 @@ export function CompatibilityMatrix() {
   )
 
   // Stable color index per member — index in full members array
-  const colorMap = useMemo(() => new Map(members.map((m, i) => [m.id, i])), [members])
+  const colorMap = useMemo(() => buildColorMap(members), [members])
 
   // View 4: re-sort activities by excited-member count (MUST + WANT), score as tiebreaker
   const crewRows = useMemo((): CrewRow[] =>
@@ -845,10 +865,10 @@ export function CompatibilityMatrix() {
       ) : (
         <div className="overflow-x-auto scrollbar-hide rounded-[var(--radius-card)] border border-border bg-bg-card">
           {isActRows && (
-            <ActivitiesRowsTable activities={actSlice} scores={scoreSlice} members={memSlice} maxScore={maxScore} />
+            <ActivitiesRowsTable activities={actSlice} scores={scoreSlice} members={memSlice} maxScore={maxScore} colorMap={colorMap} />
           )}
           {isMemRows && (
-            <MembersRowsTable members={memSlice} activities={actSlice} scores={scoreSlice} maxScore={maxScore} />
+            <MembersRowsTable members={memSlice} activities={actSlice} scores={scoreSlice} maxScore={maxScore} colorMap={colorMap} />
           )}
           {isRoster && (
             <RosterTable activities={actSlice} scores={scoreSlice} members={members} maxScore={maxScore} colorMap={colorMap} />

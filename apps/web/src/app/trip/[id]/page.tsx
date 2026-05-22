@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useRef, useState } from "react";
+import { use, useMemo, useRef, useState } from "react";
 import {
   useTripData,
   useSession,
@@ -21,6 +21,7 @@ import { MemberDatesModal } from "@/components/MemberDatesModal";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
+import { memberPalette, buildColorMap } from "@/lib/memberColors";
 import type { Rating, Activity } from "@pulse/types";
 
 type Tab = "activities" | "matrix";
@@ -76,6 +77,7 @@ export default function TripPage({
   const { session } = useSession();
   const trip = useTripStore((s) => s.trip);
   const members = useTripStore((s) => s.members);
+  const colorMap = useMemo(() => buildColorMap(members), [members]);
   const activities = useTripStore((s) => s.activities);
   const ratings = useTripStore((s) => s.ratings);
 
@@ -258,8 +260,47 @@ export default function TripPage({
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-bg flex items-center justify-center">
-        <p className="text-text-muted text-sm">Loading…</p>
+      <main className="min-h-screen bg-bg overflow-x-clip">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex flex-col lg:flex-row gap-8 lg:items-start">
+            <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6">
+              <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3 animate-pulse">
+                <div className="h-5 bg-border rounded w-3/4" />
+                <div className="h-3.5 bg-border rounded w-1/2" />
+                <div className="h-3 bg-border rounded w-2/3 mt-1" />
+              </div>
+              <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3 animate-pulse">
+                <div className="h-4 bg-border rounded w-1/3" />
+                <div className="h-3 bg-border rounded w-full" />
+                <div className="h-3 bg-border rounded w-4/5" />
+                <div className="h-3 bg-border rounded w-3/5" />
+              </div>
+              <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3 animate-pulse">
+                <div className="h-4 bg-border rounded w-1/4" />
+                <div className="h-8 bg-border rounded w-full" />
+              </div>
+            </aside>
+            <div className="flex-1 min-w-0 flex flex-col gap-4">
+              <div className="flex gap-2 animate-pulse">
+                <div className="h-8 bg-border rounded-lg w-24" />
+                <div className="h-8 bg-border rounded-lg w-32" />
+              </div>
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="bg-bg-card rounded-[var(--radius-card)] border border-border p-4 flex items-center gap-3 animate-pulse">
+                  <div className="flex-1 flex flex-col gap-2">
+                    <div className="h-4 bg-border rounded w-2/5" />
+                    <div className="h-3 bg-border rounded w-1/4" />
+                  </div>
+                  <div className="flex gap-1.5">
+                    <div className="h-6 w-14 bg-border rounded-full" />
+                    <div className="h-6 w-14 bg-border rounded-full" />
+                    <div className="h-6 w-14 bg-border rounded-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </main>
     );
   }
@@ -279,10 +320,10 @@ export default function TripPage({
           {/* ── Sidebar ─────────────────────────────────────────── */}
           <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6 lg:sticky lg:top-[5rem]">
             {/* Trip identity */}
-            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
+            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border border-t-2 border-t-accent p-5 flex flex-col gap-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-col gap-0.5 min-w-0">
-                  <h1 className="text-lg font-semibold text-text-primary leading-tight">
+                  <h1 className="text-xl font-semibold text-text-primary leading-tight">
                     {trip.name}
                   </h1>
                   <p className="text-sm text-text-muted truncate">
@@ -389,9 +430,13 @@ export default function TripPage({
                   );
                   return (
                     <div key={m.id} className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-text-subtle font-semibold text-xs shrink-0">
-                        {m.name.charAt(0).toUpperCase()}
-                      </span>
+                      {m.avatar_url ? (
+                        <img src={m.avatar_url} alt={m.name} className="w-7 h-7 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <span className="w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shrink-0" style={{ backgroundColor: memberPalette(colorMap.get(m.id) ?? 0).bg, color: memberPalette(colorMap.get(m.id) ?? 0).fg }}>
+                          {m.name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
                       <div className="flex flex-col leading-tight min-w-0 flex-1">
                         <span className="text-xs font-medium text-text-primary">
                           {m.name.split(" ")[0]}
@@ -508,88 +553,91 @@ export default function TripPage({
                         );
                         const editable = canEdit(activity);
 
+                        const ratedIds = new Set(activityRatings.map(r => r.user_id));
+                        const raters = members.filter(m => ratedIds.has(m.id));
+                        const ratersCapped = raters.slice(0, 4);
+                        const ratersOverflow = raters.length - 4;
+                        const suggester = members.find(m => m.id === activity.added_by);
+
                         return (
                           <div
                             key={activity.id}
-                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-border/60 hover:shadow-sm transition-all"
+                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3 flex items-start gap-3 cursor-pointer hover:shadow-sm hover:-translate-y-0.5 transition-all duration-150"
                             onClick={() => setModal({ mode: "view", activity })}
                           >
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-text-primary truncate">
-                                {activity.name}
-                              </p>
-                              {activity.location && (
-                                <p className="text-xs text-text-muted truncate mt-0.5">
-                                  {activity.location}
-                                </p>
-                              )}
-                            </div>
+                            <div className="flex-1 min-w-0 flex flex-col gap-1">
+                              {/* Line 1: name + my rating */}
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-sm font-semibold text-text-primary truncate">{activity.name}</p>
+                                {myRating ? (
+                                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}>
+                                    {myRating.rating}
+                                  </span>
+                                ) : (
+                                  <span className="text-[11px] px-2 py-0.5 rounded-[var(--radius-badge)] bg-accent/8 border border-accent/20 text-accent shrink-0">
+                                    Rate
+                                  </span>
+                                )}
+                              </div>
 
-                            {/* Per-member rating chips — hidden on mobile, shown sm+ */}
-                            <div className="hidden sm:flex items-center gap-1 shrink-0">
-                              {members.slice(0, 5).map((member) => {
-                                const r = activityRatings.find(
-                                  (r) => r.user_id === member.id,
-                                );
-                                return (
-                                  <div
-                                    key={member.id}
-                                    title={`${member.name.split(" ")[0]}: ${r?.rating ?? "unrated"}`}
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold ${
-                                      r
-                                        ? ratingColor[r.rating]
-                                        : "bg-border text-text-subtle"
-                                    }`}
-                                  >
-                                    {member.name.charAt(0).toUpperCase()}
-                                  </div>
-                                );
-                              })}
-                              {members.length > 5 && (
-                                <div className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-[11px] font-semibold text-text-muted">
-                                  +{members.length - 5}
+                              {/* Line 2: location with pin */}
+                              {activity.location && (
+                                <div className="flex items-center gap-1 text-xs font-medium text-text-muted">
+                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                                    <circle cx="12" cy="9" r="2.5"/>
+                                  </svg>
+                                  <span className="truncate">{activity.location}</span>
                                 </div>
                               )}
-                            </div>
-                            {/* Mobile: compact rated count */}
-                            <span className="flex sm:hidden text-xs text-text-muted tabular-nums shrink-0">
-                              {activityRatings.length}/{members.length}
-                            </span>
 
-                            {myRating ? (
-                              <span
-                                className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}
-                              >
-                                {myRating.rating}
-                              </span>
-                            ) : (
-                              <span className="text-[11px] text-text-subtle px-2 py-0.5 rounded-[var(--radius-badge)] border border-dashed border-border shrink-0">
-                                Rate
-                              </span>
-                            )}
+                              {/* Line 3: suggested by + who rated */}
+                              <div className="flex items-center justify-between gap-2 mt-0.5">
+                                {suggester ? (
+                                  <div className="flex items-center gap-1.5 min-w-0">
+                                    {suggester.avatar_url ? (
+                                      <img src={suggester.avatar_url} alt={suggester.name} className="w-5 h-5 rounded-full object-cover shrink-0" />
+                                    ) : (
+                                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ backgroundColor: memberPalette(colorMap.get(suggester.id) ?? 0).bg, color: memberPalette(colorMap.get(suggester.id) ?? 0).fg }}>
+                                        {suggester.name.charAt(0).toUpperCase()}
+                                      </div>
+                                    )}
+                                    <span className="text-[11px] text-text-subtle truncate">{suggester.name.split(" ")[0]}</span>
+                                  </div>
+                                ) : <div />}
+
+                                {raters.length > 0 ? (
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <div className="flex">
+                                      {ratersCapped.map((m, i) => m.avatar_url ? (
+                                        <img key={m.id} src={m.avatar_url} alt={m.name} className="w-5 h-5 rounded-full object-cover" style={{ marginLeft: i > 0 ? '-5px' : 0, border: '2px solid var(--bg-card)' }} />
+                                      ) : (
+                                        <div key={m.id} className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ marginLeft: i > 0 ? '-5px' : 0, border: '2px solid var(--bg-card)', backgroundColor: memberPalette(colorMap.get(m.id) ?? 0).bg, color: memberPalette(colorMap.get(m.id) ?? 0).fg }}>
+                                          {m.name.charAt(0).toUpperCase()}
+                                        </div>
+                                      ))}
+                                      {ratersOverflow > 0 && (
+                                        <div className="w-5 h-5 rounded-full bg-border flex items-center justify-center text-[8px] font-bold text-text-muted" style={{ marginLeft: '-5px', border: '2px solid var(--bg-card)' }}>
+                                          +{ratersOverflow}
+                                        </div>
+                                      )}
+                                    </div>
+                                    <span className="text-[11px] text-text-subtle">{raters.length} rated</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-[11px] text-text-subtle shrink-0">no ratings yet</span>
+                                )}
+                              </div>
+                            </div>
 
                             {editable && (
-                              <div
-                                className="flex items-center gap-0.5 shrink-0"
-                                onClick={(e) => e.stopPropagation()}
-                              >
+                              <div className="flex flex-col gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
                                 <button
-                                  onClick={() =>
-                                    setModal({ mode: "edit", activity })
-                                  }
+                                  onClick={() => setModal({ mode: "edit", activity })}
                                   className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
-                                  title="Edit"
+                                  aria-label="Edit activity"
                                 >
-                                  <svg
-                                    width="13"
-                                    height="13"
-                                    viewBox="0 0 14 14"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
+                                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" />
                                   </svg>
                                 </button>
@@ -597,22 +645,9 @@ export default function TripPage({
                                   onClick={() => handleDelete(activity)}
                                   disabled={acting}
                                   className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === activity.id ? "text-red-500 bg-red-500/10" : "text-text-muted hover:text-red-500 hover:bg-bg"}`}
-                                  title={
-                                    pendingDeleteId === activity.id
-                                      ? "Tap again to delete"
-                                      : "Delete"
-                                  }
+                                  aria-label={pendingDeleteId === activity.id ? "Confirm delete activity" : "Delete activity"}
                                 >
-                                  <svg
-                                    width="13"
-                                    height="13"
-                                    viewBox="0 0 14 14"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
+                                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5" />
                                   </svg>
                                 </button>
