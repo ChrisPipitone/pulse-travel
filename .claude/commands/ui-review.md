@@ -47,7 +47,7 @@ Evaluate everything through this lens. Internalize it before writing a single su
 - If something is well-executed and has no meaningful room for improvement, say: `✓ Done — no further action.`
 - If a common suggestion would make it worse (too much animation, too many visual treatments), say so and explain why. Push back.
 - Do not suggest something just to fill the list. A short, high-signal review beats a padded one.
-- Rate each item by impact: **HIGH** / **MED** / **LOW**. If you can't get something above LOW, question whether it belongs.
+- Rate each item by impact: **HIGH** / **MED** / **LOW**. Impact means user-perceived quality improvement — how much better does the app *feel* with this done. Code size and implementation effort are irrelevant to the rating. A one-line fix can be HIGH; a large refactor can be LOW. If you can't get something above LOW, question whether it belongs.
 - Do not suggest adding libraries. Work with what exists: Tailwind v4, CSS custom properties, React state, no animation libraries.
 
 ---
