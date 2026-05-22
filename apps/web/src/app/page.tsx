@@ -152,14 +152,9 @@ export default function Home() {
                     className="group w-full text-left bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-150"
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-base font-semibold text-text-primary leading-tight truncate">
-                          {trip.name}
-                        </span>
-                        <span className="text-sm text-text-muted truncate">
-                          {trip.destination}
-                        </span>
-                      </div>
+                      <span className="text-base font-semibold text-text-primary leading-tight truncate">
+                        {trip.name}
+                      </span>
                       {isOwner && (
                         <span className="shrink-0 text-[10px] font-semibold text-accent bg-accent/10 rounded-full px-2.5 py-1 uppercase tracking-wide">
                           Owner
@@ -167,12 +162,18 @@ export default function Home() {
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-1 text-sm font-medium text-text-muted">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                        <circle cx="12" cy="9" r="2.5"/>
+                      </svg>
+                      <span className="truncate">{trip.destination}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-auto pt-1">
                       <MemberDots count={trip.member_count} />
                       {dates && (
-                        <span className="text-xs text-text-muted tabular-nums shrink-0">
-                          {dates}
-                        </span>
+                        <span className="text-xs text-text-muted tabular-nums shrink-0">{dates}</span>
                       )}
                     </div>
                   </button>

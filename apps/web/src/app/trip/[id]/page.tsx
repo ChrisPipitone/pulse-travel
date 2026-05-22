@@ -596,9 +596,9 @@ export default function TripPage({
                                 {suggester ? (
                                   <div className="flex items-center gap-1.5 min-w-0">
                                     {suggester.avatar_url ? (
-                                      <img src={suggester.avatar_url} alt={suggester.name} className="w-4 h-4 rounded-full object-cover shrink-0" />
+                                      <img src={suggester.avatar_url} alt={suggester.name} className="w-5 h-5 rounded-full object-cover shrink-0" />
                                     ) : (
-                                      <div className="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0" style={{ backgroundColor: memberPalette(colorMap.get(suggester.id) ?? 0).bg, color: memberPalette(colorMap.get(suggester.id) ?? 0).fg }}>
+                                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ backgroundColor: memberPalette(colorMap.get(suggester.id) ?? 0).bg, color: memberPalette(colorMap.get(suggester.id) ?? 0).fg }}>
                                         {suggester.name.charAt(0).toUpperCase()}
                                       </div>
                                     )}
@@ -610,14 +610,14 @@ export default function TripPage({
                                   <div className="flex items-center gap-1.5 shrink-0">
                                     <div className="flex">
                                       {ratersCapped.map((m, i) => m.avatar_url ? (
-                                        <img key={m.id} src={m.avatar_url} alt={m.name} className="w-4 h-4 rounded-full object-cover" style={{ marginLeft: i > 0 ? '-4px' : 0, border: '2px solid var(--bg-card)' }} />
+                                        <img key={m.id} src={m.avatar_url} alt={m.name} className="w-5 h-5 rounded-full object-cover" style={{ marginLeft: i > 0 ? '-5px' : 0, border: '2px solid var(--bg-card)' }} />
                                       ) : (
-                                        <div key={m.id} className="w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold" style={{ marginLeft: i > 0 ? '-4px' : 0, border: '2px solid var(--bg-card)', backgroundColor: memberPalette(colorMap.get(m.id) ?? 0).bg, color: memberPalette(colorMap.get(m.id) ?? 0).fg }}>
+                                        <div key={m.id} className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ marginLeft: i > 0 ? '-5px' : 0, border: '2px solid var(--bg-card)', backgroundColor: memberPalette(colorMap.get(m.id) ?? 0).bg, color: memberPalette(colorMap.get(m.id) ?? 0).fg }}>
                                           {m.name.charAt(0).toUpperCase()}
                                         </div>
                                       ))}
                                       {ratersOverflow > 0 && (
-                                        <div className="w-4 h-4 rounded-full bg-border flex items-center justify-center text-[7px] font-bold text-text-muted" style={{ marginLeft: '-4px', border: '2px solid var(--bg-card)' }}>
+                                        <div className="w-5 h-5 rounded-full bg-border flex items-center justify-center text-[8px] font-bold text-text-muted" style={{ marginLeft: '-5px', border: '2px solid var(--bg-card)' }}>
                                           +{ratersOverflow}
                                         </div>
                                       )}
