@@ -550,7 +550,7 @@ export default function TripPage({
                         return (
                           <div
                             key={activity.id}
-                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-accent/20 hover:shadow-sm transition-all"
+                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:shadow-sm hover:-translate-y-0.5 transition-all duration-150"
                             onClick={() => setModal({ mode: "view", activity })}
                           >
                             <div className="flex-1 min-w-0">
