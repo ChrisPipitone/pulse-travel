@@ -318,10 +318,10 @@ export default function TripPage({
           {/* ── Sidebar ─────────────────────────────────────────── */}
           <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6 lg:sticky lg:top-[5rem]">
             {/* Trip identity */}
-            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
+            <div className="bg-bg rounded-[var(--radius-card)] p-5 flex flex-col gap-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-col gap-0.5 min-w-0">
-                  <h1 className="text-lg font-semibold text-text-primary leading-tight">
+                  <h1 className="text-xl font-semibold text-text-primary leading-tight">
                     {trip.name}
                   </h1>
                   <p className="text-sm text-text-muted truncate">
@@ -550,7 +550,7 @@ export default function TripPage({
                         return (
                           <div
                             key={activity.id}
-                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-accent/20 hover:shadow-sm transition-all group"
+                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-accent/20 hover:shadow-sm transition-all"
                             onClick={() => setModal({ mode: "view", activity })}
                           >
                             <div className="flex-1 min-w-0">
@@ -609,7 +609,7 @@ export default function TripPage({
 
                             {editable && (
                               <div
-                                className="flex items-center gap-0.5 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                                className="flex items-center gap-0.5 shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button

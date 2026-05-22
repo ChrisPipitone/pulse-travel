@@ -30,7 +30,7 @@ None — all Round 1 items are done.
 
 - [x] **V4** — Edit/delete icons on activity cards: desktop clutter + mobile touch target problem. Two fixes in one: (1) hide on desktop until hover (`sm:opacity-0 sm:group-hover:opacity-100`), keep always visible below `sm`. (2) Touch targets are `p-1.5` + 13px icon ≈ 25px square — below the 44px Apple HIG minimum. Change to `p-2.5 sm:p-1.5` so mobile gets a usable target while desktop stays compact. Both fixes go on the same buttons. **[Impact: MED]**
 
-- [ ] **V5** — Trip identity sidebar card has equal visual weight to Schedules and Invite cards. It's the most important card on the page — trip name, destination, dates. Give it more presence: remove the border, use a slightly different background (`bg-bg` instead of `bg-bg-card`), or at minimum increase the trip name to `text-xl`. The three-card sidebar currently reads as three equals. **[Impact: MED]**
+- [x] **V5** — Trip identity sidebar card has equal visual weight to Schedules and Invite cards. It's the most important card on the page — trip name, destination, dates. Give it more presence: remove the border, use a slightly different background (`bg-bg` instead of `bg-bg-card`), or at minimum increase the trip name to `text-xl`. The three-card sidebar currently reads as three equals. **[Impact: MED]**
 
 ### CONSISTENCY — things that don't match
 
