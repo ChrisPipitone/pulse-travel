@@ -318,7 +318,7 @@ export default function TripPage({
           {/* ── Sidebar ─────────────────────────────────────────── */}
           <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6 lg:sticky lg:top-[5rem]">
             {/* Trip identity */}
-            <div className="bg-bg rounded-[var(--radius-card)] p-5 flex flex-col gap-3">
+            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border border-t-2 border-t-accent p-5 flex flex-col gap-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <h1 className="text-xl font-semibold text-text-primary leading-tight">
