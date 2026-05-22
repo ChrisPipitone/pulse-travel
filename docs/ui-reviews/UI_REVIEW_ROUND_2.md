@@ -47,7 +47,7 @@ None — all Round 1 items are done.
 
 ### ACCESSIBILITY — new gap
 
-- [ ] **AC1** — Edit and delete icon buttons on activity cards use `title="Edit"` / `title="Delete"` (tooltip only). Screen readers get nothing. Change to `aria-label="Edit activity"` / `aria-label="Delete activity"`. Two attributes, two minutes. **[Impact: MED]**
+- [x] **AC1** — Edit and delete icon buttons on activity cards use `title="Edit"` / `title="Delete"` (tooltip only). Screen readers get nothing. Change to `aria-label="Edit activity"` / `aria-label="Delete activity"`. Two attributes, two minutes. **[Impact: MED]**
 
 ### REACT NATIVE — component drift since Round 1
 
