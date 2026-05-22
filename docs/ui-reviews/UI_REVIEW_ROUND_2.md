@@ -1,87 +1,147 @@
 # Pulse — UI/UX Audit Round 2
 
-Focus: styling appeal, quality-of-life animations, visual consistency.
+Round 1 is fully complete. This round focuses on motion (two high-impact animations), visual consistency gaps, and a handful of styling items that are genuinely worth doing — the rest from the 1.5 draft got cut.
 Work 1–3 items at a time. Check off as done.
+
+---
+
+## OPEN FROM ROUND 1
+None — all Round 1 items are done.
 
 ---
 
 ## CHECKLIST
 
-### ANIMATIONS — motion that earns its keep
+### ANIMATION — two that earn their keep
 
-- [ ] **AN1** — Modal enter/exit: slide-up on mobile (translate-y: 100% → 0), fade+scale on desktop (scale-95 opacity-0 → scale-100 opacity-100). 200ms ease-out. Apply to all 4 modals. Biggest single UX improvement on this list.
-- [ ] **AN2** — Toast slide-in/out: slide up from below + fade on enter; fade + slide down on exit. CSS @keyframes in globals.css, ~200ms. Currently toasts just pop — jarring.
-- [ ] **AN3** — Score bars animated width on mount: width transitions from 0 → actual% over 500ms, staggered by row index (50ms delay each). Classic "data reveals" effect, reads as alive.
-- [ ] **AN4** — Matrix view switch fade: 150ms opacity crossfade when switching between the 5 views. Content change is currently instant and abrupt.
-- [ ] **AN5** — Rating chip tap feedback: brief `scale-95 → scale-100` on click (active state). Adds tactile feel to rating action.
-- [ ] **AN6** — "Copy link" → "Copied!" transition: fade-swap the label text rather than instant replace. 150ms. Small but noticeable.
-- [ ] **AN7** — Tab switch fade: 150ms opacity transition when switching Activities ↔ Matrix tab. Avoids jarring layout jump.
+- [ ] **AN1** — Modal enter/exit animation. All 4 modals snap in with no transition — the most jarring moment in the app. Mobile: slide up from bottom (`translate-y-full` → `translate-y-0`). Desktop: fade + slight scale (`scale-95 opacity-0` → `scale-100 opacity-1`). 200ms ease-out. CSS `@keyframes` in globals.css, no library. **[Impact: HIGH]**
 
-### STYLING — visual appeal and hierarchy
+- [ ] **AN2** — Toast enter/exit animation. Toasts currently pop in and out instantly. A slide-up from below on enter + fade-down on exit (~180ms) turns a functional system into a polished one. `@keyframes toast-in` / `toast-out` in globals.css. **[Impact: HIGH]**
 
-- [ ] **S1** — Activity card left accent stripe: `border-l-[3px]` in your own rating color (must=orange, want=teal, meh=yellow, unrated=transparent). Instant at-a-glance self-context, no hover required. High impact.
-- [ ] **S2** — Edit/delete icons on activity cards: hide by default (`opacity-0`), show on group-hover (`group-hover:opacity-100`). Desktop only — touch needs them visible. Removes clutter from long lists.
-- [ ] **S3** — Avatar color consistency: sidebar schedule avatars and activity list member chips are all gray. Matrix uses per-member PALETTE colors — bring those same colors to every avatar in the app (schedule list, rating chips in activity rows).
-- [ ] **S4** — Sidebar card visual hierarchy: trip identity card should feel like the parent of the other two. Give it slightly heavier treatment: `bg-gradient-to-br from-bg-card to-bg` or a slightly deeper border. Schedule and invite cards feel visually equal right now.
-- [ ] **S5** — "Rate" ghost badge: change from `border-dashed border-border text-text-subtle` → `bg-accent/8 border border-accent/20 text-accent` — subtle orange tint makes it feel like an invitation, not a placeholder.
-- [ ] **S6** — Twin grid heatmap color range: low compat scores (0–30%) are barely distinguishable from mid (40–60%). The heatmap needs a wider perceived range — try interpolating from `bg-cell-empty` (light gray) → `bg-want` (teal) → `bg-must` (orange) at 100% instead of just lightening one color.
-- [ ] **S7** — Score bar height: `h-1.5` is barely visible at small sizes. Bump to `h-2` and add a numeric label (`3 pts`) next to bar — wait, I2/I5 in round 1 already did the pts label. Just do the height bump.
-- [ ] **S8** — Trip card "Owner" badge: currently `bg-border text-text-subtle` (gray pill). Change to `bg-accent/10 text-accent` — makes ownership visible at a glance, matches accent system.
-- [ ] **S9** — Invite code display: add `tracking-widest` and `uppercase` to the `<code>` element. Short random codes are more scannable with wider letter spacing.
-- [ ] **S10** — AppNav height + logo: nav is `h-16`. On mobile this eats screen real estate. At sm: and below, compress to `h-12`. Also add `hover:scale-105 transition-transform` to just the logo icon (not text) — subtle logo delight.
-- [ ] **S11** — Activity card hover: `hover:border-border/60` makes border *lighter* on hover — counterintuitive. Change to `hover:border-accent/25 hover:shadow-sm` so hover reads as activation, not fade.
-- [ ] **S12** — Empty state icons: trip page empty state uses "No activities yet" text with no icon. Home page "No trips yet" uses ✈️ emoji. Standardize to consistent SVG illustrations, no emojis in empty states.
+- [ ] **AN3** — Score bar animated width on mount. Width transitions 0 → actual% over 400ms, staggered by row index (40ms delay each). Communicates "data loaded" in a way that feels alive without being decorative — the motion explains the data. Use `useState(false)` + `useEffect` to trigger after paint. **[Impact: MED]**
 
-### CONSISTENCY — things that don't match across views
+### VISUAL — things that are clearly off
 
-- [ ] **C1** — Member avatar color: same person appears as PALETTE color in matrix, gray dot in activity chips, gray circle in sidebar schedule. One canonical helper (`memberColor(id, colorMap)`) should drive all three locations.
-- [ ] **C2** — Border radius: activity cards use `rounded-[var(--radius-card)]`, modal inner div uses hardcoded `rounded-t-2xl sm:rounded-2xl` in ActivityFormModal. Audit: all card-shaped divs should use `var(--radius-card)`, all modals consistent.
-- [ ] **C3** — Loading states: trip page shows plain "Loading…" text center-screen. Home page shows skeleton cards. Trip page should show a skeleton layout matching the 2-col sidebar+main structure — dramatically reduces perceived load time.
+- [ ] **V1** — Activity card hover border direction is wrong. `hover:border-border/60` makes the border *lighter* — hover should signal activation, not fade. Change to `hover:border-accent/20 hover:shadow-sm`. One line. **[Impact: MED]**
 
-### UX — interaction quality
+- [ ] **V2** — "Rate" ghost badge needs more presence. `border-dashed border-border text-text-subtle` is so faint it defeats the nudge purpose. Change to `bg-accent/8 border border-accent/20 text-accent`. Still understated, but actually readable. **[Impact: MED]**
 
-- [ ] **UX1** — Activity card actions (edit/delete) stop propagation correctly but the click target on the card row is the whole row. On mobile, the action buttons are very small (p-1.5 icons). Increase touch target to `p-2.5` on mobile.
-- [ ] **UX2** — Schedules card: when no member has set dates, every row shows "Full trip" — the card looks like a placeholder. Add a small contextual note: "Set your dates to help the group plan around you." with a `→ Edit` link.
-- [ ] **UX3** — Stacked toasts: currently unlimited stack. Cap at 3; when a 4th arrives, dismiss the oldest silently. Multiple undo toasts stacking is visually noisy.
+- [ ] **V3** — "Owner" badge on trip cards is invisible. `bg-border text-text-subtle` means it blends into the card. `bg-accent/10 text-accent` makes ownership scannable at a glance — consistent with how accent communicates "this is yours." **[Impact: MED]**
+
+- [ ] **V4** — Edit/delete icons on activity cards visible at all times. On desktop this clutters every row. Add `group` to the card div, change icons to `opacity-0 group-hover:opacity-100 transition-opacity`. On mobile (`touch-action: none` doesn't apply), they stay visible — add `sm:opacity-0 sm:group-hover:opacity-100` to keep them always-visible on touch. **[Impact: MED]**
+
+- [ ] **V5** — Trip identity sidebar card has equal visual weight to Schedules and Invite cards. It's the most important card on the page — trip name, destination, dates. Give it more presence: remove the border, use a slightly different background (`bg-bg` instead of `bg-bg-card`), or at minimum increase the trip name to `text-xl`. The three-card sidebar currently reads as three equals. **[Impact: MED]**
+
+### CONSISTENCY — things that don't match
+
+- [ ] **C1** — Modal inner container radius is hardcoded in ActivityDetailModal and ActivityFormModal (`rounded-t-2xl sm:rounded-2xl`) but uses `var(--radius-card)` correctly in CreateTripModal and MemberDatesModal. In the editorial theme (8px radius) the hardcoded modals will look wrong. Fix: replace with `rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)]` in both. **[Impact: MED]**
+
+- [ ] **C2** — Member avatar color is inconsistent. The matrix uses a per-member PALETTE (10 distinct colors). Sidebar schedule and activity row chips use gray for everyone. Same person should have the same color everywhere. Extract `buildColorMap(members: Member[])` from CompatibilityMatrix into a shared util (or the Zustand store) and use it in both places. **[Impact: MED]**
+
+- [ ] **C3** — Close button pattern is inconsistent. ActivityDetailModal uses an SVG icon (good — precise, controllable). CreateTripModal and MemberDatesModal use a raw `×` text character. Standardize all to the SVG pattern. Three lines each. **[Impact: LOW]**
+
+### LOADING — the one gap that matters
+
+- [ ] **L1** — Trip page loading state is a centered "Loading…" text. Home page has skeleton cards. The trip page loading state should be a skeleton matching its actual layout: a narrow sidebar placeholder (3 stacked card outlines) + a wide main area placeholder (a few activity row outlines). Dramatically reduces perceived load time and prevents layout jump. **[Impact: HIGH]**
+
+### ACCESSIBILITY — new gap
+
+- [ ] **AC1** — Edit and delete icon buttons on activity cards use `title="Edit"` / `title="Delete"` (tooltip only). Screen readers get nothing. Change to `aria-label="Edit activity"` / `aria-label="Delete activity"`. Two attributes, two minutes. **[Impact: MED]**
+
+---
+
+## WHAT'S SOLID — no action needed
+
+**Token color system.** The two-theme CSS var setup is clean and well-structured. `@theme inline` mapping is correct. Nothing to change.
+
+**Toast design.** The accent-tinted `bg-accent/10 border-accent/30` treatment is tasteful and theme-aware. The undo button placement and behavior is exactly right. Leave it alone.
+
+**Modal backdrop.** `bg-black/40 backdrop-blur-sm` is the correct amount of blur — present but not theatrical. ✓ Done — no further action.
+
+**Focus ring system.** `focus-visible:ring-2 focus-visible:ring-accent/50` on buttons and inputs is correct and complete. ✓ Done — no further action.
+
+**Rating chip active state.** `ring-2 ring-offset-2` with rating-color ring is clear and unambiguous. The `justRated` → `✓` → auto-close flow is good UX. ✓ Done — no further action.
+
+**AppNav.** Clean, appropriately minimal. The Pulse logo mark is good. The back-to-trips pattern on trip pages works. Height is fine at h-16 — compressing it would save ~8px and break nothing, but it's not worth the complexity.
+
+**Scroll behavior.** `scrollbar-hide` on matrix overflow areas and `overflow-x-clip` on page mains are correct. ✓ Done — no further action.
+
+**Button radius.** Primary pill, outline/ghost rounded-lg — the hierarchy reads correctly. ✓ Done — no further action.
 
 ---
 
 ## NOTES
 
-### AN1 — Modal animation pattern
+### AN1 — Modal animation implementation
 
-Tailwind approach (no extra library):
-- Outer overlay: `animate-in fade-in` (Tailwind v4 has `@keyframes` utilities)
-- Mobile sheet inner div: `animate-in slide-in-from-bottom`
-- Desktop inner div: `animate-in fade-in zoom-in-95`
-- Duration: `duration-200 ease-out`
+Avoid Tailwind animate utilities here — Tailwind v4's built-ins may need plugin config. Use raw `@keyframes` in globals.css:
 
-If Tailwind's built-in animate utilities aren't available in v4 without a plugin, use CSS `@keyframes` in globals.css directly.
-
-### AN3 — Score bar animation
-
-Use inline `style={{ transitionDelay: \`${i * 50}ms\` }}` on the bar fill div, with `transition-[width] duration-500`. Mount state: start `w-0`, set actual width after first paint via `useState(false)` + `useEffect`.
-
-### S1 — Left accent stripe
-
-Apply to the outer activity card div:
+```css
+@keyframes modal-overlay-in {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+@keyframes modal-sheet-in {
+  from { transform: translateY(100%) }
+  to   { transform: translateY(0) }
+}
+@keyframes modal-dialog-in {
+  from { opacity: 0; transform: scale(0.96) }
+  to   { opacity: 1; transform: scale(1) }
+}
+.modal-overlay  { animation: modal-overlay-in 200ms ease-out }
+.modal-sheet    { animation: modal-sheet-in 220ms cubic-bezier(0.32, 0.72, 0, 1) }
+.modal-dialog   { animation: modal-dialog-in 180ms ease-out }
 ```
-border-l-[3px] border-l-transparent
-myRating === 'MUST' → border-l-must
-myRating === 'WANT' → border-l-want
-myRating === 'MEH'  → border-l-meh
+
+Apply: overlay div → `modal-overlay`, mobile inner div → `modal-sheet`, `sm:modal-dialog`. The easing `cubic-bezier(0.32, 0.72, 0, 1)` on the sheet is the iOS sheet easing — snappy start, smooth landing.
+
+Exit animation requires either CSS `animation-fill-mode` tricks or a small state machine (`closing` boolean that adds exit class, `onAnimationEnd` fires actual close). Simpler to skip exit animation on first pass — enter animation alone is the 80% win.
+
+### AN2 — Toast animation
+
+```css
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+.toast-enter { animation: toast-in 180ms ease-out }
 ```
-Needs `--color-must/want/meh` mapped to `border-l-*` via `@theme inline` (already mapped).
 
-### S3 / C1 — Avatar color consistency
+Add `toast-enter` class to each toast `<div>`. No exit animation needed on first pass (same reasoning as AN1).
 
-CompatibilityMatrix builds a `colorMap: Map<userId, paletteIndex>` from member array position. This same logic needs to run wherever member avatars appear. Recommend extracting `buildColorMap(members: Member[])` to a shared utility in `packages/hooks` (or a local helper) and passing `colorMap` as a prop or reading from the store.
+Also: cap the toast stack at 3. When a 4th toast fires, silently dismiss the oldest. Multiple stacked undo toasts are visually noisy. Add to `showToast`: `setToasts(prev => [...prev.slice(-2), { id, message, onUndo }])`.
 
----
+### C2 — Avatar color consistency
 
-## FUTURE / POST-ROUND
+CompatibilityMatrix already has this logic inline. Extract it:
 
-- Dark mode toggle in AppNav (CSS vars already support it)
-- Micro-interaction: activity card rows animate in on first load (staggered fade-up, 30ms delay each)
-- Confetti burst when all members have rated an activity
-- Pull-to-refresh on mobile (PWA)
+```typescript
+// apps/web/src/lib/memberColors.ts
+const PALETTE = [
+  { bg: '#ef4444', fg: '#fff' }, { bg: '#f97316', fg: '#fff' },
+  { bg: '#eab308', fg: '#000' }, { bg: '#22c55e', fg: '#fff' },
+  { bg: '#14b8a6', fg: '#fff' }, { bg: '#3b82f6', fg: '#fff' },
+  { bg: '#8b5cf6', fg: '#fff' }, { bg: '#ec4899', fg: '#fff' },
+  { bg: '#64748b', fg: '#fff' }, { bg: '#a16207', fg: '#fff' },
+]
+export function memberPalette(index: number) {
+  return PALETTE[index % PALETTE.length]
+}
+export function buildColorMap(members: { id: string }[]) {
+  return new Map(members.map((m, i) => [m.id, i]))
+}
+```
+
+Then: trip page builds `colorMap` once from `members`, passes it (or slice of it) to the sidebar schedule and activity chip renderers.
+
+### What was cut from the 1.5 draft and why
+
+- **AN4** (matrix view crossfade), **AN5** (rating chip scale), **AN6** ("Copied!" fade): decorative. The matrix views are distinct enough that abrupt switching is fine. The rating chips already have ring feedback. "Copied!" is clear without animation.
+- **S4** (sidebar gradient): gradients are the "AI-generated design" tell. Avoid.
+- **S6** (twin grid heatmap range): the two-color linear interpolation in the current code is doing the right thing for the data. Changing to a multi-stop gradient for aesthetics risks misrepresenting the underlying Jaccard scores.
+- **S7** (score bar height h-2): the pts label already from R1 makes the score readable. Adding height just for visual weight is noise.
+- **S9** (invite code `tracking-widest`): short alphanumeric codes don't need widened tracking — they read fine at normal spacing.
+- **S10** (compress AppNav to h-12 on mobile): h-16 is 64px, a standard mobile nav height. Not worth touching.
+- **UX2** (schedules card contextual note): adds copy to explain a UI that's already self-evident. Skip.
+- **AN7** (tab switch fade): LOW impact. The tab bar's active indicator already signals context. Content changing is expected behavior.
