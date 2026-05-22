@@ -27,7 +27,7 @@ type Tab = "activities" | "matrix";
 
 const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
   activities: { short: "Activities", full: "Activities" },
-  matrix: { short: "Crew", full: "Find your crew" },
+  matrix: { short: "Find your crew", full: "Find your crew" },
 };
 
 const ratingColor: Record<Rating, string> = {
@@ -107,24 +107,28 @@ export default function TripPage({
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const pendingDeleteRef = useRef<string | null>(null);
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(new Set());
-  const undoTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const undoTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map(),
+  );
 
   function requestDelete(key: string, ms = 3000) {
     if (pendingDeleteRef.current === key) {
-      clearTimeout(deleteTimerRef.current!)
-      pendingDeleteRef.current = null
-      setPendingDeleteId(null)
-      return true
+      clearTimeout(deleteTimerRef.current!);
+      pendingDeleteRef.current = null;
+      setPendingDeleteId(null);
+      return true;
     }
-    clearTimeout(deleteTimerRef.current!)
-    pendingDeleteRef.current = key
-    setPendingDeleteId(key)
+    clearTimeout(deleteTimerRef.current!);
+    pendingDeleteRef.current = key;
+    setPendingDeleteId(key);
     deleteTimerRef.current = setTimeout(() => {
-      pendingDeleteRef.current = null
-      setPendingDeleteId(null)
-    }, ms)
-    return false
+      pendingDeleteRef.current = null;
+      setPendingDeleteId(null);
+    }, ms);
+    return false;
   }
 
   const userId = session?.user.id;
@@ -177,10 +181,14 @@ export default function TripPage({
 
   async function handleDelete(activity: Activity) {
     if (!requestDelete(activity.id, 3000)) return;
-    setHiddenActivityIds(prev => new Set(prev).add(activity.id));
+    setHiddenActivityIds((prev) => new Set(prev).add(activity.id));
     const timer = setTimeout(async () => {
       undoTimersRef.current.delete(activity.id);
-      setHiddenActivityIds(prev => { const s = new Set(prev); s.delete(activity.id); return s; });
+      setHiddenActivityIds((prev) => {
+        const s = new Set(prev);
+        s.delete(activity.id);
+        return s;
+      });
       const ok = await deleteActivity(activity.id);
       if (!ok) showToast("Failed to delete — activity restored");
     }, 4000);
@@ -190,7 +198,11 @@ export default function TripPage({
       () => {
         clearTimeout(undoTimersRef.current.get(activity.id));
         undoTimersRef.current.delete(activity.id);
-        setHiddenActivityIds(prev => { const s = new Set(prev); s.delete(activity.id); return s; });
+        setHiddenActivityIds((prev) => {
+          const s = new Set(prev);
+          s.delete(activity.id);
+          return s;
+        });
       },
       4000,
     );
@@ -215,21 +227,21 @@ export default function TripPage({
   }
 
   async function handleDeleteTrip() {
-    if (!requestDelete('trip', 5000)) return;
+    if (!requestDelete("trip", 5000)) return;
     const tripId = trip!.id;
     const tripName = trip!.name;
     router.replace("/");
     const timer = setTimeout(async () => {
-      undoTimersRef.current.delete('trip');
+      undoTimersRef.current.delete("trip");
       await deleteTrip(tripId, () => {});
-      window.dispatchEvent(new Event('pulse:trips:changed'));
+      window.dispatchEvent(new Event("pulse:trips:changed"));
     }, 5000);
-    undoTimersRef.current.set('trip', timer);
+    undoTimersRef.current.set("trip", timer);
     showToast(
       `Trip "${tripName}" deleted`,
       () => {
-        clearTimeout(undoTimersRef.current.get('trip'));
-        undoTimersRef.current.delete('trip');
+        clearTimeout(undoTimersRef.current.get("trip"));
+        undoTimersRef.current.delete("trip");
         router.push(`/trip/${tripId}`);
       },
       5000,
@@ -300,8 +312,12 @@ export default function TripPage({
                     <button
                       onClick={handleDeleteTrip}
                       disabled={deleting}
-                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === 'trip' ? 'text-red-500 bg-red-500/10' : 'text-text-muted hover:text-red-500 hover:bg-bg'}`}
-                      title={pendingDeleteId === 'trip' ? 'Tap again to confirm delete' : 'Delete trip'}
+                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === "trip" ? "text-red-500 bg-red-500/10" : "text-text-muted hover:text-red-500 hover:bg-bg"}`}
+                      title={
+                        pendingDeleteId === "trip"
+                          ? "Tap again to confirm delete"
+                          : "Delete trip"
+                      }
                     >
                       <svg
                         width="14"
@@ -450,153 +466,165 @@ export default function TripPage({
             </div>
 
             {/* Activities tab */}
-            {tab === "activities" && (() => {
-              const visibleActivities = activities.filter(a => !hiddenActivityIds.has(a.id));
-              return (
-              <>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-text-muted">
-                    {visibleActivities.length}{" "}
-                    {visibleActivities.length === 1 ? "activity" : "activities"}
-                  </p>
-                  <Button size="sm" onClick={() => setModal({ mode: "add" })}>
-                    + Add activity
-                  </Button>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  {visibleActivities.length === 0 && (
-                    <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
-                      <p className="text-sm font-medium text-text-primary">
-                        No activities yet
+            {tab === "activities" &&
+              (() => {
+                const visibleActivities = activities.filter(
+                  (a) => !hiddenActivityIds.has(a.id),
+                );
+                return (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-text-muted">
+                        {visibleActivities.length}{" "}
+                        {visibleActivities.length === 1
+                          ? "activity"
+                          : "activities"}
                       </p>
-                      <p className="text-xs text-text-muted">
-                        Add the first one for the group to rate.
-                      </p>
-                    </div>
-                  )}
-                  {visibleActivities.map((activity) => {
-                    const activityRatings = ratings.filter(
-                      (r) => r.activity_id === activity.id,
-                    );
-                    const myRating = activityRatings.find(
-                      (r) => r.user_id === session?.user.id,
-                    );
-                    const editable = canEdit(activity);
-
-                    return (
-                      <div
-                        key={activity.id}
-                        className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-border/60 hover:shadow-sm transition-all"
-                        onClick={() => setModal({ mode: "view", activity })}
+                      <Button
+                        size="sm"
+                        onClick={() => setModal({ mode: "add" })}
                       >
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-text-primary truncate">
-                            {activity.name}
+                        + Add activity
+                      </Button>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      {visibleActivities.length === 0 && (
+                        <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
+                          <p className="text-sm font-medium text-text-primary">
+                            No activities yet
                           </p>
-                          {activity.location && (
-                            <p className="text-xs text-text-muted truncate mt-0.5">
-                              {activity.location}
-                            </p>
-                          )}
+                          <p className="text-xs text-text-muted">
+                            Add the first one for the group to rate.
+                          </p>
                         </div>
+                      )}
+                      {visibleActivities.map((activity) => {
+                        const activityRatings = ratings.filter(
+                          (r) => r.activity_id === activity.id,
+                        );
+                        const myRating = activityRatings.find(
+                          (r) => r.user_id === session?.user.id,
+                        );
+                        const editable = canEdit(activity);
 
-                        {/* Per-member rating chips — hidden on mobile, shown sm+ */}
-                        <div className="hidden sm:flex items-center gap-1 shrink-0">
-                          {members.slice(0, 5).map((member) => {
-                            const r = activityRatings.find(
-                              (r) => r.user_id === member.id,
-                            );
-                            return (
-                              <div
-                                key={member.id}
-                                title={`${member.name.split(" ")[0]}: ${r?.rating ?? "unrated"}`}
-                                className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold ${
-                                  r
-                                    ? ratingColor[r.rating]
-                                    : "bg-border text-text-subtle"
-                                }`}
-                              >
-                                {member.name.charAt(0).toUpperCase()}
-                              </div>
-                            );
-                          })}
-                          {members.length > 5 && (
-                            <div className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-[11px] font-semibold text-text-muted">
-                              +{members.length - 5}
-                            </div>
-                          )}
-                        </div>
-                        {/* Mobile: compact rated count */}
-                        <span className="flex sm:hidden text-xs text-text-muted tabular-nums shrink-0">
-                          {activityRatings.length}/{members.length}
-                        </span>
-
-                        {myRating ? (
-                          <span
-                            className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}
-                          >
-                            {myRating.rating}
-                          </span>
-                        ) : (
-                          <span className="text-[11px] text-text-subtle px-2 py-0.5 rounded-[var(--radius-badge)] border border-dashed border-border shrink-0">
-                            Rate
-                          </span>
-                        )}
-
-                        {editable && (
+                        return (
                           <div
-                            className="flex items-center gap-0.5 shrink-0"
-                            onClick={(e) => e.stopPropagation()}
+                            key={activity.id}
+                            className="bg-bg-card rounded-[var(--radius-card)] border border-border px-4 py-3.5 flex items-center gap-4 cursor-pointer hover:border-border/60 hover:shadow-sm transition-all"
+                            onClick={() => setModal({ mode: "view", activity })}
                           >
-                            <button
-                              onClick={() =>
-                                setModal({ mode: "edit", activity })
-                              }
-                              className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
-                              title="Edit"
-                            >
-                              <svg
-                                width="13"
-                                height="13"
-                                viewBox="0 0 14 14"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-text-primary truncate">
+                                {activity.name}
+                              </p>
+                              {activity.location && (
+                                <p className="text-xs text-text-muted truncate mt-0.5">
+                                  {activity.location}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Per-member rating chips — hidden on mobile, shown sm+ */}
+                            <div className="hidden sm:flex items-center gap-1 shrink-0">
+                              {members.slice(0, 5).map((member) => {
+                                const r = activityRatings.find(
+                                  (r) => r.user_id === member.id,
+                                );
+                                return (
+                                  <div
+                                    key={member.id}
+                                    title={`${member.name.split(" ")[0]}: ${r?.rating ?? "unrated"}`}
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold ${
+                                      r
+                                        ? ratingColor[r.rating]
+                                        : "bg-border text-text-subtle"
+                                    }`}
+                                  >
+                                    {member.name.charAt(0).toUpperCase()}
+                                  </div>
+                                );
+                              })}
+                              {members.length > 5 && (
+                                <div className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-[11px] font-semibold text-text-muted">
+                                  +{members.length - 5}
+                                </div>
+                              )}
+                            </div>
+                            {/* Mobile: compact rated count */}
+                            <span className="flex sm:hidden text-xs text-text-muted tabular-nums shrink-0">
+                              {activityRatings.length}/{members.length}
+                            </span>
+
+                            {myRating ? (
+                              <span
+                                className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}
                               >
-                                <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => handleDelete(activity)}
-                              disabled={acting}
-                              className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === activity.id ? 'text-red-500 bg-red-500/10' : 'text-text-muted hover:text-red-500 hover:bg-bg'}`}
-                              title={pendingDeleteId === activity.id ? 'Tap again to delete' : 'Delete'}
-                            >
-                              <svg
-                                width="13"
-                                height="13"
-                                viewBox="0 0 14 14"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
+                                {myRating.rating}
+                              </span>
+                            ) : (
+                              <span className="text-[11px] text-text-subtle px-2 py-0.5 rounded-[var(--radius-badge)] border border-dashed border-border shrink-0">
+                                Rate
+                              </span>
+                            )}
+
+                            {editable && (
+                              <div
+                                className="flex items-center gap-0.5 shrink-0"
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5" />
-                              </svg>
-                            </button>
+                                <button
+                                  onClick={() =>
+                                    setModal({ mode: "edit", activity })
+                                  }
+                                  className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
+                                  title="Edit"
+                                >
+                                  <svg
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 14 14"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" />
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(activity)}
+                                  disabled={acting}
+                                  className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === activity.id ? "text-red-500 bg-red-500/10" : "text-text-muted hover:text-red-500 hover:bg-bg"}`}
+                                  title={
+                                    pendingDeleteId === activity.id
+                                      ? "Tap again to delete"
+                                      : "Delete"
+                                  }
+                                >
+                                  <svg
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 14 14"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-              );
-            })()}
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
 
             {/* Matrix tab */}
             {tab === "matrix" && <CompatibilityMatrix />}
