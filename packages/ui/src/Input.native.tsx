@@ -13,7 +13,7 @@ export function Input({ label, className = '', id, ...props }: Props & { id?: st
       )}
       <TextInput
         className={`w-full bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle ${className}`}
-        placeholderTextColor="var(--text-subtle)"
+        placeholderTextColor="#A8A49A"
         {...props}
       />
     </View>

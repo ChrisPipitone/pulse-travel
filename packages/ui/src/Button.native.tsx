@@ -5,9 +5,9 @@ type Variant = 'primary' | 'outline' | 'ghost'
 type Size = 'sm' | 'md' | 'lg'
 
 const variantStyles: Record<Variant, { container: string; text: string }> = {
-  primary: { container: 'bg-accent',         text: 'text-white' },
-  outline: { container: 'border border-border', text: 'text-text-primary' },
-  ghost:   { container: 'bg-meh',            text: 'text-accent' },
+  primary: { container: 'bg-accent rounded-[var(--radius-btn)]', text: 'text-white' },
+  outline: { container: 'border border-border rounded-lg',       text: 'text-text-primary' },
+  ghost:   { container: 'bg-meh rounded-lg',                     text: 'text-accent' },
 }
 
 const sizeStyles: Record<Size, { container: string; text: string }> = {
@@ -30,7 +30,7 @@ export function Button({ variant = 'primary', size = 'md', className = '', disab
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className={`flex-row items-center justify-center rounded-[var(--radius-btn)] ${variantStyles[variant].container} ${sizeStyles[size].container} ${disabled ? 'opacity-40' : ''} ${className}`}
+      className={`flex-row items-center justify-center ${variantStyles[variant].container} ${sizeStyles[size].container} ${disabled ? 'opacity-40' : ''} ${className}`}
     >
       <Text className={`font-medium ${variantStyles[variant].text} ${sizeStyles[size].text}`}>
         {children}

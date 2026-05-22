@@ -53,9 +53,9 @@ None — all Round 1 items are done.
 
 The `.native.tsx` files in `packages/ui/src/` have not been updated since Round 1 web changes. Two real issues, one tracking note:
 
-- [ ] **RN1** — `Input.native.tsx` line 16: `placeholderTextColor="var(--text-subtle)"` is a bug. CSS custom properties are not valid React Native color values — this prop is silently ignored, placeholder text will use the system default color instead of the theme value. Fix: pass a hardcoded fallback for now (`#A8A49A` modern / `#A89178` editorial) or resolve via a theme context. **[Impact: MED — silent visual bug when RN app ships]**
+- [x] **RN1** — `Input.native.tsx` line 16: `placeholderTextColor="var(--text-subtle)"` is a bug. CSS custom properties are not valid React Native color values — this prop is silently ignored, placeholder text will use the system default color instead of the theme value. Fix: pass a hardcoded fallback for now (`#A8A49A` modern / `#A89178` editorial) or resolve via a theme context. **[Impact: MED — silent visual bug when RN app ships]**
 
-- [ ] **RN2** — `Button.native.tsx`: web Button now uses `rounded-lg` for `outline`/`ghost` variants (fixed, theme-agnostic) while primary uses `rounded-[var(--radius-btn)]`. Native still uses `rounded-[var(--radius-btn)]` for all three variants. Sync the radius split to match web intent. **[Impact: LOW — visual inconsistency when themes diverge]**
+- [x] **RN2** — `Button.native.tsx`: web Button now uses `rounded-lg` for `outline`/`ghost` variants (fixed, theme-agnostic) while primary uses `rounded-[var(--radius-btn)]`. Native still uses `rounded-[var(--radius-btn)]` for all three variants. Sync the radius split to match web intent. **[Impact: LOW — visual inconsistency when themes diverge]**
 
 - [ ] **RN3** — All four native components use `rounded-[var(--radius-*)]` arbitrary CSS vars. Verify NativeWind v4 resolves these correctly at runtime. If not, the border radius will silently fall back to 0 in the native app. Needs a test render. **[Impact: HIGH if broken, unknown until tested]**
 
