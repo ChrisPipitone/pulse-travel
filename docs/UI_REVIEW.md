@@ -30,11 +30,11 @@ Work through these together, 1–3 at a time. Check off as done.
 
 ### POLISH — spacing, rounding, visual refinement
 
-- [ ] **P1** — Home page join section: wrap in card (`bg-bg-card border border-border rounded-[var(--radius-card)] p-5`)
-- [ ] **P2** — Modal backdrop blur: add `backdrop-blur-sm` to all modal overlays
-- [ ] **P3** — Button radius audit: CTAs → pill (`rounded-[var(--radius-btn)]`), secondary/ghost → `rounded-lg`. Audit: "Sign out", "Join", "Add Activity", "Save"
-- [ ] **P4** — Focus rings: replace `focus:outline-none` with `focus-visible:ring-2 focus-visible:ring-accent/50` on all interactive elements
-- [ ] **P5** — Scrollbar hide on overflow-x-auto: matrix tabs + horizontal scroll areas
+- [x] **P1** — Home page join section: wrap in card (`bg-bg-card border border-border rounded-[var(--radius-card)] p-5`)
+- [x] **P2** — Modal backdrop blur: add `backdrop-blur-sm` to all modal overlays
+- [x] **P3** — Button radius audit: CTAs → pill (`rounded-[var(--radius-btn)]`), secondary/ghost → `rounded-lg`. Audit: "Sign out", "Join", "Add Activity", "Save"
+- [x] **P4** — Focus rings: replace `focus:outline-none` with `focus-visible:ring-2 focus-visible:ring-accent/50` on all interactive elements
+- [x] **P5** — Scrollbar hide on overflow-x-auto: matrix tabs + horizontal scroll areas
 
 ### UX FLOW
 
@@ -95,6 +95,10 @@ Lightweight, no library. Fixed-position stack in bottom-right (or top-center on 
 ### A5 — Trip edit
 
 Owner-only. Edit (pencil) icon on sidebar trip info card → opens modal pre-filled with current name/destination/dates. Same fields as CreateTripModal. Service call: `UPDATE trips WHERE id = ? AND created_by = auth.uid()`. RLS already enforces owner-only writes.
+
+---
+
+## Comments
 
 ---
 

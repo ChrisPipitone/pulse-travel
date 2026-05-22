@@ -606,7 +606,7 @@ function TwinGrid({ members, jaccardMatrix, colorMap }: {
         })}
       </div>
       {/* Desktop: N×N heatmap grid */}
-      <div className="hidden sm:block overflow-x-auto">
+      <div className="hidden sm:block overflow-x-auto scrollbar-hide">
         <table className="border-collapse text-sm">
           <thead>
             <tr className="border-b border-border">
@@ -808,7 +808,7 @@ export function CompatibilityMatrix() {
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
         <div className="flex flex-col gap-1.5 min-w-0 w-full sm:w-auto">
           {/* 5-way segmented control — scrollable on mobile */}
-          <div className="w-full overflow-x-auto pb-px">
+          <div className="w-full overflow-x-auto scrollbar-hide pb-px">
             <div className="inline-flex items-center border border-border rounded-[var(--radius-btn)] overflow-hidden min-w-max">
               {VIEWS.map(({ id, label, shortLabel }) => (
                 <button
@@ -843,7 +843,7 @@ export function CompatibilityMatrix() {
       {isCrew ? (
         <CrewCards rows={crewSlice} maxScore={maxScore} colorMap={colorMap} />
       ) : (
-        <div className="overflow-x-auto rounded-[var(--radius-card)] border border-border bg-bg-card">
+        <div className="overflow-x-auto scrollbar-hide rounded-[var(--radius-card)] border border-border bg-bg-card">
           {isActRows && (
             <ActivitiesRowsTable activities={actSlice} scores={scoreSlice} members={memSlice} maxScore={maxScore} />
           )}

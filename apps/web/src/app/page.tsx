@@ -183,7 +183,7 @@ export default function Home() {
         </section>
 
         {/* Join section */}
-        <section className="max-w-md flex flex-col gap-3">
+        <section className="max-w-md bg-bg-card border border-border rounded-[var(--radius-card)] p-5 flex flex-col gap-3">
           <div>
             <h2 className="text-sm font-semibold text-text-primary">
               Join a trip
@@ -202,7 +202,7 @@ export default function Home() {
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}
-              className="flex-1 bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors"
+              className="flex-1 bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:border-accent transition-colors"
             />
             <Button type="submit" variant="outline" disabled={!joinCode.trim()}>
               Join
