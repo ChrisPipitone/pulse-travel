@@ -206,16 +206,21 @@ export default function TripPage({
 
   async function handleDeleteTrip() {
     if (!requestDelete('trip', 5000)) return;
+    const tripId = trip!.id;
+    const tripName = trip!.name;
+    router.replace("/");
     const timer = setTimeout(async () => {
       undoTimersRef.current.delete('trip');
-      await deleteTrip(trip!.id, () => router.replace("/"));
+      await deleteTrip(tripId, () => {});
+      window.dispatchEvent(new Event('pulse:trips:changed'));
     }, 5000);
     undoTimersRef.current.set('trip', timer);
     showToast(
-      `Trip "${trip!.name}" deleted`,
+      `Trip "${tripName}" deleted`,
       () => {
         clearTimeout(undoTimersRef.current.get('trip'));
         undoTimersRef.current.delete('trip');
+        router.push(`/trip/${tripId}`);
       },
       5000,
     );

@@ -54,6 +54,12 @@ export default function Home() {
     if (!sessionLoading && !session) router.replace("/login");
   }, [session, sessionLoading, router]);
 
+  useEffect(() => {
+    const handler = () => refresh();
+    window.addEventListener('pulse:trips:changed', handler);
+    return () => window.removeEventListener('pulse:trips:changed', handler);
+  }, [refresh]);
+
   async function handleCreate(fields: {
     name: string;
     destination: string;
