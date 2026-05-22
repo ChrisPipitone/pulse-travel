@@ -42,7 +42,7 @@ None — all Round 1 items are done.
 
 ### LOADING — the one gap that matters
 
-- [ ] **L1** — Trip page loading state is a centered "Loading…" text. Home page has skeleton cards. The trip page loading state should be a skeleton matching its actual layout: a narrow sidebar placeholder (3 stacked card outlines) + a wide main area placeholder (a few activity row outlines). Dramatically reduces perceived load time and prevents layout jump. **[Impact: HIGH]**
+- [x] **L1** — Trip page loading state is a centered "Loading…" text. Home page has skeleton cards. The trip page loading state should be a skeleton matching its actual layout: a narrow sidebar placeholder (3 stacked card outlines) + a wide main area placeholder (a few activity row outlines). Dramatically reduces perceived load time and prevents layout jump. **[Impact: HIGH]**
 
 ### ACCESSIBILITY — new gap
 
