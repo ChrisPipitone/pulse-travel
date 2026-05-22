@@ -61,7 +61,7 @@ export function ActivityDetailModal({
     const timer = setTimeout(() => {
       setJustRated(false)
       onClose()
-    }, 1500)
+    }, 600)
     return () => clearTimeout(timer)
   }, [justRated, ratingLoading, onClose])
 
