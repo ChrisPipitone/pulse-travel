@@ -40,7 +40,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           {toasts.map(t => (
             <div
               key={t.id}
-              className="pointer-events-auto flex items-center gap-3 bg-bg-card border border-border text-text-primary px-4 py-3 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] w-full max-w-sm"
+              className="pointer-events-auto flex items-center gap-3 bg-accent/10 border border-accent/30 text-text-primary px-4 py-3 rounded-xl shadow-[0_8px_28px_rgba(0,0,0,0.14)] w-full max-w-sm"
             >
               <span className="flex-1 text-sm">{t.message}</span>
               {t.onUndo && (
