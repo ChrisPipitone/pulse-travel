@@ -1,17 +1,44 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Trip, Activity, ActivityRating, Member } from '@pulse/types'
 
-export async function getUserTrips(client: SupabaseClient): Promise<Array<Trip & { member_count: number }>> {
+export type TripMemberAvatar = { id: string; name: string; avatar_url?: string | null }
+export type TripSummary = Trip & { member_count: number; member_avatars: TripMemberAvatar[] }
+
+export async function getUserTrips(client: SupabaseClient): Promise<TripSummary[]> {
   const { data, error } = await client
     .from('trips')
-    .select('*, trip_members(count)')
+    .select('*, trip_members(user_id)')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
-  return (data ?? []).map((t: Trip & { trip_members: { count: number }[] }) => ({
-    ...t,
-    member_count: t.trip_members?.[0]?.count ?? 0,
-    trip_members: undefined,
-  })) as Array<Trip & { member_count: number }>
+
+  const trips = data ?? []
+  const allUserIds = [...new Set(trips.flatMap((t: any) => (t.trip_members ?? []).map((m: any) => m.user_id as string)))]
+
+  const profileMap = new Map<string, { name: string; avatar_url?: string | null }>()
+  if (allUserIds.length > 0) {
+    const { data: profiles, error: profilesError } = await client
+      .from('profiles')
+      .select('id, display_name, avatar_url')
+      .in('id', allUserIds)
+    if (profilesError) throw new Error(profilesError.message)
+    for (const p of profiles ?? []) {
+      profileMap.set(p.id, { name: p.display_name ?? 'Unknown', avatar_url: p.avatar_url })
+    }
+  }
+
+  return trips.map((t: any) => {
+    const memberIds: string[] = (t.trip_members ?? []).map((m: any) => m.user_id as string)
+    return {
+      ...t,
+      member_count: memberIds.length,
+      member_avatars: memberIds.slice(0, 5).map((id) => ({
+        id,
+        name: profileMap.get(id)?.name ?? 'Unknown',
+        avatar_url: profileMap.get(id)?.avatar_url,
+      })),
+      trip_members: undefined,
+    }
+  })
 }
 
 export async function createTrip(

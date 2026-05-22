@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSession, useUserTrips, useCreateTrip } from "@pulse/hooks";
 import { Button } from "@pulse/ui";
 import { CreateTripModal } from "@/components/CreateTripModal";
-import type { Trip } from "@pulse/types";
-
-type TripSummary = Trip & { member_count: number };
+import { memberPalette } from "@/lib/memberColors";
+import type { TripSummary, TripMemberAvatar } from "@pulse/services";
 
 function formatDateRange(start?: string | null, end?: string | null) {
   if (!start && !end) return null;
@@ -21,19 +20,38 @@ function formatDateRange(start?: string | null, end?: string | null) {
   return `Until ${fmt(end!)}`;
 }
 
-function MemberDots({ count }: { count: number }) {
+function MemberDots({ count, avatars }: { count: number; avatars: TripMemberAvatar[] }) {
   const shown = Math.min(count, 5);
+  const overflow = count - shown;
   return (
     <div className="flex items-center">
-      {Array.from({ length: shown }).map((_, i) => (
+      {avatars.slice(0, shown).map((member, i) =>
+        member.avatar_url ? (
+          <img
+            key={member.id}
+            src={member.avatar_url}
+            alt={member.name}
+            style={{ marginLeft: i === 0 ? 0 : -6, zIndex: shown - i }}
+            className="relative w-6 h-6 rounded-full object-cover border-2 border-bg-card"
+          />
+        ) : (
+          <span
+            key={member.id}
+            style={{ marginLeft: i === 0 ? 0 : -6, zIndex: shown - i, backgroundColor: memberPalette(i).bg, color: memberPalette(i).fg }}
+            className="relative w-6 h-6 rounded-full border-2 border-bg-card flex items-center justify-center text-[9px] font-semibold"
+          >
+            {member.name.charAt(0).toUpperCase()}
+          </span>
+        )
+      )}
+      {overflow > 0 && (
         <span
-          key={i}
-          style={{ marginLeft: i === 0 ? 0 : -6, zIndex: shown - i }}
+          style={{ marginLeft: -6, zIndex: 0 }}
           className="relative w-6 h-6 rounded-full bg-border border-2 border-bg-card flex items-center justify-center text-[9px] font-semibold text-text-subtle"
         >
-          {i === shown - 1 && count > 5 ? `+${count - 4}` : ""}
+          +{overflow}
         </span>
-      ))}
+      )}
       <span className="ml-2 text-xs text-text-muted">
         {count} {count === 1 ? "person" : "people"}
       </span>
@@ -171,7 +189,7 @@ export default function Home() {
                     </div>
 
                     <div className="flex items-center justify-between mt-auto pt-1">
-                      <MemberDots count={trip.member_count} />
+                      <MemberDots count={trip.member_count} avatars={trip.member_avatars} />
                       {dates && (
                         <span className="text-xs text-text-muted tabular-nums shrink-0">{dates}</span>
                       )}

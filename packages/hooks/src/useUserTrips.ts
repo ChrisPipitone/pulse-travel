@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react'
-import type { Trip } from '@pulse/types'
 import { useSupabase } from './SupabaseContext'
 import { getUserTrips } from '@pulse/services'
-
-type TripSummary = Trip & { member_count: number }
+import type { TripSummary } from '@pulse/services'
 
 type UserTripsState = {
   trips: TripSummary[]
