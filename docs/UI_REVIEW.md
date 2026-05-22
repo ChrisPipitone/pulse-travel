@@ -44,9 +44,9 @@ Work through these together, 1–3 at a time. Check off as done.
 
 ### ACCESSIBILITY
 
-- [ ] **AC1** — Focus trap in modals: Tab cycles within modal only when open
-- [ ] **AC2** — `aria-label` on icon-only buttons: × close, copy icon, remove member
-- [ ] **AC3** — Matrix cells: `aria-label="Marco: MUST"` on each colored cell
+- [x] **AC1** — Focus trap in modals: Tab cycles within modal only when open
+- [x] **AC2** — `aria-label` on icon-only buttons: × close, copy icon, remove member
+- [x] **AC3** — Matrix cells: `aria-label="Marco: MUST"` on each colored cell
 
 ---
 

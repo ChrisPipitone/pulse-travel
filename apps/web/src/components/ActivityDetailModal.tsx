@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Activity, ActivityRating, Member, Rating } from '@pulse/types'
 
 // TODO(mobile): revisit rating UX for touch — consider long-press popover or
@@ -45,6 +46,8 @@ export function ActivityDetailModal({
   onRate, onClose, onEdit, canEdit,
 }: Props) {
   const [justRated, setJustRated] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(modalRef, open)
 
   useEffect(() => {
     if (!open) return
@@ -58,7 +61,7 @@ export function ActivityDetailModal({
     const timer = setTimeout(() => {
       setJustRated(false)
       onClose()
-    }, 600)
+    }, 1500)
     return () => clearTimeout(timer)
   }, [justRated, ratingLoading, onClose])
 
@@ -74,7 +77,7 @@ export function ActivityDetailModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md shadow-lg overflow-hidden">
+      <div ref={modalRef} className="relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md shadow-lg overflow-hidden">
 
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-4">
@@ -86,6 +89,7 @@ export function ActivityDetailModal({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">

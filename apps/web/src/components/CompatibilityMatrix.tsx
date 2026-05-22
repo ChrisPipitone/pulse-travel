@@ -71,10 +71,10 @@ function paletteFor(idx: number) { return PALETTE[idx % PALETTE.length] }
 
 // ── Shared primitives ─────────────────────────────────────────────────────
 
-function Cell({ rating }: { rating?: Rating }) {
+function Cell({ rating, ariaLabel }: { rating?: Rating; ariaLabel?: string }) {
   const base = 'w-8 h-8 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold mx-auto select-none'
-  if (!rating) return <div className={`${base} bg-cell-empty text-text-subtle`}>–</div>
-  return <div className={`${base} ${cellStyle[rating]}`}>{rating[0]}</div>
+  if (!rating) return <div className={`${base} bg-cell-empty text-text-subtle`} aria-label={ariaLabel ? `${ariaLabel}: unrated` : undefined}>–</div>
+  return <div className={`${base} ${cellStyle[rating]}`} aria-label={ariaLabel ? `${ariaLabel}: ${rating}` : undefined}>{rating[0]}</div>
 }
 
 function ScoreBar({ score, max }: { score: number; max: number }) {
@@ -242,7 +242,7 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
                 </td>
                 {members.map(m => (
                   <td key={m.id} className="px-1 py-2 align-middle">
-                    <Cell rating={score?.ratings[m.id]} />
+                    <Cell rating={score?.ratings[m.id]} ariaLabel={m.name.split(' ')[0]} />
                   </td>
                 ))}
                 <td className="px-3 py-2.5 align-middle">
@@ -323,7 +323,7 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
               </td>
               {scores.map((score, i) => (
                 <td key={activities[i]?.id ?? i} className="px-1 py-2 align-middle">
-                  <Cell rating={score.ratings[m.id]} />
+                  <Cell rating={score.ratings[m.id]} ariaLabel={activities[i]?.name} />
                 </td>
               ))}
             </tr>

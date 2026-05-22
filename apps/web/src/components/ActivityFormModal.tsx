@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button, Input } from '@pulse/ui'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 type Fields = {
   name: string
@@ -23,6 +24,8 @@ type Props = {
 
 export function ActivityFormModal({ open, title, initial, loading, error, submitLabel = 'Save', onClose, onSubmit }: Props) {
   const [fields, setFields] = useState<Fields>({ name: '', location: '', description: '', url: '' })
+  const modalRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(modalRef, !!open)
 
   useEffect(() => {
     if (open) {
@@ -70,7 +73,7 @@ export function ActivityFormModal({ open, title, initial, loading, error, submit
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md p-6 flex flex-col gap-5 shadow-lg">
+      <div ref={modalRef} className="relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md p-6 flex flex-col gap-5 shadow-lg">
         <h2 className="text-base font-semibold text-text-primary">{title}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input label="Activity *" id="act-name" placeholder="Colosseum Tour" required autoFocus maxLength={100} value={fields.name} onChange={set('name')} />

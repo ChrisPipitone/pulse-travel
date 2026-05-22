@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
 import { useToast } from '@/components/ToastProvider'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Member } from '@pulse/types'
 
 type Fields = {
@@ -36,6 +37,8 @@ export function CreateTripModal({
   members, ownerId, onRemoveMember, removingMemberId, removeError,
 }: Props) {
   const { showToast } = useToast()
+  const modalRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(modalRef, open)
   const [fields, setFields] = useState<Fields>({ name: '', destination: '', start_date: '', end_date: '' })
   const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null)
   const pendingRemoveRef = useRef<string | null>(null)
@@ -118,10 +121,10 @@ export function CreateTripModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl max-h-[90dvh] overflow-y-auto">
+      <div ref={modalRef} className="relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">{title}</h2>
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Close" className="text-text-muted hover:text-text-primary transition-colors text-xl leading-none">×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
