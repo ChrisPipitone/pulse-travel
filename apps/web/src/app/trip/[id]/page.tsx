@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useRef, useState } from "react";
+import { use, useMemo, useRef, useState } from "react";
 import {
   useTripData,
   useSession,
@@ -21,6 +21,7 @@ import { MemberDatesModal } from "@/components/MemberDatesModal";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
+import { memberPalette, buildColorMap } from "@/lib/memberColors";
 import type { Rating, Activity } from "@pulse/types";
 
 type Tab = "activities" | "matrix";
@@ -76,6 +77,7 @@ export default function TripPage({
   const { session } = useSession();
   const trip = useTripStore((s) => s.trip);
   const members = useTripStore((s) => s.members);
+  const colorMap = useMemo(() => buildColorMap(members), [members]);
   const activities = useTripStore((s) => s.activities);
   const ratings = useTripStore((s) => s.ratings);
 
@@ -428,9 +430,13 @@ export default function TripPage({
                   );
                   return (
                     <div key={m.id} className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-text-subtle font-semibold text-xs shrink-0">
-                        {m.name.charAt(0).toUpperCase()}
-                      </span>
+                      {m.avatar_url ? (
+                        <img src={m.avatar_url} alt={m.name} className="w-7 h-7 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <span className="w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shrink-0" style={{ backgroundColor: memberPalette(colorMap.get(m.id) ?? 0).bg, color: memberPalette(colorMap.get(m.id) ?? 0).fg }}>
+                          {m.name.charAt(0).toUpperCase()}
+                        </span>
+                      )}
                       <div className="flex flex-col leading-tight min-w-0 flex-1">
                         <span className="text-xs font-medium text-text-primary">
                           {m.name.split(" ")[0]}
@@ -570,15 +576,21 @@ export default function TripPage({
                                 const r = activityRatings.find(
                                   (r) => r.user_id === member.id,
                                 );
-                                return (
+                                const palette = memberPalette(colorMap.get(member.id) ?? 0);
+                                return member.avatar_url && !r ? (
+                                  <img
+                                    key={member.id}
+                                    src={member.avatar_url}
+                                    alt={member.name}
+                                    title={`${member.name.split(" ")[0]}: unrated`}
+                                    className="w-7 h-7 rounded-full object-cover"
+                                  />
+                                ) : (
                                   <div
                                     key={member.id}
                                     title={`${member.name.split(" ")[0]}: ${r?.rating ?? "unrated"}`}
-                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold ${
-                                      r
-                                        ? ratingColor[r.rating]
-                                        : "bg-border text-text-subtle"
-                                    }`}
+                                    className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold ${r ? ratingColor[r.rating] : ""}`}
+                                    style={!r ? { backgroundColor: palette.bg, color: palette.fg } : undefined}
                                   >
                                     {member.name.charAt(0).toUpperCase()}
                                   </div>

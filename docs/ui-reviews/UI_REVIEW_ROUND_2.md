@@ -37,7 +37,7 @@ None — all Round 1 items are done.
 
 - [x] **C1** — Modal inner container radius is hardcoded in ActivityDetailModal and ActivityFormModal (`rounded-t-2xl sm:rounded-2xl`) but uses `var(--radius-card)` correctly in CreateTripModal and MemberDatesModal. In the editorial theme (8px radius) the hardcoded modals will look wrong. Fix: replace with `rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)]` in both. **[Impact: MED]**
 
-- [ ] **C2** — Member avatar color is inconsistent. The matrix uses a per-member PALETTE (10 distinct colors). Sidebar schedule and activity row chips use gray for everyone. Same person should have the same color everywhere. Extract `buildColorMap(members: Member[])` from CompatibilityMatrix into a shared util (or the Zustand store) and use it in both places. **[Impact: MED]**
+- [x] **C2** — Member avatar color is inconsistent. The matrix uses a per-member PALETTE (10 distinct colors). Sidebar schedule and activity row chips use gray for everyone. Same person should have the same color everywhere. Extract `buildColorMap(members: Member[])` from CompatibilityMatrix into a shared util (or the Zustand store) and use it in both places. **[Impact: MED]**
 
 - [x] **C3** — Close button pattern is inconsistent. ActivityDetailModal uses an SVG icon (good — precise, controllable). CreateTripModal and MemberDatesModal use a raw `×` text character. Standardize all to the SVG pattern. Three lines each. **[Impact: LOW]**
 
