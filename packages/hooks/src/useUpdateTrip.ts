@@ -7,7 +7,7 @@ import { updateTrip as updateTripService } from '@pulse/services'
 type UpdateFields = Pick<Trip, 'name' | 'destination'> & { start_date?: string | null; end_date?: string | null }
 
 type UpdateTripState = {
-  updateTrip: (fields: UpdateFields) => Promise<void>
+  updateTrip: (fields: UpdateFields) => Promise<boolean>
   loading: boolean
   error: string | null
 }
@@ -20,8 +20,8 @@ export function useUpdateTrip(): UpdateTripState {
   const trip = useTripStore((s) => s.trip)
   const setTrip = useTripStore((s) => s.setTrip)
 
-  async function updateTrip(fields: UpdateFields): Promise<void> {
-    if (!trip) return
+  async function updateTrip(fields: UpdateFields): Promise<boolean> {
+    if (!trip) return false
     setError(null)
 
     const previous = trip
@@ -31,9 +31,11 @@ export function useUpdateTrip(): UpdateTripState {
     try {
       const updated = await updateTripService(client, trip.id, fields)
       setTrip(updated)
+      return true
     } catch (e) {
       setTrip(previous)
       setError(e instanceof Error ? e.message : 'Failed to update trip')
+      return false
     } finally {
       setLoading(false)
     }

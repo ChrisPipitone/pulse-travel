@@ -10,16 +10,16 @@ Work through these together, 1–3 at a time. Check off as done.
 
 - [x] **F1** — "+ New trip" button text clips on home page (px-6 → px-4 sm:px-6 on home `<main>`)
 - [x] **F2** — No ESC key to dismiss modals (all 4: CreateTripModal, ActivityFormModal, ActivityDetailModal, MemberDatesModal)
-- [ ] **F3** — Native `confirm()` dialogs for delete activity + delete trip — replace with polished pattern (see notes)
-- [ ] **F4** — Destructive action buttons ("Remove", "Delete", "Leave") not visually red — should always show red text, not just on hover
+- [x] **F3** — Native `confirm()` dialogs for delete activity + delete trip — replace with polished pattern (see notes)
+- [x] **F4** — Destructive action buttons ("Remove", "Delete", "Leave") not visually red — should always show red text, not just on hover
 
 ### ADD — new features
 
 - [ ] **A1** — Profile pictures: show `<img src={avatar_url}>` where populated; initials fallback. Applies everywhere: member list, rating chips, matrix cells, crew cards, twin grid. _(Google OAuth only for now — see future notes)_
-- [ ] **A2** — Lightweight toast system: "Activity added", "Removed Marco", "Failed — check connection". ~50 lines, no library, CSS slide-in, 3s auto-dismiss. _(See notes for details)_
-- [ ] **A3** — Copy invite code button: clipboard icon next to code, "Copied!" flash for 2s
-- [ ] **A4** — Empty state for matrix views: friendly prompt when 0 activities or 0 ratings exist
-- [ ] **A5** — Trip edit: owner can rename trip, update destination + dates. Edit icon on sidebar trip card. Same modal as CreateTripModal. _(See notes for details)_
+- [x] **A2** — Lightweight toast system: "Activity added", "Removed Marco", "Failed — check connection". ~50 lines, no library, CSS slide-in, 3s auto-dismiss. _(See notes for details)_
+- [x] **A3** — Copy invite code button: clipboard icon next to code, "Copied!" flash for 2s
+- [x] **A4** — Empty state for matrix views: friendly prompt when 0 activities or 0 ratings exist
+- [x] **A5** — Trip edit: owner can rename trip, update destination + dates. Edit icon on sidebar trip card. Same modal as CreateTripModal. _(See notes for details)_
 
 ### IMPROVE — better execution of existing features
 

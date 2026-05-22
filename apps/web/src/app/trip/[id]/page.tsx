@@ -140,7 +140,7 @@ export default function TripPage({
     description: string;
     url: string;
   }) {
-    await addActivity({
+    const ok = await addActivity({
       trip_id: id,
       name: fields.name,
       location: fields.location || null,
@@ -150,7 +150,10 @@ export default function TripPage({
       duration_hours: null,
       category_id: null,
     });
-    setModal({ mode: "closed" });
+    if (ok) {
+      setModal({ mode: "closed" });
+      showToast("Activity added");
+    }
   }
 
   async function handleEdit(fields: {
@@ -160,13 +163,16 @@ export default function TripPage({
     url: string;
   }) {
     if (modal.mode !== "edit") return;
-    await updateActivity(modal.activity.id, {
+    const ok = await updateActivity(modal.activity.id, {
       name: fields.name,
       location: fields.location || null,
       description: fields.description || null,
       url: fields.url || null,
     });
-    setModal({ mode: "closed" });
+    if (ok) {
+      setModal({ mode: "closed" });
+      showToast("Activity saved");
+    }
   }
 
   async function handleDelete(activity: Activity) {
@@ -175,7 +181,8 @@ export default function TripPage({
     const timer = setTimeout(async () => {
       undoTimersRef.current.delete(activity.id);
       setHiddenActivityIds(prev => { const s = new Set(prev); s.delete(activity.id); return s; });
-      await deleteActivity(activity.id);
+      const ok = await deleteActivity(activity.id);
+      if (!ok) showToast("Failed to delete — activity restored");
     }, 4000);
     undoTimersRef.current.set(activity.id, timer);
     showToast(
@@ -195,13 +202,16 @@ export default function TripPage({
     start_date: string;
     end_date: string;
   }) {
-    await updateTrip({
+    const ok = await updateTrip({
       name: fields.name,
       destination: fields.destination,
       start_date: fields.start_date || null,
       end_date: fields.end_date || null,
     });
-    setShowEditTrip(false);
+    if (ok) {
+      setShowEditTrip(false);
+      showToast("Trip updated");
+    }
   }
 
   async function handleDeleteTrip() {

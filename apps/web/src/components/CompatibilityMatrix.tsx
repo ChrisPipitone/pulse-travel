@@ -778,10 +778,20 @@ export function CompatibilityMatrix() {
 
   const currentView = VIEWS.find(v => v.id === orientation)!
 
-  if (activities.length === 0 || members.length === 0) {
+  if (activities.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-sm text-text-muted">Add activities and members to see the matrix.</p>
+      <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-14 flex flex-col items-center gap-2 text-center">
+        <p className="text-sm font-medium text-text-primary">No activities yet</p>
+        <p className="text-xs text-text-muted max-w-xs">Add activities to the trip — then come back to see how the group compares.</p>
+      </div>
+    )
+  }
+
+  if (ratings.length === 0) {
+    return (
+      <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-14 flex flex-col items-center gap-2 text-center">
+        <p className="text-sm font-medium text-text-primary">No ratings yet</p>
+        <p className="text-xs text-text-muted max-w-xs">Rate activities as MUST, WANT, or MEH — the matrix will show who's excited about what.</p>
       </div>
     )
   }
