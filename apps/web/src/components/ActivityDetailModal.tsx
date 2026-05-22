@@ -13,6 +13,12 @@ const ratingColor: Record<Rating, string> = {
   MEH:  'bg-meh text-meh-text',
 }
 
+const ratingRing: Record<Rating, string> = {
+  MUST: 'ring-must',
+  WANT: 'ring-want',
+  MEH:  'ring-meh',
+}
+
 const ratingLabel: Record<Rating, string> = {
   MUST: 'Must',
   WANT: 'Want',
@@ -112,7 +118,7 @@ export function ActivityDetailModal({
                     onClick={() => onRate(r)}
                     className={`flex-1 py-2 rounded-[var(--radius-card)] text-sm font-semibold transition-all disabled:opacity-50 ${
                       active
-                        ? ratingColor[r]
+                        ? `${ratingColor[r]} ring-2 ring-offset-2 ${ratingRing[r]}`
                         : 'bg-bg border border-border text-text-muted hover:border-accent/40 hover:text-text-primary'
                     }`}
                   >

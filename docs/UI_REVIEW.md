@@ -22,11 +22,11 @@ Work through these together, 1–3 at a time. Check off as done.
 
 ### IMPROVE — better execution of existing features
 
-- [ ] **I1** — Rating chip active state: add `ring-2 ring-offset-1` or `font-bold` so selected rating is unmistakably distinct from unselected
-- [ ] **I2** — Unrated activity nudge: small ghost "Rate it" badge on activities the current user hasn't rated yet
-- [ ] **I3** — Matrix cell sizing consistency: standardize to `h-8 w-8` with `text-[10px]` across all views
-- [ ] **I4** — Tab bar label shortening at narrow widths: "Travel Twin" → "Twin" at xs, or icon-only variant
-- [ ] **I5** — Score bars: show numeric score next to bar (`3 pts`) so rank is readable without inferring from fill width
+- [x] **I1** — Rating chip active state: add `ring-2 ring-offset-1` or `font-bold` so selected rating is unmistakably distinct from unselected
+- [x] **I2** — Unrated activity nudge: small ghost "Rate it" badge on activities the current user hasn't rated yet
+- [x] **I3** — Matrix cell sizing consistency: standardize to `h-8 w-8` with `text-[10px]` across all views
+- [x] **I4** — Tab bar label shortening at narrow widths: "Travel Twin" → "Twin" at xs, or icon-only variant
+- [x] **I5** — Score bars: show numeric score next to bar (`3 pts`) so rank is readable without inferring from fill width
 
 ### POLISH — spacing, rounding, visual refinement
 

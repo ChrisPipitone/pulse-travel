@@ -25,9 +25,9 @@ import type { Rating, Activity } from "@pulse/types";
 
 type Tab = "activities" | "matrix";
 
-const TAB_LABELS: Record<Tab, string> = {
-  activities: "Activities",
-  matrix: "Find your crew",
+const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
+  activities: { short: "Activities", full: "Activities" },
+  matrix: { short: "Crew", full: "Find your crew" },
 };
 
 const ratingColor: Record<Rating, string> = {
@@ -443,7 +443,8 @@ export default function TripPage({
                       : "text-text-muted border-transparent hover:text-text-primary"
                   }`}
                 >
-                  {TAB_LABELS[t]}
+                  <span className="sm:hidden">{TAB_LABELS[t].short}</span>
+                  <span className="hidden sm:inline">{TAB_LABELS[t].full}</span>
                 </button>
               ))}
             </div>
@@ -531,11 +532,15 @@ export default function TripPage({
                           {activityRatings.length}/{members.length}
                         </span>
 
-                        {myRating && (
+                        {myRating ? (
                           <span
                             className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}
                           >
                             {myRating.rating}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-text-subtle px-2 py-0.5 rounded-[var(--radius-badge)] border border-dashed border-border shrink-0">
+                            Rate
                           </span>
                         )}
 

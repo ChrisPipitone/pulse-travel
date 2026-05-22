@@ -11,31 +11,36 @@ const ROSTER_CAP   = 9
 
 type Orientation = 'activities-rows' | 'members-rows' | 'roster' | 'crew' | 'twin'
 
-interface ViewMeta { id: Orientation; label: string; description: string }
+interface ViewMeta { id: Orientation; label: string; shortLabel: string; description: string }
 const VIEWS: ViewMeta[] = [
   {
     id: 'crew',
     label: 'Rundown',
+    shortLabel: 'Rundown',
     description: 'Every activity at a glance — who\'s a MUST, who\'s a WANT, who\'s a MEH. Ranked by excitement.',
   },
   {
     id: 'twin',
     label: 'Travel twin',
+    shortLabel: 'Twin',
     description: 'Pairwise compatibility based on shared MUST + WANT overlap. Higher % = more similar vacation style. MEH is ignored — it means "I\'ll go either way."',
   },
   {
     id: 'activities-rows',
     label: 'By activity',
+    shortLabel: 'Activity',
     description: "Each activity's ratings across the whole group, sorted by group enthusiasm score.",
   },
   {
     id: 'members-rows',
     label: 'By member',
+    shortLabel: 'Member',
     description: "Each member's full rating list side by side — spot who has strong opinions and where they align.",
   },
   {
     id: 'roster',
     label: "Who's in",
+    shortLabel: "Who's in",
     description: "For every activity: exactly who's excited, who's neutral, and who hasn't responded yet.",
   },
 ]
@@ -194,7 +199,7 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
                         </div>
                         <span className="text-[11px] text-text-muted">{m.name.split(' ')[0]}</span>
                       </div>
-                      <div className="w-7 h-7 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold shrink-0 select-none">
+                      <div className="w-8 h-8 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold shrink-0 select-none">
                         {r ? <div className={`w-full h-full rounded-[var(--radius-cell)] flex items-center justify-center ${cellStyle[r]}`}>{r[0]}</div>
                             : <div className="w-full h-full rounded-[var(--radius-cell)] flex items-center justify-center bg-cell-empty text-text-subtle">–</div>}
                       </div>
@@ -280,7 +285,7 @@ function MembersRowsTable({ members, activities, scores, maxScore }: {
                 return (
                   <div key={a.id} className="flex items-center justify-between gap-2">
                     <span className="text-[11px] text-text-muted truncate">{a.name}</span>
-                    <div className="w-7 h-7 shrink-0 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold select-none">
+                    <div className="w-8 h-8 shrink-0 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold select-none">
                       {r ? <div className={`w-full h-full rounded-[var(--radius-cell)] flex items-center justify-center ${cellStyle[r]}`}>{r[0]}</div>
                           : <div className="w-full h-full rounded-[var(--radius-cell)] flex items-center justify-center bg-cell-empty text-text-subtle">–</div>}
                     </div>
@@ -805,7 +810,7 @@ export function CompatibilityMatrix() {
           {/* 5-way segmented control — scrollable on mobile */}
           <div className="w-full overflow-x-auto pb-px">
             <div className="inline-flex items-center border border-border rounded-[var(--radius-btn)] overflow-hidden min-w-max">
-              {VIEWS.map(({ id, label }) => (
+              {VIEWS.map(({ id, label, shortLabel }) => (
                 <button
                   key={id}
                   onClick={() => { setOrientation(id); setActPage(0); setMemPage(0) }}
@@ -815,7 +820,8 @@ export function CompatibilityMatrix() {
                       : 'bg-bg-card text-text-muted hover:text-text-primary'
                   }`}
                 >
-                  {label}
+                  <span className="sm:hidden">{shortLabel}</span>
+                  <span className="hidden sm:inline">{label}</span>
                 </button>
               ))}
             </div>
