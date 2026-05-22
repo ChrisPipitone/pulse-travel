@@ -1,5 +1,7 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Activity, ActivityRating, Member, Rating } from '@pulse/types'
 
 // TODO(mobile): revisit rating UX for touch — consider long-press popover or
@@ -10,6 +12,12 @@ const ratingColor: Record<Rating, string> = {
   MUST: 'bg-must text-must-text',
   WANT: 'bg-want text-want-text',
   MEH:  'bg-meh text-meh-text',
+}
+
+const ratingRing: Record<Rating, string> = {
+  MUST: 'ring-must',
+  WANT: 'ring-want',
+  MEH:  'ring-meh',
 }
 
 const ratingLabel: Record<Rating, string> = {
@@ -37,6 +45,30 @@ export function ActivityDetailModal({
   open, activity, members, activityRatings, myRating, ratingLoading,
   onRate, onClose, onEdit, canEdit,
 }: Props) {
+  const [justRated, setJustRated] = useState(false)
+  const modalRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(modalRef, open)
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  useEffect(() => {
+    if (!justRated || ratingLoading) return
+    const timer = setTimeout(() => {
+      setJustRated(false)
+      onClose()
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [justRated, ratingLoading, onClose])
+
+  useEffect(() => {
+    if (!open) setJustRated(false)
+  }, [open])
+
   if (!open || !activity) return null
 
   const addedBy = members.find((m) => m.id === activity.added_by)
@@ -45,7 +77,7 @@ export function ActivityDetailModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md shadow-lg overflow-hidden">
+      <div ref={modalRef} className="relative bg-bg-card rounded-t-2xl sm:rounded-2xl border border-border w-full sm:max-w-md shadow-lg overflow-hidden">
 
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-4">
@@ -57,6 +89,7 @@ export function ActivityDetailModal({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -97,18 +130,19 @@ export function ActivityDetailModal({
             <div className="flex gap-2">
               {ratings.map((r) => {
                 const active = myRating === r
+                const showCheck = active && justRated && !ratingLoading
                 return (
                   <button
                     key={r}
                     disabled={ratingLoading}
-                    onClick={() => onRate(r)}
+                    onClick={() => { setJustRated(true); onRate(r) }}
                     className={`flex-1 py-2 rounded-[var(--radius-card)] text-sm font-semibold transition-all disabled:opacity-50 ${
                       active
-                        ? ratingColor[r]
+                        ? `${ratingColor[r]} ring-2 ring-offset-2 ${ratingRing[r]}`
                         : 'bg-bg border border-border text-text-muted hover:border-accent/40 hover:text-text-primary'
                     }`}
                   >
-                    {ratingLabel[r]}
+                    {showCheck ? '✓' : ratingLabel[r]}
                   </button>
                 )
               })}

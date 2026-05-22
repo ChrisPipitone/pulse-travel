@@ -14,7 +14,7 @@ export function Input({ label, className = '', id, ...props }: Props) {
       )}
       <input
         id={id}
-        className={`w-full bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent transition-colors ${className}`}
+        className={`w-full bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:border-accent transition-colors ${className}`}
         {...props}
       />
     </div>

@@ -94,3 +94,8 @@ body {
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
 }
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}

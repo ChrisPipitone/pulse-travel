@@ -234,7 +234,16 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] Input validation — all forms: trim, maxLength, URL format, date order, email regex; DB CHECK constraints on all tables (migration 0006)
 - [x] Hosted Supabase — all migrations (0000–0006) applied and in sync with local
 - [x] Compatibility matrix UI — 5 views: Rundown (card layout), Travel twin (Jaccard heatmap), By activity, By member, Who's in. Jaccard model (MUST+WANT excited set, MEH excluded). Per-view descriptions. Pagination.
+- [x] Global AppNav — sticky header, route-aware (Pulse wordmark on home, ← Trips on trip pages), sign out button; wired in Providers.tsx above {children}
+- [x] Home page layout — trip card grid (sm:2col, lg:3col), MemberDots overlap avatars, empty state, skeleton loading, join section card
+- [x] Trip page layout — two-column (sidebar + main) at lg:, sticky sidebar with trip info / schedule / invite cards; tab bar for Activities / Find your crew
+- [x] Mobile: all 5 matrix views have mobile card layouts at sm: breakpoint; no horizontal overflow
+- [x] Cross-browser overflow fix — removed `flex flex-col` from body (caused Firefox width calc divergence); `overflow-x-clip` on each page's `<main>` instead
+- [x] ESC key closes all 4 modals (CreateTripModal, ActivityFormModal, ActivityDetailModal, MemberDatesModal)
+- [x] UI audit — `docs/UI_REVIEW.md` with 26-item checklist (Fix/Add/Improve/Polish/UX/A11y); F1+F2 done; F3–AC3 pending
+- [ ] Continue UI_REVIEW.md checklist (F3, F4, A1–A5, I1–I5, P1–P5, U1–U3, AC1–AC3)
 - [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs
+- [ ] Merge branch `ui/web-layout-polish` to main when polish complete
 
 ## Dev Setup
 ```bash

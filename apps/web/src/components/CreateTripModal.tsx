@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
+import { useToast } from '@/components/ToastProvider'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Member } from '@pulse/types'
 
 type Fields = {
@@ -34,7 +36,47 @@ export function CreateTripModal({
   loading, error, onClose, onSubmit,
   members, ownerId, onRemoveMember, removingMemberId, removeError,
 }: Props) {
+  const { showToast } = useToast()
+  const modalRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(modalRef, open)
   const [fields, setFields] = useState<Fields>({ name: '', destination: '', start_date: '', end_date: '' })
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null)
+  const pendingRemoveRef = useRef<string | null>(null)
+  const removeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [hiddenMemberIds, setHiddenMemberIds] = useState<Set<string>>(new Set())
+  const undoMemberTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
+
+  function handleRemoveClick(memberId: string) {
+    if (pendingRemoveRef.current === memberId) {
+      clearTimeout(removeTimerRef.current!)
+      pendingRemoveRef.current = null
+      setPendingRemoveId(null)
+      setHiddenMemberIds(prev => new Set(prev).add(memberId))
+      const timer = setTimeout(() => {
+        undoMemberTimersRef.current.delete(memberId)
+        setHiddenMemberIds(prev => { const s = new Set(prev); s.delete(memberId); return s })
+        onRemoveMember?.(memberId)
+      }, 4000)
+      undoMemberTimersRef.current.set(memberId, timer)
+      showToast(
+        'Member removed',
+        () => {
+          clearTimeout(undoMemberTimersRef.current.get(memberId))
+          undoMemberTimersRef.current.delete(memberId)
+          setHiddenMemberIds(prev => { const s = new Set(prev); s.delete(memberId); return s })
+        },
+        4000,
+      )
+      return
+    }
+    clearTimeout(removeTimerRef.current!)
+    pendingRemoveRef.current = memberId
+    setPendingRemoveId(memberId)
+    removeTimerRef.current = setTimeout(() => {
+      pendingRemoveRef.current = null
+      setPendingRemoveId(null)
+    }, 3000)
+  }
 
   useEffect(() => {
     if (open) setFields({
@@ -44,6 +86,13 @@ export function CreateTripModal({
       end_date: initial?.end_date ?? '',
     })
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
 
   if (!open) return null
 
@@ -71,11 +120,11 @@ export function CreateTripModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl max-h-[90dvh] overflow-y-auto">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div ref={modalRef} className="relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">{title}</h2>
-          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors text-xl leading-none">×</button>
+          <button onClick={onClose} aria-label="Close" className="text-text-muted hover:text-text-primary transition-colors text-xl leading-none">×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -132,7 +181,7 @@ export function CreateTripModal({
           <div className="flex flex-col gap-3 border-t border-border pt-5">
             <h3 className="text-sm font-semibold text-text-primary">Members</h3>
             <div className="flex flex-col gap-1">
-              {members.map((m) => {
+              {members.filter(m => !hiddenMemberIds.has(m.id)).map((m) => {
                 const isOwner = m.id === ownerId
                 const isRemoving = removingMemberId === m.id
                 return (
@@ -146,11 +195,11 @@ export function CreateTripModal({
                     ) : (
                       <button
                         type="button"
-                        onClick={() => onRemoveMember(m.id)}
+                        onClick={() => handleRemoveClick(m.id)}
                         disabled={isRemoving}
-                        className="text-xs text-text-muted hover:text-red-500 transition-colors disabled:opacity-40 px-1 py-0.5"
+                        className="text-xs text-red-500 hover:text-red-600 transition-colors disabled:opacity-40 px-1 py-0.5"
                       >
-                        {isRemoving ? 'Removing…' : 'Remove'}
+                        {isRemoving ? 'Removing…' : pendingRemoveId === m.id ? 'Confirm?' : 'Remove'}
                       </button>
                     )}
                   </div>

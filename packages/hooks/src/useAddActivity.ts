@@ -8,7 +8,7 @@ import { addActivity as addActivityService } from '@pulse/services'
 type NewActivityInput = Omit<Activity, 'id' | 'created_at' | 'added_by'>
 
 type AddActivityState = {
-  addActivity: (data: NewActivityInput) => Promise<void>
+  addActivity: (data: NewActivityInput) => Promise<boolean>
   loading: boolean
   error: string | null
 }
@@ -19,13 +19,13 @@ export function useAddActivity(): AddActivityState {
   const [error, setError] = useState<string | null>(null)
   const addToStore = useTripStore((s) => s.addActivity)
 
-  async function addActivity(data: NewActivityInput): Promise<void> {
+  async function addActivity(data: NewActivityInput): Promise<boolean> {
     setLoading(true)
     setError(null)
 
     try {
       const { data: { user } } = await client.auth.getUser()
-      if (!user) return
+      if (!user) return false
 
       const created = await addActivityService(client, { ...data, added_by: user.id })
 
@@ -34,8 +34,10 @@ export function useAddActivity(): AddActivityState {
       // The real-time subscription in useTripData will also fire; the store's
       // addActivity action handles the duplicate gracefully.
       if (created) addToStore(created)
+      return true
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to add activity')
+      return false
     } finally {
       setLoading(false)
     }
