@@ -19,6 +19,8 @@ import { ActivityDetailModal } from "@/components/ActivityDetailModal";
 import { CompatibilityMatrix } from "@/components/CompatibilityMatrix";
 import { MemberDatesModal } from "@/components/MemberDatesModal";
 import { CreateTripModal } from "@/components/CreateTripModal";
+import { MemberSchedulesModal } from "@/components/MemberSchedulesModal";
+import { FadeReveal } from "@/components/FadeReveal";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 import { memberPalette, buildColorMap } from "@/lib/memberColors";
@@ -104,6 +106,7 @@ export default function TripPage({
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
   const [showDatesModal, setShowDatesModal] = useState(false);
   const [showEditTrip, setShowEditTrip] = useState(false);
+  const [showSchedulesModal, setShowSchedulesModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("activities");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -285,8 +288,11 @@ export default function TripPage({
                 <div className="h-8 bg-border rounded-lg w-24" />
                 <div className="h-8 bg-border rounded-lg w-32" />
               </div>
-              {[1, 2, 3, 4].map(i => (
-                <div key={i} className="bg-bg-card rounded-[var(--radius-card)] border border-border p-4 flex items-center gap-3 animate-pulse">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="bg-bg-card rounded-[var(--radius-card)] border border-border p-4 flex items-center gap-3 animate-pulse"
+                >
                   <div className="flex-1 flex flex-col gap-2">
                     <div className="h-4 bg-border rounded w-2/5" />
                     <div className="h-3 bg-border rounded w-1/4" />
@@ -417,59 +423,94 @@ export default function TripPage({
             </div>
 
             {/* Member schedule */}
-            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
-              <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">
-                Schedules
-              </h2>
-              <div className="flex flex-col gap-2">
-                {members.map((m) => {
-                  const isMe = m.id === userId;
-                  const dateStr = formatMemberDates(
-                    m.arrival_date,
-                    m.departure_date,
-                  );
-                  return (
-                    <div key={m.id} className="flex items-center gap-2.5">
-                      {m.avatar_url ? (
-                        <img src={m.avatar_url} alt={m.name} className="w-7 h-7 rounded-full object-cover shrink-0" />
-                      ) : (
-                        <span className="w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shrink-0" style={{ backgroundColor: memberPalette(colorMap.get(m.id) ?? 0).bg, color: memberPalette(colorMap.get(m.id) ?? 0).fg }}>
-                          {m.name.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                      <div className="flex flex-col leading-tight min-w-0 flex-1">
-                        <span className="text-xs font-medium text-text-primary">
-                          {m.name.split(" ")[0]}
-                        </span>
-                        <span className="text-[11px] text-text-muted">
-                          {dateStr ?? "Full trip"}
-                        </span>
-                      </div>
-                      {isMe && (
-                        <button
-                          onClick={() => setShowDatesModal(true)}
-                          className="p-1 text-text-muted hover:text-text-primary transition-colors shrink-0"
-                          title="Edit my dates"
-                        >
-                          <svg
-                            width="11"
-                            height="11"
-                            viewBox="0 0 14 14"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {(() => {
+              const INLINE_CAP = 5;
+              const useModal = members.length > INLINE_CAP;
+              const me = members.find((m) => m.id === userId);
+              const others = members.filter((m) => m.id !== userId);
+              const inlineList = useModal
+                ? me
+                  ? [me, ...others.slice(0, INLINE_CAP)]
+                  : members.slice(0, INLINE_CAP)
+                : me
+                  ? [me, ...others]
+                  : members;
+
+              return (
+                <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
+                  <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">
+                    Schedules
+                  </h2>
+                  <div className="flex flex-col gap-2">
+                    {inlineList.map((m) => {
+                      const isMe = m.id === userId;
+                      const dateStr = formatMemberDates(
+                        m.arrival_date,
+                        m.departure_date,
+                      );
+                      return (
+                        <div key={m.id} className="flex items-center gap-2.5">
+                          {m.avatar_url ? (
+                            <img
+                              src={m.avatar_url}
+                              alt={m.name}
+                              className="w-7 h-7 rounded-full object-cover shrink-0"
+                            />
+                          ) : (
+                            <span
+                              className="w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shrink-0"
+                              style={{
+                                backgroundColor: memberPalette(
+                                  colorMap.get(m.id) ?? 0,
+                                ).bg,
+                                color: memberPalette(colorMap.get(m.id) ?? 0)
+                                  .fg,
+                              }}
+                            >
+                              {m.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          <div className="flex flex-col leading-tight min-w-0 flex-1">
+                            <span className="text-xs font-medium text-text-primary">
+                              {m.name.split(" ")[0]}
+                            </span>
+                            <span className="text-[11px] text-text-muted">
+                              {dateStr ?? "Full trip"}
+                            </span>
+                          </div>
+                          {isMe && (
+                            <button
+                              onClick={() => setShowDatesModal(true)}
+                              className="p-1 text-text-muted hover:text-text-primary transition-colors shrink-0"
+                              title="Edit my dates"
+                            >
+                              <svg
+                                width="11"
+                                height="11"
+                                viewBox="0 0 14 14"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {useModal && (
+                    <FadeReveal
+                      label={`See all ${members.length} members →`}
+                      onClick={() => setShowSchedulesModal(true)}
+                    />
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Invite code */}
             <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
@@ -553,11 +594,17 @@ export default function TripPage({
                         );
                         const editable = canEdit(activity);
 
-                        const ratedIds = new Set(activityRatings.map(r => r.user_id));
-                        const raters = members.filter(m => ratedIds.has(m.id));
+                        const ratedIds = new Set(
+                          activityRatings.map((r) => r.user_id),
+                        );
+                        const raters = members.filter((m) =>
+                          ratedIds.has(m.id),
+                        );
                         const ratersCapped = raters.slice(0, 4);
                         const ratersOverflow = raters.length - 4;
-                        const suggester = members.find(m => m.id === activity.added_by);
+                        const suggester = members.find(
+                          (m) => m.id === activity.added_by,
+                        );
 
                         return (
                           <div
@@ -568,9 +615,13 @@ export default function TripPage({
                             <div className="flex-1 min-w-0 flex flex-col gap-1">
                               {/* Line 1: name + my rating */}
                               <div className="flex items-center justify-between gap-2">
-                                <p className="text-sm font-semibold text-text-primary truncate">{activity.name}</p>
+                                <p className="text-sm font-semibold text-text-primary truncate">
+                                  {activity.name}
+                                </p>
                                 {myRating ? (
-                                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}>
+                                  <span
+                                    className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}
+                                  >
                                     {myRating.rating}
                                   </span>
                                 ) : (
@@ -583,11 +634,23 @@ export default function TripPage({
                               {/* Line 2: location with pin */}
                               {activity.location && (
                                 <div className="flex items-center gap-1 text-xs font-medium text-text-muted">
-                                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
-                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                                    <circle cx="12" cy="9" r="2.5"/>
+                                  <svg
+                                    width="10"
+                                    height="10"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="shrink-0 opacity-60"
+                                  >
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                                    <circle cx="12" cy="9" r="2.5" />
                                   </svg>
-                                  <span className="truncate">{activity.location}</span>
+                                  <span className="truncate">
+                                    {activity.location}
+                                  </span>
                                 </div>
                               )}
 
@@ -596,48 +659,116 @@ export default function TripPage({
                                 {suggester ? (
                                   <div className="flex items-center gap-1.5 min-w-0">
                                     {suggester.avatar_url ? (
-                                      <img src={suggester.avatar_url} alt={suggester.name} className="w-5 h-5 rounded-full object-cover shrink-0" />
+                                      <img
+                                        src={suggester.avatar_url}
+                                        alt={suggester.name}
+                                        className="w-5 h-5 rounded-full object-cover shrink-0"
+                                      />
                                     ) : (
-                                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ backgroundColor: memberPalette(colorMap.get(suggester.id) ?? 0).bg, color: memberPalette(colorMap.get(suggester.id) ?? 0).fg }}>
+                                      <div
+                                        className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
+                                        style={{
+                                          backgroundColor: memberPalette(
+                                            colorMap.get(suggester.id) ?? 0,
+                                          ).bg,
+                                          color: memberPalette(
+                                            colorMap.get(suggester.id) ?? 0,
+                                          ).fg,
+                                        }}
+                                      >
                                         {suggester.name.charAt(0).toUpperCase()}
                                       </div>
                                     )}
-                                    <span className="text-[11px] text-text-subtle truncate">{suggester.name.split(" ")[0]}</span>
+                                    <span className="text-[11px] text-text-subtle truncate">
+                                      {suggester.name.split(" ")[0]}
+                                    </span>
                                   </div>
-                                ) : <div />}
+                                ) : (
+                                  <div />
+                                )}
 
                                 {raters.length > 0 ? (
                                   <div className="flex items-center gap-1.5 shrink-0">
                                     <div className="flex">
-                                      {ratersCapped.map((m, i) => m.avatar_url ? (
-                                        <img key={m.id} src={m.avatar_url} alt={m.name} className="w-5 h-5 rounded-full object-cover" style={{ marginLeft: i > 0 ? '-5px' : 0, border: '2px solid var(--bg-card)' }} />
-                                      ) : (
-                                        <div key={m.id} className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold" style={{ marginLeft: i > 0 ? '-5px' : 0, border: '2px solid var(--bg-card)', backgroundColor: memberPalette(colorMap.get(m.id) ?? 0).bg, color: memberPalette(colorMap.get(m.id) ?? 0).fg }}>
-                                          {m.name.charAt(0).toUpperCase()}
-                                        </div>
-                                      ))}
+                                      {ratersCapped.map((m, i) =>
+                                        m.avatar_url ? (
+                                          <img
+                                            key={m.id}
+                                            src={m.avatar_url}
+                                            alt={m.name}
+                                            className="w-5 h-5 rounded-full object-cover"
+                                            style={{
+                                              marginLeft: i > 0 ? "-5px" : 0,
+                                              border:
+                                                "2px solid var(--bg-card)",
+                                            }}
+                                          />
+                                        ) : (
+                                          <div
+                                            key={m.id}
+                                            className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold"
+                                            style={{
+                                              marginLeft: i > 0 ? "-5px" : 0,
+                                              border:
+                                                "2px solid var(--bg-card)",
+                                              backgroundColor: memberPalette(
+                                                colorMap.get(m.id) ?? 0,
+                                              ).bg,
+                                              color: memberPalette(
+                                                colorMap.get(m.id) ?? 0,
+                                              ).fg,
+                                            }}
+                                          >
+                                            {m.name.charAt(0).toUpperCase()}
+                                          </div>
+                                        ),
+                                      )}
                                       {ratersOverflow > 0 && (
-                                        <div className="w-5 h-5 rounded-full bg-border flex items-center justify-center text-[8px] font-bold text-text-muted" style={{ marginLeft: '-5px', border: '2px solid var(--bg-card)' }}>
+                                        <div
+                                          className="w-5 h-5 rounded-full bg-border flex items-center justify-center text-[8px] font-bold text-text-muted"
+                                          style={{
+                                            marginLeft: "-5px",
+                                            border: "2px solid var(--bg-card)",
+                                          }}
+                                        >
                                           +{ratersOverflow}
                                         </div>
                                       )}
                                     </div>
-                                    <span className="text-[11px] text-text-subtle">{raters.length} rated</span>
+                                    <span className="text-[11px] text-text-subtle">
+                                      {raters.length} rated
+                                    </span>
                                   </div>
                                 ) : (
-                                  <span className="text-[11px] text-text-subtle shrink-0">no ratings yet</span>
+                                  <span className="text-[11px] text-text-subtle shrink-0">
+                                    no ratings yet
+                                  </span>
                                 )}
                               </div>
                             </div>
 
                             {editable && (
-                              <div className="flex flex-col gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <div
+                                className="flex flex-col gap-0.5 shrink-0"
+                                onClick={(e) => e.stopPropagation()}
+                              >
                                 <button
-                                  onClick={() => setModal({ mode: "edit", activity })}
+                                  onClick={() =>
+                                    setModal({ mode: "edit", activity })
+                                  }
                                   className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
                                   aria-label="Edit activity"
                                 >
-                                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <svg
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 14 14"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
                                     <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" />
                                   </svg>
                                 </button>
@@ -645,9 +776,22 @@ export default function TripPage({
                                   onClick={() => handleDelete(activity)}
                                   disabled={acting}
                                   className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === activity.id ? "text-red-500 bg-red-500/10" : "text-text-muted hover:text-red-500 hover:bg-bg"}`}
-                                  aria-label={pendingDeleteId === activity.id ? "Confirm delete activity" : "Delete activity"}
+                                  aria-label={
+                                    pendingDeleteId === activity.id
+                                      ? "Confirm delete activity"
+                                      : "Delete activity"
+                                  }
                                 >
-                                  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <svg
+                                    width="13"
+                                    height="13"
+                                    viewBox="0 0 14 14"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
                                     <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5" />
                                   </svg>
                                 </button>
@@ -666,6 +810,15 @@ export default function TripPage({
           </div>
         </div>
       </div>
+
+      <MemberSchedulesModal
+        open={showSchedulesModal}
+        members={members}
+        colorMap={colorMap}
+        userId={userId}
+        onEditDates={() => setShowDatesModal(true)}
+        onClose={() => setShowSchedulesModal(false)}
+      />
 
       <ActivityDetailModal
         open={modal.mode === "view"}

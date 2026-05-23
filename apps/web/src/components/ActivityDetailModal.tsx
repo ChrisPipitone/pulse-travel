@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { FadeReveal } from './FadeReveal'
 import { memberPalette, buildColorMap } from '@/lib/memberColors'
 import type { Activity, ActivityRating, Member, Rating } from '@pulse/types'
 
@@ -42,11 +43,14 @@ type Props = {
   canEdit: boolean
 }
 
+const GROUP_RATINGS_CAP = 5
+
 export function ActivityDetailModal({
   open, activity, members, activityRatings, myRating, ratingLoading,
   onRate, onClose, onEdit, canEdit,
 }: Props) {
   const [justRated, setJustRated] = useState(false)
+  const [ratingsExpanded, setRatingsExpanded] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
   const colorMap = useMemo(() => buildColorMap(members), [members])
   useFocusTrap(modalRef, open)
@@ -68,7 +72,7 @@ export function ActivityDetailModal({
   }, [justRated, ratingLoading, onClose])
 
   useEffect(() => {
-    if (!open) setJustRated(false)
+    if (!open) { setJustRated(false); setRatingsExpanded(false) }
   }, [open])
 
   if (!open || !activity) return null
@@ -152,35 +156,53 @@ export function ActivityDetailModal({
           </div>
 
           {/* Group ratings */}
-          {memberRatings.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <p className="text-xs font-medium text-text-muted uppercase tracking-wide">Group</p>
-              <div className="flex flex-col gap-1.5">
-                {members.map((member) => {
-                  const r = memberRatings.find((ar) => ar.user_id === member.id)
-                  if (!r) return null
-                  const palette = memberPalette(colorMap.get(member.id) ?? 0)
-                  return (
-                    <div key={member.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {member.avatar_url ? (
-                          <img src={member.avatar_url} alt={member.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
-                        ) : (
-                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ backgroundColor: palette.bg, color: palette.fg }}>
-                            {member.name.charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                        <span className="text-sm text-text-primary">{member.name.split(' ')[0]}</span>
+          {memberRatings.length > 0 && (() => {
+            const ratedMembers = members.filter((m) => memberRatings.some((ar) => ar.user_id === m.id))
+            const visible = ratingsExpanded ? ratedMembers : ratedMembers.slice(0, GROUP_RATINGS_CAP)
+            const overflow = ratedMembers.length - GROUP_RATINGS_CAP
+            return (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-medium text-text-muted uppercase tracking-wide">Group</p>
+                <div className="flex flex-col gap-1.5">
+                  {visible.map((member) => {
+                    const r = memberRatings.find((ar) => ar.user_id === member.id)!
+                    const palette = memberPalette(colorMap.get(member.id) ?? 0)
+                    return (
+                      <div key={member.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {member.avatar_url ? (
+                            <img src={member.avatar_url} alt={member.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
+                          ) : (
+                            <span className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ backgroundColor: palette.bg, color: palette.fg }}>
+                              {member.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          <span className="text-sm text-text-primary">{member.name.split(' ')[0]}</span>
+                        </div>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] ${ratingColor[r.rating]}`}>
+                          {ratingLabel[r.rating]}
+                        </span>
                       </div>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] ${ratingColor[r.rating]}`}>
-                        {ratingLabel[r.rating]}
-                      </span>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
+                {overflow > 0 && !ratingsExpanded && (
+                  <FadeReveal
+                    label={`+${overflow} more`}
+                    onClick={() => setRatingsExpanded(true)}
+                  />
+                )}
+                {ratingsExpanded && (
+                  <button
+                    onClick={() => setRatingsExpanded(false)}
+                    className="text-xs font-medium text-accent hover:opacity-75 transition-opacity text-center w-full"
+                  >
+                    Show less
+                  </button>
+                )}
               </div>
-            </div>
-          )}
+            )
+          })()}
         </div>
 
         {/* Footer — edit */}
