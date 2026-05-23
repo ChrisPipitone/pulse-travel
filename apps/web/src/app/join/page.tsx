@@ -123,7 +123,13 @@ function JoinPage() {
           </p>
         </div>
 
-        {joinError && <p className="text-xs text-red-500 text-center">{joinError}</p>}
+        {joinError && (
+          <p className="text-xs text-red-500 text-center">
+            {joinError.includes('Trip is full')
+              ? 'This trip is full — the owner would need to upgrade to add more members.'
+              : joinError}
+          </p>
+        )}
 
         <div className="flex flex-col gap-2">
           <Button onClick={handleJoin} disabled={joining} className="w-full">

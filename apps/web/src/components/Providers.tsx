@@ -5,6 +5,7 @@ import { SupabaseProvider } from '@pulse/hooks'
 import { supabase } from '@/lib/supabase'
 import { AppNav } from '@/components/AppNav'
 import { ToastProvider } from '@/components/ToastProvider'
+import { SetDisplayNameModal } from '@/components/SetDisplayNameModal'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ThemeProvider>
         <ToastProvider>
           <AppNav />
+          <SetDisplayNameModal />
           {children}
         </ToastProvider>
       </ThemeProvider>

@@ -236,6 +236,18 @@ export async function sendInviteEmail(
   if (error) throw new Error(error.message)
 }
 
+export async function updateDisplayName(
+  client: SupabaseClient,
+  userId: string,
+  displayName: string,
+): Promise<void> {
+  const { error } = await client
+    .from('profiles')
+    .update({ display_name: displayName })
+    .eq('id', userId)
+  if (error) throw new Error(error.message)
+}
+
 export async function isEmailTripMember(
   client: SupabaseClient,
   tripId: string,

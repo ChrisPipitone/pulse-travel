@@ -151,8 +151,14 @@ function LoginPage() {
     <Layout>
       <div className="flex flex-col gap-6">
         <div>
-          <h2 className="text-2xl font-semibold text-text-primary">Welcome to Pulse</h2>
-          <p className="text-sm text-text-muted mt-1">New or returning — just enter your email.</p>
+          <h2 className="text-2xl font-semibold text-text-primary">
+            {returnTo.includes('/join') ? 'Sign in to continue' : 'Welcome to Pulse'}
+          </h2>
+          <p className="text-sm text-text-muted mt-1">
+            {returnTo.includes('/join')
+              ? 'Sign in to finish joining the trip.'
+              : 'New or returning — just enter your email.'}
+          </p>
         </div>
 
         <form onSubmit={handleSend} className="flex flex-col gap-3">
