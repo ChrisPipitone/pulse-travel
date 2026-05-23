@@ -842,6 +842,7 @@ export default function TripPage({
       {showInviteModal && trip && (
         <InviteMemberModal
           tripName={trip.name}
+          tripId={trip.id}
           inviteCode={trip.invite_code}
           onClose={() => setShowInviteModal(false)}
         />

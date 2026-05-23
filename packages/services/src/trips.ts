@@ -235,3 +235,16 @@ export async function sendInviteEmail(
   })
   if (error) throw new Error(error.message)
 }
+
+export async function isEmailTripMember(
+  client: SupabaseClient,
+  tripId: string,
+  email: string,
+): Promise<boolean> {
+  const { data, error } = await client.rpc('is_trip_member_by_email', {
+    p_trip_id: tripId,
+    p_email: email,
+  })
+  if (error) return false
+  return data === true
+}
