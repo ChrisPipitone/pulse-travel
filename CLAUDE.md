@@ -223,7 +223,7 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] Activity detail modal — MUST/WANT/MEH chip rating, group ratings, optimistic update + rollback
 - [x] Toggle-to-unrate — tapping active rating removes it; optimistic remove + rollback; deleteRating service + removeRating store action
 - [x] 11 hooks, 52 tests passing
-- [x] Trip member limit — 50-member cap via BEFORE INSERT trigger
+- [x] Trip member limit — tier-aware BEFORE INSERT trigger (free=5, planner=25, enterprise=unlimited) replacing old 50-member hard cap
 - [x] Invite code lookup — SECURITY DEFINER RPC (non-member safe)
 - [x] Home page — trip list with member count, create trip modal, join via invite code
 - [x] Trip create flow — insert trip + add creator as first member
@@ -240,10 +240,11 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] Mobile: all 5 matrix views have mobile card layouts at sm: breakpoint; no horizontal overflow
 - [x] Cross-browser overflow fix — removed `flex flex-col` from body (caused Firefox width calc divergence); `overflow-x-clip` on each page's `<main>` instead
 - [x] ESC key closes all 4 modals (CreateTripModal, ActivityFormModal, ActivityDetailModal, MemberDatesModal)
-- [x] UI audit — `docs/UI_REVIEW.md` with 26-item checklist (Fix/Add/Improve/Polish/UX/A11y); F1+F2 done; F3–AC3 pending
-- [ ] Continue UI_REVIEW.md checklist (F3, F4, A1–A5, I1–I5, P1–P5, U1–U3, AC1–AC3)
+- [x] UI audit rounds 1 + 2 complete — see `docs/ui-reviews/`; RN3 open (needs simulator)
+- [x] User tiers — `user_tier` enum (free/planner/enterprise) on profiles; tier-aware member limit; see `docs/TIERS.md`
+- [x] Stress-test seed — 200 bulk users, 9 trips at 10/15/20/50/75/100/125/150/200 members with random ratings
 - [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs
-- [ ] Merge branch `ui/web-layout-polish` to main when polish complete
+- [ ] **PRE-DEPLOY: tiers enforcement** — DB trigger only; needs server-side guard + billing before real users see tiers (see `docs/TIERS.md`)
 
 ## Dev Setup
 ```bash

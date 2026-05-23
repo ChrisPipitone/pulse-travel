@@ -53,6 +53,20 @@
 - [ ] Smoke test auth flow on prod (magic link + Google OAuth)
 - [ ] Verify `.env*` never committed (gitignore check)
 
+## Tiers & Billing (post-MVP — see docs/TIERS.md)
+
+- [x] `user_tier` enum + column on profiles (migration 20260522000000)
+- [x] Tier-aware member limit trigger (free=5, planner=25, enterprise=unlimited)
+- [x] Stress-test seed with trips at 10/15/20/50/75/100/125/150/200 members
+- [ ] **REQUIRED BEFORE DEPLOY**: server-side tier enforcement — DB trigger can be bypassed via direct API; needs middleware or RLS policy check
+- [ ] Expose tier to client — include in profile fetch, surface in account/settings
+- [ ] UI prompt — show upgrade CTA when trip owner hits or approaches tier limit
+- [ ] Billing integration — Stripe (or similar) for tier upgrades
+- [ ] Webhook handler — sync Stripe subscription events → `profiles.tier`
+- [ ] Enterprise cap decision — currently unlimited; decide 125 vs unlimited before launch
+- [ ] Soft limit warnings — warn owner at 80% of tier cap (e.g. 4/5 or 20/25 members)
+- [ ] Admin tooling — manual tier assignment for beta users / customer support
+
 ## Future
 
 - [ ] PWA support

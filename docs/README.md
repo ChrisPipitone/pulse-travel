@@ -19,8 +19,9 @@ All diagrams use [Mermaid](https://mermaid.js.org/) and render natively on GitHu
 
 | Doc | What it covers |
 |---|---|
-| [TRIP_FLOW.md](./TRIP_FLOW.md) | Create trip, invite code lifecycle, join flow, duplicate join handling, 50-member cap, trip page state machine, permission model |
+| [TRIP_FLOW.md](./TRIP_FLOW.md) | Create trip, invite code lifecycle, join flow, duplicate join handling, tier-aware member cap, trip page state machine, permission model |
 | [RATING_MATRIX.md](./RATING_MATRIX.md) | MUST/WANT/MEH scoring formula, data flow, optimistic updates + rollback, CompatibilityScore type, real-time sync |
+| [TIERS.md](./TIERS.md) | User tier system (free/planner/enterprise), what's built, pre-deploy gaps, billing roadmap |
 
 ### Design
 
