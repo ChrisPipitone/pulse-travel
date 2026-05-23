@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useSignIn } from '@pulse/hooks'
 import { supabase } from '@/lib/supabase'
 import { Input } from '@pulse/ui'
 import { Button } from '@pulse/ui'
 import { Card } from '@pulse/ui'
 
-export default function LoginPage() {
+function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [otp, setOtp] = useState('')
@@ -17,6 +17,8 @@ export default function LoginPage() {
   const [pwError, setPwError] = useState<string | null>(null)
   const { sendOtp, verifyOtp, signInWithGoogle, loading, error } = useSignIn()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnTo = searchParams.get('returnTo') || '/'
 
   const trimmedEmail = email.trim()
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)
@@ -27,7 +29,7 @@ export default function LoginPage() {
     setPwError(null)
     const { error } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password })
     if (error) { setPwError(error.message); setPwLoading(false); return }
-    router.replace('/')
+    router.replace(returnTo)
   }
 
   async function handleSend(e: React.FormEvent) {
@@ -44,7 +46,7 @@ export default function LoginPage() {
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault()
     const ok = await verifyOtp(email, otp)
-    if (ok) router.replace('/')
+    if (ok) router.replace(returnTo)
   }
 
   function handleChangeEmail() {
@@ -53,7 +55,10 @@ export default function LoginPage() {
   }
 
   function handleGoogleSignIn() {
-    signInWithGoogle(`${window.location.origin}/auth/callback`)
+    const callbackUrl = returnTo === '/'
+      ? `${window.location.origin}/auth/callback`
+      : `${window.location.origin}/auth/callback?returnTo=${encodeURIComponent(returnTo)}`
+    signInWithGoogle(callbackUrl)
   }
 
   if (sent) {
@@ -161,5 +166,17 @@ export default function LoginPage() {
         </Card>
       </div>
     </main>
+  )
+}
+
+export default function LoginPageWrapper() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-bg flex items-center justify-center">
+        <p className="text-text-muted text-sm">Loading…</p>
+      </main>
+    }>
+      <LoginPage />
+    </Suspense>
   )
 }

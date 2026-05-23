@@ -10,13 +10,14 @@ function Callback() {
 
   useEffect(() => {
     const code = searchParams.get('code')
+    const returnTo = searchParams.get('returnTo') || '/'
 
     if (code) {
       // PKCE flow: explicit code exchange (hosted Supabase + production).
       // Sign out first to clear any stale session from a previous auth method.
       supabase.auth.signOut().then(() => {
         supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-          router.replace(error ? '/login' : '/')
+          router.replace(error ? '/login' : returnTo)
         })
       })
       return
@@ -29,11 +30,11 @@ function Callback() {
     const timeout = setTimeout(() => router.replace('/login'), 10_000)
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) { clearTimeout(timeout); router.replace('/') }
+      if (session) { clearTimeout(timeout); router.replace(returnTo) }
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') { clearTimeout(timeout); router.replace('/') }
+      if (event === 'SIGNED_IN') { clearTimeout(timeout); router.replace(returnTo) }
     })
 
     return () => { subscription.unsubscribe(); clearTimeout(timeout) }

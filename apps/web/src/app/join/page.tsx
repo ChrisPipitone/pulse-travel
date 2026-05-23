@@ -30,10 +30,10 @@ function JoinPage() {
 
   useEffect(() => {
     if (!sessionLoading && !session) {
-      router.replace(`/login`)
+      router.replace(`/login?returnTo=${encodeURIComponent(`/join?code=${code}`)}`)
       return
     }
-  }, [session, sessionLoading, router])
+  }, [session, sessionLoading, router, code])
 
   useEffect(() => {
     if (!code || sessionLoading || !session) return
