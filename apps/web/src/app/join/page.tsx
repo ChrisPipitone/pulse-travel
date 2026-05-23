@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession, useJoinTrip } from '@pulse/hooks'
 import { Button } from '@pulse/ui'
-import { getTripByInviteCode } from '@pulse/services'
+import { getTripByInviteCode, getMembers } from '@pulse/services'
 import { supabase } from '@/lib/supabase'
 import type { Trip } from '@pulse/types'
 
@@ -25,6 +25,7 @@ function JoinPage() {
   const { joinTrip, loading: joining, error: joinError } = useJoinTrip()
 
   const [trip, setTrip] = useState<Trip | null>(null)
+  const [alreadyMember, setAlreadyMember] = useState(false)
   const [lookupError, setLookupError] = useState<string | null>(null)
   const [lookupDone, setLookupDone] = useState(false)
 
@@ -38,9 +39,11 @@ function JoinPage() {
   useEffect(() => {
     if (!code || sessionLoading || !session) return
     getTripByInviteCode(supabase, code)
-      .then((t) => {
-        if (!t) setLookupError('Invite link not found. Check the code and try again.')
-        else setTrip(t)
+      .then(async (t) => {
+        if (!t) { setLookupError('Invite link not found. Check the code and try again.'); return }
+        setTrip(t)
+        const members = await getMembers(supabase, t.id)
+        if (members.some((m) => m.id === session!.user.id)) setAlreadyMember(true)
       })
       .catch((e) => setLookupError(e instanceof Error ? e.message : 'Failed to look up invite code'))
       .finally(() => setLookupDone(true))
@@ -78,6 +81,31 @@ function JoinPage() {
   }
 
   const dates = formatDateRange(trip.start_date, trip.end_date)
+
+  if (alreadyMember) {
+    return (
+      <Screen>
+        <div className="w-full max-w-sm flex flex-col gap-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold text-text-primary">You're already in</h1>
+            <p className="text-sm text-text-muted mt-1">You're already a member of this trip.</p>
+          </div>
+
+          <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-5 flex flex-col gap-1">
+            <p className="text-base font-semibold text-text-primary">{trip.name}</p>
+            <p className="text-sm text-text-muted">
+              {trip.destination}
+              {dates && <> · {dates}</>}
+            </p>
+          </div>
+
+          <Button onClick={() => router.replace(`/trip/${trip.id}`)} className="w-full">
+            Go to trip
+          </Button>
+        </div>
+      </Screen>
+    )
+  }
 
   return (
     <Screen>

@@ -9,8 +9,10 @@ import { Button } from '@pulse/ui'
 import { Card } from '@pulse/ui'
 
 function LoginPage() {
+  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [otp, setOtp] = useState('')
   const [sent, setSent] = useState(false)
   const [pwLoading, setPwLoading] = useState(false)
@@ -28,6 +30,16 @@ function LoginPage() {
     setPwLoading(true)
     setPwError(null)
     const { error } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password })
+    if (error) { setPwError(error.message); setPwLoading(false); return }
+    router.replace(returnTo)
+  }
+
+  async function handleSignUp(e: React.FormEvent) {
+    e.preventDefault()
+    if (password !== confirmPassword) { setPwError('Passwords do not match'); return }
+    setPwLoading(true)
+    setPwError(null)
+    const { error } = await supabase.auth.signUp({ email: trimmedEmail, password })
     if (error) { setPwError(error.message); setPwLoading(false); return }
     router.replace(returnTo)
   }
@@ -116,34 +128,79 @@ function LoginPage() {
         </div>
 
         <Card className="flex flex-col gap-5">
-          <div>
-            <h2 className="text-base font-medium text-text-primary">Sign in</h2>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => { setMode('signin'); setPwError(null) }}
+              className={`text-sm font-medium px-1 pb-0.5 border-b-2 transition-colors ${mode === 'signin' ? 'text-text-primary border-accent' : 'text-text-muted border-transparent hover:text-text-primary'}`}
+            >
+              Sign in
+            </button>
+            <span className="text-text-subtle text-sm mx-1">/</span>
+            <button
+              onClick={() => { setMode('signup'); setPwError(null) }}
+              className={`text-sm font-medium px-1 pb-0.5 border-b-2 transition-colors ${mode === 'signup' ? 'text-text-primary border-accent' : 'text-text-muted border-transparent hover:text-text-primary'}`}
+            >
+              Create account
+            </button>
           </div>
 
-          {/* Email + password */}
-          <form onSubmit={handlePasswordSignIn} className="flex flex-col gap-3">
-            <Input
-              type="email"
-              label="Email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoFocus
-            />
-            <Input
-              type="password"
-              label="Password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <Button type="submit" disabled={pwLoading || loading || !emailValid || !password}>
-              {pwLoading ? 'Signing in…' : 'Sign in'}
-            </Button>
-            {pwError && <p className="text-xs text-red-500">{pwError}</p>}
-          </form>
+          {mode === 'signin' ? (
+            <form onSubmit={handlePasswordSignIn} className="flex flex-col gap-3">
+              <Input
+                type="email"
+                label="Email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
+              <Input
+                type="password"
+                label="Password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <Button type="submit" disabled={pwLoading || loading || !emailValid || !password}>
+                {pwLoading ? 'Signing in…' : 'Sign in'}
+              </Button>
+              {pwError && <p className="text-xs text-red-500">{pwError}</p>}
+            </form>
+          ) : (
+            <form onSubmit={handleSignUp} className="flex flex-col gap-3">
+              <Input
+                type="email"
+                label="Email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoFocus
+              />
+              <Input
+                type="password"
+                label="Password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <Input
+                type="password"
+                label="Confirm password"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <Button type="submit" disabled={pwLoading || loading || !emailValid || !password || !confirmPassword}>
+                {pwLoading ? 'Creating account…' : 'Create account'}
+              </Button>
+              {pwError && <p className="text-xs text-red-500">{pwError}</p>}
+            </form>
+          )}
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-border" />
