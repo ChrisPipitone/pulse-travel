@@ -493,37 +493,49 @@ select 'aaaaaaaa-0000-0000-0000-000000000006',
        ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
 from generate_series(1, 20) as i;
 
--- Trip 7:  50 members — users 11–60
+-- Trip 7:  50 members — Marco + users 11–60
+insert into trip_members (trip_id, user_id) values
+  ('aaaaaaaa-0000-0000-0000-000000000007', '00000000-0000-0000-0000-000000000001');
 insert into trip_members (trip_id, user_id)
 select 'aaaaaaaa-0000-0000-0000-000000000007',
        ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
 from generate_series(11, 60) as i;
 
--- Trip 8:  75 members — users 11–85
+-- Trip 8:  75 members — Marco + users 11–85
+insert into trip_members (trip_id, user_id) values
+  ('aaaaaaaa-0000-0000-0000-000000000008', '00000000-0000-0000-0000-000000000001');
 insert into trip_members (trip_id, user_id)
 select 'aaaaaaaa-0000-0000-0000-000000000008',
        ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
 from generate_series(11, 85) as i;
 
--- Trip 9:  100 members — users 11–110
+-- Trip 9:  100 members — Marco + users 11–110
+insert into trip_members (trip_id, user_id) values
+  ('aaaaaaaa-0000-0000-0000-000000000009', '00000000-0000-0000-0000-000000000001');
 insert into trip_members (trip_id, user_id)
 select 'aaaaaaaa-0000-0000-0000-000000000009',
        ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
 from generate_series(11, 110) as i;
 
--- Trip 10: 125 members — users 11–135
+-- Trip 10: 125 members — Marco + users 11–135
+insert into trip_members (trip_id, user_id) values
+  ('aaaaaaaa-0000-0000-0000-000000000010', '00000000-0000-0000-0000-000000000001');
 insert into trip_members (trip_id, user_id)
 select 'aaaaaaaa-0000-0000-0000-000000000010',
        ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
 from generate_series(11, 135) as i;
 
--- Trip 11: 150 members — users 11–160
+-- Trip 11: 150 members — Marco + users 11–160
+insert into trip_members (trip_id, user_id) values
+  ('aaaaaaaa-0000-0000-0000-000000000011', '00000000-0000-0000-0000-000000000001');
 insert into trip_members (trip_id, user_id)
 select 'aaaaaaaa-0000-0000-0000-000000000011',
        ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
 from generate_series(11, 160) as i;
 
--- Trip 12: 200 members — users 11–210
+-- Trip 12: 200 members — Marco + users 11–210
+insert into trip_members (trip_id, user_id) values
+  ('aaaaaaaa-0000-0000-0000-000000000012', '00000000-0000-0000-0000-000000000001');
 insert into trip_members (trip_id, user_id)
 select 'aaaaaaaa-0000-0000-0000-000000000012',
        ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
