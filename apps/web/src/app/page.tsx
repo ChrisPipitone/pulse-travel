@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession, useUserTrips, useCreateTrip } from "@pulse/hooks";
 import { Button } from "@pulse/ui";
 import { CreateTripModal } from "@/components/CreateTripModal";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { memberPalette } from "@/lib/memberColors";
 import type { TripSummary, TripMemberAvatar } from "@pulse/services";
 
@@ -114,6 +115,16 @@ export default function Home() {
     if (code) router.push(`/join?code=${encodeURIComponent(code)}`);
   }
 
+  function handleJoinCode(raw: string) {
+    // Accept both a raw code and a full invite URL — extract the code param if present.
+    try {
+      const url = new URL(raw)
+      const codeParam = url.searchParams.get('code')
+      if (codeParam) { router.push(`/join?code=${encodeURIComponent(codeParam)}`); return }
+    } catch {}
+    router.push(`/join?code=${encodeURIComponent(raw.trim())}`)
+  }
+
   if (sessionLoading || !session) {
     return (
       <main className="min-h-screen bg-bg flex items-center justify-center">
@@ -122,32 +133,21 @@ export default function Home() {
     );
   }
 
-  return (
-    <main className="min-h-screen bg-bg overflow-x-clip">
-      <div className="max-w-screen-xl mx-auto px-6 py-10 flex flex-col gap-10">
-        {/* Trips section */}
-        <section className="flex flex-col gap-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-text-primary">
-                Your trips
-              </h1>
-              <p className="hidden sm:block text-sm text-text-muted mt-0.5">
-                Plan, rate, and explore with your group.
-              </p>
-            </div>
-            <Button size="sm" onClick={() => setShowCreate(true)}>
-              + New trip
-            </Button>
-          </div>
+  const hasTrips = !tripsLoading && !tripsError && trips.length > 0
 
-          {tripsLoading && (
+  return (
+    <main className="min-h-screen bg-bg overflow-x-clip flex flex-col">
+      {/* Loading skeletons */}
+      {tripsLoading && (
+        <div className="max-w-screen-xl mx-auto w-full px-6 py-10 flex flex-col gap-10">
+          <section className="flex flex-col gap-5">
+            <div className="flex items-center justify-between">
+              <div className="h-7 bg-border/60 rounded w-32 animate-pulse" />
+              <div className="h-8 bg-border/40 rounded w-20 animate-pulse" />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 h-36 animate-pulse flex flex-col justify-between"
-                >
+                <div key={i} className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 h-36 animate-pulse flex flex-col justify-between">
                   <div className="flex flex-col gap-2">
                     <div className="h-4 bg-border/60 rounded w-3/4" />
                     <div className="h-3 bg-border/40 rounded w-1/2" />
@@ -156,36 +156,43 @@ export default function Home() {
                 </div>
               ))}
             </div>
-          )}
+          </section>
+        </div>
+      )}
 
-          {!tripsLoading && tripsError && (
-            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-5 py-4">
-              <p className="text-sm text-text-muted">Failed to load trips: {tripsError}</p>
-            </div>
-          )}
+      {/* Error */}
+      {!tripsLoading && tripsError && (
+        <div className="max-w-screen-xl mx-auto w-full px-6 py-10">
+          <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-5 py-4">
+            <p className="text-sm text-text-muted">Failed to load trips: {tripsError}</p>
+          </div>
+        </div>
+      )}
 
-          {!tripsLoading && !tripsError && trips.length === 0 && (
-            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-8 py-16 flex flex-col items-center gap-3 text-center">
-              <div className="w-12 h-12 rounded-full bg-border flex items-center justify-center text-2xl">
-                ✈️
+      {/* Welcome screen — zero trips */}
+      {!tripsLoading && !tripsError && !hasTrips && (
+        <WelcomeScreen
+          onPlanTrip={() => setShowCreate(true)}
+          onJoinTrip={handleJoinCode}
+        />
+      )}
+
+      {/* Normal home — has trips */}
+      {hasTrips && (
+        <div className="max-w-screen-xl mx-auto w-full px-6 py-10 flex flex-col gap-10">
+          <section className="flex flex-col gap-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold text-text-primary">Your trips</h1>
+                <p className="hidden sm:block text-sm text-text-muted mt-0.5">
+                  Plan, rate, and explore with your group.
+                </p>
               </div>
-              <p className="text-sm font-medium text-text-primary">
-                No trips yet
-              </p>
-              <p className="text-xs text-text-muted max-w-xs">
-                Create your first trip or join one below with an invite code.
-              </p>
-              <Button
-                size="sm"
-                onClick={() => setShowCreate(true)}
-                className="mt-1"
-              >
+              <Button size="sm" onClick={() => setShowCreate(true)}>
                 + New trip
               </Button>
             </div>
-          )}
 
-          {!tripsLoading && trips.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {trips.map((trip: TripSummary) => {
                 const dates = formatDateRange(trip.start_date, trip.end_date);
@@ -208,17 +215,7 @@ export default function Home() {
                     </div>
 
                     <div className="flex items-center gap-1 text-sm font-medium text-text-muted">
-                      <svg
-                        width="11"
-                        height="11"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="shrink-0 opacity-60"
-                      >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                         <circle cx="12" cy="9" r="2.5" />
                       </svg>
@@ -226,51 +223,40 @@ export default function Home() {
                     </div>
 
                     <div className="flex items-center justify-between mt-auto pt-1">
-                      <MemberDots
-                        count={trip.member_count}
-                        avatars={trip.member_avatars}
-                      />
+                      <MemberDots count={trip.member_count} avatars={trip.member_avatars} />
                       {dates && (
-                        <span className="text-xs text-text-muted tabular-nums shrink-0">
-                          {dates}
-                        </span>
+                        <span className="text-xs text-text-muted tabular-nums shrink-0">{dates}</span>
                       )}
                     </div>
                   </button>
                 );
               })}
             </div>
-          )}
-        </section>
+          </section>
 
-        {/* Join section */}
-        <section className="max-w-md bg-bg-card border border-border rounded-[var(--radius-card)] p-5 flex flex-col gap-3">
-          <div>
-            <h2 className="text-sm font-semibold text-text-primary">
-              Join a trip
-            </h2>
-            <p className="text-xs text-text-muted mt-0.5">
-              Enter an invite code to join someone's trip.
-            </p>
-          </div>
-          <form onSubmit={handleJoin} className="flex gap-2">
-            <input
-              type="text"
-              placeholder="Invite code"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)}
-              maxLength={50}
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              className="flex-1 bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:border-accent transition-colors"
-            />
-            <Button type="submit" variant="outline" disabled={!joinCode.trim()}>
-              Join
-            </Button>
-          </form>
-        </section>
-      </div>
+          {/* Join section — only shown when user already has trips */}
+          <section className="max-w-md bg-bg-card border border-border rounded-[var(--radius-card)] p-5 flex flex-col gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-text-primary">Join another trip</h2>
+              <p className="text-xs text-text-muted mt-0.5">Have an invite code or link?</p>
+            </div>
+            <form onSubmit={handleJoin} className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Invite code or link"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value)}
+                maxLength={200}
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                className="flex-1 bg-bg-card border border-border rounded-[var(--radius-card)] px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:border-accent transition-colors"
+              />
+              <Button type="submit" variant="outline" disabled={!joinCode.trim()}>Join</Button>
+            </form>
+          </section>
+        </div>
+      )}
 
       <CreateTripModal
         open={showCreate}
