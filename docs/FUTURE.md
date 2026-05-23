@@ -75,6 +75,10 @@ See `docs/TIERS.md` for full detail. Summary:
 | Magic link revisit | OTP-only chosen for MVP. Revisit magic link before prod. See `memory/project_auth_otp_revisit.md`. |
 | Google OAuth prod redirect URLs | Set in Supabase dashboard before deploy. Prod URL not yet configured. |
 | Auth confirmation flow | `enable_confirmations = true` in config.toml. Verify email confirmation UX is smooth for non-technical users. |
+| Phone number sign-in (SMS OTP) | Supabase supports `signInWithOtp({ phone })` + Twilio/Vonage. Mobile-native flow: enter phone → SMS 6-digit code → signed in. No email required. Great for the "60 seconds" goal. Requires Supabase Pro + Twilio setup. |
+| SMS invite | Trip owner enters a phone number → system sends SMS with invite link. Same flow as email invite but via Twilio. Bypasses email entirely — more likely to reach people immediately. |
+| Phone-number-only sign-up | Let users skip email on sign-up entirely if on mobile. Phone becomes their identity. Requires phone OTP above. |
+| WhatsApp / iMessage share | After invite modal, offer native share sheet (Web Share API) to send the join link via any messaging app. Zero SMS cost, works on any platform. Very low lift once invite link exists (already does). |
 
 ---
 
