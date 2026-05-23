@@ -4,19 +4,26 @@ import { renderHookWithClient } from './helpers/renderHookWithProvider'
 import { useUserTrips } from '../useUserTrips'
 import type { Trip } from '@pulse/types'
 
-const fakeTrips: Array<Trip & { trip_members: { user_id: string }[] }> = [
+const fakeTrips: Trip[] = [
   {
     id: 'trip-1', name: 'Italy 2025', destination: 'Italy',
     start_date: '2025-06-03', end_date: '2025-06-24',
     created_by: 'u1', invite_code: 'italy25',
-    trip_members: [{ user_id: 'u1' }, { user_id: 'u2' }, { user_id: 'u3' }, { user_id: 'u4' }],
   },
   {
     id: 'trip-2', name: 'Tokyo', destination: 'Japan',
     start_date: '2025-09-01', end_date: '2025-09-10',
     created_by: 'u2', invite_code: 'tokyo25',
-    trip_members: [{ user_id: 'u5' }, { user_id: 'u6' }],
   },
+]
+
+const fakeTripMembers = [
+  { trip_id: 'trip-1', user_id: 'u1' },
+  { trip_id: 'trip-1', user_id: 'u2' },
+  { trip_id: 'trip-1', user_id: 'u3' },
+  { trip_id: 'trip-1', user_id: 'u4' },
+  { trip_id: 'trip-2', user_id: 'u5' },
+  { trip_id: 'trip-2', user_id: 'u6' },
 ]
 
 const fakeProfiles = [
@@ -31,12 +38,18 @@ describe('useUserTrips', () => {
     client = createMockClient()
   })
 
-  it('returns trips with member_count derived from trip_members array', async () => {
+  it('returns trips with member_count derived from trip_members', async () => {
     vi.mocked(client.from).mockImplementation((table: string) => {
       if (table === 'trips') {
         return {
           select: vi.fn().mockReturnThis(),
           order: vi.fn().mockResolvedValue({ data: fakeTrips, error: null }),
+        } as never
+      }
+      if (table === 'trip_members') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          in: vi.fn().mockResolvedValue({ data: fakeTripMembers, error: null }),
         } as never
       }
       return {

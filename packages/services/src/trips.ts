@@ -5,21 +5,35 @@ export type TripMemberAvatar = { id: string; name: string; avatar_url?: string |
 export type TripSummary = Trip & { member_count: number; member_avatars: TripMemberAvatar[] }
 
 export async function getUserTrips(client: SupabaseClient): Promise<TripSummary[]> {
-  const { data, error } = await client
+  const { data: trips, error } = await client
     .from('trips')
-    .select('*, trip_members(user_id)')
+    .select('*')
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
+  if (!trips?.length) return []
 
-  const trips = data ?? []
-  const allUserIds = [...new Set(trips.flatMap((t: any) => (t.trip_members ?? []).map((m: any) => m.user_id as string)))]
+  const tripIds = trips.map((t: any) => t.id as string)
+
+  const { data: members, error: membersError } = await client
+    .from('trip_members')
+    .select('trip_id, user_id')
+    .in('trip_id', tripIds)
+  if (membersError) throw new Error(membersError.message)
+
+  const membersByTrip = new Map<string, string[]>()
+  for (const m of members ?? []) {
+    if (!membersByTrip.has(m.trip_id)) membersByTrip.set(m.trip_id, [])
+    membersByTrip.get(m.trip_id)!.push(m.user_id)
+  }
+
+  const previewIds = [...new Set([...membersByTrip.values()].flatMap((ids) => ids.slice(0, 5)))]
 
   const profileMap = new Map<string, { name: string; avatar_url?: string | null }>()
-  if (allUserIds.length > 0) {
+  if (previewIds.length > 0) {
     const { data: profiles, error: profilesError } = await client
       .from('profiles')
       .select('id, display_name, avatar_url')
-      .in('id', allUserIds)
+      .in('id', previewIds)
     if (profilesError) throw new Error(profilesError.message)
     for (const p of profiles ?? []) {
       profileMap.set(p.id, { name: p.display_name ?? 'Unknown', avatar_url: p.avatar_url })
@@ -27,7 +41,7 @@ export async function getUserTrips(client: SupabaseClient): Promise<TripSummary[
   }
 
   return trips.map((t: any) => {
-    const memberIds: string[] = (t.trip_members ?? []).map((m: any) => m.user_id as string)
+    const memberIds = membersByTrip.get(t.id) ?? []
     return {
       ...t,
       member_count: memberIds.length,
@@ -36,7 +50,6 @@ export async function getUserTrips(client: SupabaseClient): Promise<TripSummary[
         name: profileMap.get(id)?.name ?? 'Unknown',
         avatar_url: profileMap.get(id)?.avatar_url,
       })),
-      trip_members: undefined,
     }
   })
 }

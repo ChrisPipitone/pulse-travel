@@ -20,7 +20,13 @@ function formatDateRange(start?: string | null, end?: string | null) {
   return `Until ${fmt(end!)}`;
 }
 
-function MemberDots({ count, avatars }: { count: number; avatars: TripMemberAvatar[] }) {
+function MemberDots({
+  count,
+  avatars,
+}: {
+  count: number;
+  avatars: TripMemberAvatar[];
+}) {
   const shown = Math.min(count, 5);
   const overflow = count - shown;
   return (
@@ -37,12 +43,17 @@ function MemberDots({ count, avatars }: { count: number; avatars: TripMemberAvat
         ) : (
           <span
             key={member.id}
-            style={{ marginLeft: i === 0 ? 0 : -6, zIndex: shown - i, backgroundColor: memberPalette(i).bg, color: memberPalette(i).fg }}
+            style={{
+              marginLeft: i === 0 ? 0 : -6,
+              zIndex: shown - i,
+              backgroundColor: memberPalette(i).bg,
+              color: memberPalette(i).fg,
+            }}
             className="relative w-6 h-6 rounded-full border-2 border-bg-card flex items-center justify-center text-[9px] font-semibold"
           >
             {member.name.charAt(0).toUpperCase()}
           </span>
-        )
+        ),
       )}
       {overflow > 0 && (
         <span
@@ -61,7 +72,7 @@ function MemberDots({ count, avatars }: { count: number; avatars: TripMemberAvat
 
 export default function Home() {
   const { session, loading: sessionLoading } = useSession();
-  const { trips, loading: tripsLoading, refresh } = useUserTrips();
+  const { trips, loading: tripsLoading, error: tripsError, refresh } = useUserTrips();
   const { createTrip, loading: creating, error: createError } = useCreateTrip();
   const router = useRouter();
 
@@ -74,8 +85,8 @@ export default function Home() {
 
   useEffect(() => {
     const handler = () => refresh();
-    window.addEventListener('pulse:trips:changed', handler);
-    return () => window.removeEventListener('pulse:trips:changed', handler);
+    window.addEventListener("pulse:trips:changed", handler);
+    return () => window.removeEventListener("pulse:trips:changed", handler);
   }, [refresh]);
 
   async function handleCreate(fields: {
@@ -135,13 +146,25 @@ export default function Home() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="bg-bg-card rounded-[var(--radius-card)] border border-border h-36 animate-pulse"
-                />
+                  className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 h-36 animate-pulse flex flex-col justify-between"
+                >
+                  <div className="flex flex-col gap-2">
+                    <div className="h-4 bg-border/60 rounded w-3/4" />
+                    <div className="h-3 bg-border/40 rounded w-1/2" />
+                  </div>
+                  <div className="h-3 bg-border/40 rounded w-1/3" />
+                </div>
               ))}
             </div>
           )}
 
-          {!tripsLoading && trips.length === 0 && (
+          {!tripsLoading && tripsError && (
+            <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-5 py-4">
+              <p className="text-sm text-text-muted">Failed to load trips: {tripsError}</p>
+            </div>
+          )}
+
+          {!tripsLoading && !tripsError && trips.length === 0 && (
             <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-8 py-16 flex flex-col items-center gap-3 text-center">
               <div className="w-12 h-12 rounded-full bg-border flex items-center justify-center text-2xl">
                 ✈️
@@ -152,7 +175,11 @@ export default function Home() {
               <p className="text-xs text-text-muted max-w-xs">
                 Create your first trip or join one below with an invite code.
               </p>
-              <Button onClick={() => setShowCreate(true)} className="mt-1">
+              <Button
+                size="sm"
+                onClick={() => setShowCreate(true)}
+                className="mt-1"
+              >
                 + New trip
               </Button>
             </div>
@@ -181,17 +208,32 @@ export default function Home() {
                     </div>
 
                     <div className="flex items-center gap-1 text-sm font-medium text-text-muted">
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                        <circle cx="12" cy="9" r="2.5"/>
+                      <svg
+                        width="11"
+                        height="11"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="shrink-0 opacity-60"
+                      >
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                        <circle cx="12" cy="9" r="2.5" />
                       </svg>
                       <span className="truncate">{trip.destination}</span>
                     </div>
 
                     <div className="flex items-center justify-between mt-auto pt-1">
-                      <MemberDots count={trip.member_count} avatars={trip.member_avatars} />
+                      <MemberDots
+                        count={trip.member_count}
+                        avatars={trip.member_avatars}
+                      />
                       {dates && (
-                        <span className="text-xs text-text-muted tabular-nums shrink-0">{dates}</span>
+                        <span className="text-xs text-text-muted tabular-nums shrink-0">
+                          {dates}
+                        </span>
                       )}
                     </div>
                   </button>
