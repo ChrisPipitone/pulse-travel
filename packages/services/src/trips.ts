@@ -204,8 +204,8 @@ export async function joinTrip(client: SupabaseClient, tripId: string, userId: s
     .from('trip_members')
     .upsert({ trip_id: tripId, user_id: userId }, { onConflict: 'trip_id,user_id', ignoreDuplicates: true })
   if (error) {
-    if (error.message.includes('maximum of 50 members')) {
-      throw new Error('This trip is full — the 50-member limit has been reached.')
+    if (error.message.startsWith('Trip is full')) {
+      throw new Error(error.message)
     }
     throw new Error(error.message)
   }

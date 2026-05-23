@@ -57,18 +57,18 @@ insert into auth.identities (provider_id, user_id, identity_data, provider, crea
 
 -- on_auth_user_created trigger fires on auth.users INSERT above, creating profiles
 -- with email-prefix names. Override with proper display names here.
-insert into profiles (id, display_name) values
-  ('00000000-0000-0000-0000-000000000001', 'Marco'),
-  ('00000000-0000-0000-0000-000000000002', 'Sara'),
-  ('00000000-0000-0000-0000-000000000003', 'Lena'),
-  ('00000000-0000-0000-0000-000000000004', 'Chris'),
-  ('00000000-0000-0000-0000-000000000005', 'Alex'),
-  ('00000000-0000-0000-0000-000000000006', 'Priya'),
-  ('00000000-0000-0000-0000-000000000007', 'Kai'),
-  ('00000000-0000-0000-0000-000000000008', 'Nadia'),
-  ('00000000-0000-0000-0000-000000000009', 'Tom'),
-  ('00000000-0000-0000-0000-000000000010', 'Yuki')
-on conflict (id) do update set display_name = excluded.display_name;
+insert into profiles (id, display_name, tier) values
+  ('00000000-0000-0000-0000-000000000001', 'Marco',  'planner'),
+  ('00000000-0000-0000-0000-000000000002', 'Sara',   'free'),
+  ('00000000-0000-0000-0000-000000000003', 'Lena',   'free'),
+  ('00000000-0000-0000-0000-000000000004', 'Chris',  'free'),
+  ('00000000-0000-0000-0000-000000000005', 'Alex',   'planner'),
+  ('00000000-0000-0000-0000-000000000006', 'Priya',  'enterprise'),
+  ('00000000-0000-0000-0000-000000000007', 'Kai',    'free'),
+  ('00000000-0000-0000-0000-000000000008', 'Nadia',  'free'),
+  ('00000000-0000-0000-0000-000000000009', 'Tom',    'free'),
+  ('00000000-0000-0000-0000-000000000010', 'Yuki',   'free')
+on conflict (id) do update set display_name = excluded.display_name, tier = excluded.tier;
 
 -- ── Trip ─────────────────────────────────────────────────────────────────────
 
@@ -350,3 +350,203 @@ insert into activity_ratings (activity_id, user_id, rating) values
   ('eeeeeeee-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000010', 'MUST'),
   ('eeeeeeee-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000006', 'WANT'),
   ('eeeeeeee-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000007', 'MUST');
+
+-- ════════════════════════════════════════════════════════════════════════════
+-- STRESS-TEST TRIPS (4–12) — UI performance validation at scale
+--
+-- Sizes:  10 · 15 · 20 (Marco/planner) │ 50 · 75 · 100 · 125 · 150 · 200 (Priya/enterprise)
+-- Tier assignments above in profiles upsert.
+-- ════════════════════════════════════════════════════════════════════════════
+
+-- ── Bulk users 11–210 ─────────────────────────────────────────────────────────
+-- One shared bcrypt hash for speed; all bulk users: password123
+do $$
+declare
+  i   integer;
+  uid text;
+  pw  text;
+begin
+  pw := crypt('password123', gen_salt('bf'));
+  for i in 11..210 loop
+    uid := lpad(i::text, 12, '0');
+    insert into auth.users (
+      instance_id, id, email, encrypted_password,
+      email_confirmed_at, created_at, updated_at,
+      role, aud, raw_app_meta_data, raw_user_meta_data,
+      is_super_admin, confirmation_token, recovery_token,
+      email_change, email_change_token_new
+    ) values (
+      '00000000-0000-0000-0000-000000000000',
+      ('00000000-0000-0000-0000-' || uid)::uuid,
+      'user' || i || '@example.com',
+      pw,
+      now(), now(), now(),
+      'authenticated', 'authenticated',
+      '{"provider":"email","providers":["email"]}', '{}',
+      false, '', '', '', ''
+    );
+    insert into auth.identities (provider_id, user_id, identity_data, provider, created_at, updated_at) values (
+      'user' || i || '@example.com',
+      ('00000000-0000-0000-0000-' || uid)::uuid,
+      ('{"sub":"00000000-0000-0000-0000-' || uid || '","email":"user' || i || '@example.com"}')::jsonb,
+      'email', now(), now()
+    );
+  end loop;
+end $$;
+
+-- Override display names (trigger created email-prefix names)
+do $$
+declare i integer; uid text;
+begin
+  for i in 11..210 loop
+    uid := lpad(i::text, 12, '0');
+    update profiles set display_name = 'User ' || i
+    where id = ('00000000-0000-0000-0000-' || uid)::uuid;
+  end loop;
+end $$;
+
+-- ── Stress trips ──────────────────────────────────────────────────────────────
+insert into trips (id, name, destination, start_date, end_date, created_by, invite_code) values
+  ('aaaaaaaa-0000-0000-0000-000000000004', 'Lisbon Getaway',       'Lisbon, Portugal',  '2025-10-10', '2025-10-14', '00000000-0000-0000-0000-000000000001', 'lisbon25'),
+  ('aaaaaaaa-0000-0000-0000-000000000005', 'Swiss Alps Trek',      'Switzerland',       '2025-12-26', '2026-01-02', '00000000-0000-0000-0000-000000000001', 'swiss25'),
+  ('aaaaaaaa-0000-0000-0000-000000000006', 'Costa Rica',           'Costa Rica',        '2026-02-14', '2026-02-24', '00000000-0000-0000-0000-000000000001', 'costarica26'),
+  ('aaaaaaaa-0000-0000-0000-000000000007', 'Bali Retreat',         'Bali, Indonesia',   '2026-04-01', '2026-04-10', '00000000-0000-0000-0000-000000000006', 'bali26'),
+  ('aaaaaaaa-0000-0000-0000-000000000008', 'Iceland Winter',       'Iceland',           '2026-01-15', '2026-01-22', '00000000-0000-0000-0000-000000000006', 'iceland26'),
+  ('aaaaaaaa-0000-0000-0000-000000000009', 'Australian Road Trip', 'Australia',         '2026-11-01', '2026-11-21', '00000000-0000-0000-0000-000000000006', 'australia26'),
+  ('aaaaaaaa-0000-0000-0000-000000000010', 'Safari South Africa',  'South Africa',      '2026-07-01', '2026-07-14', '00000000-0000-0000-0000-000000000006', 'safari26'),
+  ('aaaaaaaa-0000-0000-0000-000000000011', 'European Grand Tour',  'Europe',            '2026-06-01', '2026-06-30', '00000000-0000-0000-0000-000000000006', 'eurogrand26'),
+  ('aaaaaaaa-0000-0000-0000-000000000012', 'Around the World',     'Worldwide',         '2026-08-01', '2026-09-30', '00000000-0000-0000-0000-000000000006', 'aroundworld26');
+
+-- ── Activities for stress trips (5 per trip) ──────────────────────────────────
+insert into activities (id, trip_id, name, location, duration_hours, added_by) values
+  -- Trip 4: Lisbon (10 members)
+  ('00100001-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000004', 'Fado Show',               'Alfama, Lisbon',         2, '00000000-0000-0000-0000-000000000001'),
+  ('00100001-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000004', 'Belém Tower',             'Belém, Lisbon',           1, '00000000-0000-0000-0000-000000000001'),
+  ('00100001-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000004', 'Pastéis de Belém',        'Belém, Lisbon',           1, '00000000-0000-0000-0000-000000000002'),
+  ('00100001-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000004', 'LX Factory Market',       'Alcântara, Lisbon',       3, '00000000-0000-0000-0000-000000000003'),
+  ('00100001-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000004', 'Sintra Day Trip',         'Sintra',                  7, '00000000-0000-0000-0000-000000000004'),
+  -- Trip 5: Swiss Alps (15 members)
+  ('00100002-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000005', 'Matterhorn View Hike',    'Zermatt',                 5, '00000000-0000-0000-0000-000000000001'),
+  ('00100002-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000005', 'Glacier Express Train',   'Zermatt to St. Moritz',   8, '00000000-0000-0000-0000-000000000001'),
+  ('00100002-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000005', 'Grindelwald Skiing',      'Grindelwald',             6, '00000000-0000-0000-0000-000000000002'),
+  ('00100002-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000005', 'Swiss Fondue Evening',    'Interlaken',              3, '00000000-0000-0000-0000-000000000003'),
+  ('00100002-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000005', 'Jungfraujoch Summit',     'Jungfrau Region',         5, '00000000-0000-0000-0000-000000000004'),
+  -- Trip 6: Costa Rica (20 members)
+  ('00100003-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000006', 'Arenal Volcano Hike',     'La Fortuna',              4, '00000000-0000-0000-0000-000000000001'),
+  ('00100003-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000006', 'Monteverde Cloud Forest', 'Monteverde',              5, '00000000-0000-0000-0000-000000000001'),
+  ('00100003-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000006', 'Manuel Antonio Beach',    'Manuel Antonio',          4, '00000000-0000-0000-0000-000000000002'),
+  ('00100003-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000006', 'Zip-lining Canopy Tour',  'Monteverde',              3, '00000000-0000-0000-0000-000000000003'),
+  ('00100003-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000006', 'Coffee Farm Tour',        'Naranjo, Alajuela',       3, '00000000-0000-0000-0000-000000000004'),
+  -- Trip 7: Bali (50 members)
+  ('00100004-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000007', 'Ubud Rice Terraces',      'Ubud, Bali',              3, '00000000-0000-0000-0000-000000000006'),
+  ('00100004-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000007', 'Tanah Lot Temple',        'Tabanan, Bali',           2, '00000000-0000-0000-0000-000000000006'),
+  ('00100004-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000007', 'Sacred Monkey Forest',    'Ubud, Bali',              2, '00000000-0000-0000-0000-000000000006'),
+  ('00100004-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000007', 'Surfing Lessons Kuta',    'Kuta Beach, Bali',        3, '00000000-0000-0000-0000-000000000006'),
+  ('00100004-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000007', 'Balinese Cooking Class',  'Ubud, Bali',              4, '00000000-0000-0000-0000-000000000006'),
+  -- Trip 8: Iceland (75 members)
+  ('00100005-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000008', 'Blue Lagoon',             'Grindavík, Iceland',      3, '00000000-0000-0000-0000-000000000006'),
+  ('00100005-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000008', 'Northern Lights Hunt',    'Iceland',                 4, '00000000-0000-0000-0000-000000000006'),
+  ('00100005-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000008', 'Golden Circle Tour',      'South Iceland',           8, '00000000-0000-0000-0000-000000000006'),
+  ('00100005-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000008', 'Glacier Walk',            'Vatnajökull',             6, '00000000-0000-0000-0000-000000000006'),
+  ('00100005-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000008', 'Reykjavik Food Tour',     'Reykjavik',               3, '00000000-0000-0000-0000-000000000006'),
+  -- Trip 9: Australia (100 members)
+  ('00100006-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000009', 'Great Barrier Reef Dive', 'Cairns, QLD',             6, '00000000-0000-0000-0000-000000000006'),
+  ('00100006-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000009', 'Sydney Opera House',      'Sydney, NSW',             2, '00000000-0000-0000-0000-000000000006'),
+  ('00100006-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000009', 'Uluru Sunrise Walk',      'Uluru, NT',               4, '00000000-0000-0000-0000-000000000006'),
+  ('00100006-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000009', 'Great Ocean Road',        'Victoria',                8, '00000000-0000-0000-0000-000000000006'),
+  ('00100006-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000009', 'Daintree Rainforest',     'Daintree, QLD',           5, '00000000-0000-0000-0000-000000000006'),
+  -- Trip 10: South Africa (125 members)
+  ('00100007-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000010', 'Kruger Safari Drive',     'Kruger National Park',    8, '00000000-0000-0000-0000-000000000006'),
+  ('00100007-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000010', 'Table Mountain Hike',     'Cape Town',               5, '00000000-0000-0000-0000-000000000006'),
+  ('00100007-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000010', 'Robben Island',           'Cape Town',               3, '00000000-0000-0000-0000-000000000006'),
+  ('00100007-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000010', 'Stellenbosch Wine Route', 'Stellenbosch',            4, '00000000-0000-0000-0000-000000000006'),
+  ('00100007-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000010', 'Boulders Penguin Colony', 'Simon''s Town',           2, '00000000-0000-0000-0000-000000000006'),
+  -- Trip 11: European Grand Tour (150 members)
+  ('00100008-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000011', 'Eiffel Tower at Night',   'Paris, France',           2, '00000000-0000-0000-0000-000000000006'),
+  ('00100008-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000011', 'Colosseum Rome',          'Rome, Italy',             3, '00000000-0000-0000-0000-000000000006'),
+  ('00100008-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000011', 'Sagrada Família',         'Barcelona, Spain',        2, '00000000-0000-0000-0000-000000000006'),
+  ('00100008-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000011', 'Amsterdam Canals Cruise', 'Amsterdam, Netherlands',  2, '00000000-0000-0000-0000-000000000006'),
+  ('00100008-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000011', 'Prague Old Town',         'Prague, Czechia',         3, '00000000-0000-0000-0000-000000000006'),
+  -- Trip 12: Around the World (200 members)
+  ('00100009-0000-0000-0000-000000000001', 'aaaaaaaa-0000-0000-0000-000000000012', 'Shibuya Crossing',        'Tokyo, Japan',            1, '00000000-0000-0000-0000-000000000006'),
+  ('00100009-0000-0000-0000-000000000002', 'aaaaaaaa-0000-0000-0000-000000000012', 'Times Square',            'New York, USA',           2, '00000000-0000-0000-0000-000000000006'),
+  ('00100009-0000-0000-0000-000000000003', 'aaaaaaaa-0000-0000-0000-000000000012', 'Christ the Redeemer',     'Rio de Janeiro, Brazil',  2, '00000000-0000-0000-0000-000000000006'),
+  ('00100009-0000-0000-0000-000000000004', 'aaaaaaaa-0000-0000-0000-000000000012', 'Pyramids of Giza',        'Cairo, Egypt',            4, '00000000-0000-0000-0000-000000000006'),
+  ('00100009-0000-0000-0000-000000000005', 'aaaaaaaa-0000-0000-0000-000000000012', 'Sydney Harbour Bridge',   'Sydney, Australia',       3, '00000000-0000-0000-0000-000000000006');
+
+-- ── Trip members (generate_series) ────────────────────────────────────────────
+-- Trip 4:  10 members — users 1–10
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000004',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(1, 10) as i;
+
+-- Trip 5:  15 members — users 1–15
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000005',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(1, 15) as i;
+
+-- Trip 6:  20 members — users 1–20
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000006',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(1, 20) as i;
+
+-- Trip 7:  50 members — users 11–60
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000007',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(11, 60) as i;
+
+-- Trip 8:  75 members — users 11–85
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000008',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(11, 85) as i;
+
+-- Trip 9:  100 members — users 11–110
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000009',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(11, 110) as i;
+
+-- Trip 10: 125 members — users 11–135
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000010',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(11, 135) as i;
+
+-- Trip 11: 150 members — users 11–160
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000011',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(11, 160) as i;
+
+-- Trip 12: 200 members — users 11–210
+insert into trip_members (trip_id, user_id)
+select 'aaaaaaaa-0000-0000-0000-000000000012',
+       ('00000000-0000-0000-0000-' || lpad(i::text, 12, '0'))::uuid
+from generate_series(11, 210) as i;
+
+-- ── Random ratings for stress trips (~70% coverage) ───────────────────────────
+insert into activity_ratings (activity_id, user_id, rating)
+select
+  a.id,
+  tm.user_id,
+  ((array['MUST','WANT','MEH'])[floor(random() * 3 + 1)::integer])::rating
+from activities a
+join trip_members tm on tm.trip_id = a.trip_id
+where a.trip_id in (
+  'aaaaaaaa-0000-0000-0000-000000000004',
+  'aaaaaaaa-0000-0000-0000-000000000005',
+  'aaaaaaaa-0000-0000-0000-000000000006',
+  'aaaaaaaa-0000-0000-0000-000000000007',
+  'aaaaaaaa-0000-0000-0000-000000000008',
+  'aaaaaaaa-0000-0000-0000-000000000009',
+  'aaaaaaaa-0000-0000-0000-000000000010',
+  'aaaaaaaa-0000-0000-0000-000000000011',
+  'aaaaaaaa-0000-0000-0000-000000000012'
+)
+and random() < 0.7
+on conflict (activity_id, user_id) do nothing;
