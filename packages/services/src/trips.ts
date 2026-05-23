@@ -223,3 +223,15 @@ export async function joinTrip(client: SupabaseClient, tripId: string, userId: s
     throw new Error(error.message)
   }
 }
+
+export async function sendInviteEmail(
+  client: SupabaseClient,
+  email: string,
+  inviteUrl: string,
+): Promise<void> {
+  const { error } = await client.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: inviteUrl, shouldCreateUser: true },
+  })
+  if (error) throw new Error(error.message)
+}

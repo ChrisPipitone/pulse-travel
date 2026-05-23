@@ -20,6 +20,7 @@ import { CompatibilityMatrix } from "@/components/CompatibilityMatrix";
 import { MemberDatesModal } from "@/components/MemberDatesModal";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { MemberSchedulesModal } from "@/components/MemberSchedulesModal";
+import { InviteMemberModal } from "@/components/InviteMemberModal";
 import { FadeReveal } from "@/components/FadeReveal";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
@@ -107,6 +108,7 @@ export default function TripPage({
   const [showDatesModal, setShowDatesModal] = useState(false);
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [showSchedulesModal, setShowSchedulesModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("activities");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -512,18 +514,35 @@ export default function TripPage({
               );
             })()}
 
-            {/* Invite code */}
+            {/* Invite */}
             <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
               <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">
                 Invite
               </h2>
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="w-full flex items-center gap-3 rounded-xl border-2 border-dashed border-accent/30 bg-accent/5 hover:bg-accent/10 hover:border-accent/50 transition-colors px-4 py-3 group"
+              >
+                <div className="w-8 h-8 rounded-full bg-accent/15 flex items-center justify-center shrink-0 group-hover:bg-accent/25 transition-colors">
+                  <svg className="w-4 h-4 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <line x1="19" y1="8" x2="19" y2="14" />
+                    <line x1="22" y1="11" x2="16" y2="11" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-medium text-accent">Invite someone</p>
+                  <p className="text-xs text-text-muted">Send them an email invite</p>
+                </div>
+              </button>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-bg text-xs font-mono text-text-primary px-2.5 py-1.5 rounded-lg border border-border truncate">
+                <code className="flex-1 bg-bg text-xs font-mono text-text-subtle px-2.5 py-1.5 rounded-lg border border-border truncate">
                   {trip.invite_code}
                 </code>
                 <button
                   onClick={handleCopyInvite}
-                  className="shrink-0 text-xs font-medium text-accent hover:opacity-75 transition-opacity px-2.5 py-1.5 rounded-lg border border-accent/30 bg-accent/5"
+                  className="shrink-0 text-xs font-medium text-text-muted hover:text-accent transition-colors px-2.5 py-1.5 rounded-lg border border-border bg-bg hover:border-accent/30"
                 >
                   {copied ? "Copied!" : "Copy link"}
                 </button>
@@ -819,6 +838,14 @@ export default function TripPage({
         onEditDates={() => setShowDatesModal(true)}
         onClose={() => setShowSchedulesModal(false)}
       />
+
+      {showInviteModal && trip && (
+        <InviteMemberModal
+          tripName={trip.name}
+          inviteCode={trip.invite_code}
+          onClose={() => setShowInviteModal(false)}
+        />
+      )}
 
       <ActivityDetailModal
         open={modal.mode === "view"}
