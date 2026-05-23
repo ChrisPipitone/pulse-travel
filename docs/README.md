@@ -30,6 +30,12 @@ All diagrams use [Mermaid](https://mermaid.js.org/) and render natively on GitHu
 | [UI_DESIGN.md](./UI_DESIGN.md) | Theme architecture, CSS custom properties, Tailwind v4 setup, component design decisions |
 | [BRANDING.md](./BRANDING.md) | Name, positioning, voice, visual identity |
 
+### Roadmap
+
+| Doc | What it covers |
+|---|---|
+| [FUTURE.md](./FUTURE.md) | Post-MVP backlog organized by feature: scheduling, itinerary, tiers, monetization, auth, platform, UI polish |
+
 ---
 
 ## Diagramming conventions
