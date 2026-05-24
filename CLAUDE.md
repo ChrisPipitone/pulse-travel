@@ -258,8 +258,22 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 - [x] UI audit rounds 1 + 2 complete — see `docs/ui-reviews/`; RN3 open (needs simulator)
 - [x] User tiers — `user_tier` enum (free/planner/enterprise) on profiles; tier-aware member limit; see `docs/TIERS.md`
 - [x] Stress-test seed — 200 bulk users, 9 trips at 10/15/20/50/75/100/125/150/200 members with random ratings
-- [ ] Deploy to Vercel + wire hosted Supabase env vars + auth redirect URLs
-- [ ] **PRE-DEPLOY: tiers enforcement** — DB trigger only; needs server-side guard + billing before real users see tiers (see `docs/TIERS.md`)
+
+**Backlog and task tracking moved to Linear.** All open work (pre-deploy blockers, security fixes, billing, post-MVP features, UX polish) lives in the [Pulse MVP project](***REMOVED***). Do not track tasks in `.md` files. Use Linear (JAB-* issues) as the source of truth.
+
+Deprecated task files (migrated to Linear, kept for reference): `deprecated/TODO.md`, `deprecated/FUTURE.md`, `deprecated/AUTH_FLOW_GAPS.md`, `deprecated/UI_REVIEW_ROUND_1.5.md`
+
+## Linear Workflow
+
+All open work tracked in Linear ([Pulse MVP](***REMOVED***), team `JAB`).
+
+**Branches:** When work maps to a Linear issue, name the branch `jab-N-short-description`.
+Example: `jab-13-restrict-profiles-select`
+
+**Commits:** Append the ticket ID to the subject line.
+Example: `fix: restrict profiles SELECT to co-trip members (JAB-13)`
+
+When no ticket exists for the work, commit normally. If the work is substantial enough to survive the session, create the ticket first.
 
 ## Dev Setup
 ```bash
