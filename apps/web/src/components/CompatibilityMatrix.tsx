@@ -272,7 +272,7 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore, colorMap }
 
 // ── View 2: By member — members × activities, colored rating cells ─────────
 
-function MembersRowsTable({ members, activities, scores, maxScore, colorMap }: {
+export function MembersRowsTable({ members, activities, scores, maxScore, colorMap }: {
   members: Member[]
   activities: Activity[]
   scores: CompatibilityScore[]

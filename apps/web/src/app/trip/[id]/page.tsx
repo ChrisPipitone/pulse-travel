@@ -19,6 +19,7 @@ import { ActivityDetailModal } from "@/components/ActivityDetailModal";
 import { CompatibilityMatrix } from "@/components/CompatibilityMatrix";
 import { FindYourCrew } from "@/components/FindYourCrew";
 import { FindYourCrewAlt } from "@/components/FindYourCrewAlt";
+import { FindYourCrewOverview } from "@/components/FindYourCrewOverview";
 import { MemberDatesModal } from "@/components/MemberDatesModal";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { MemberSchedulesModal } from "@/components/MemberSchedulesModal";
@@ -833,7 +834,7 @@ export default function TripPage({
               })()}
 
             {/* Find your crew tab (D2 — primary) */}
-            {tab === "crew" && <FindYourCrew />}
+            {tab === "crew" && <FindYourCrewOverview />}
 
             {/* Crew alt tab (B2 — dev only) */}
             {tab === "crew-alt" && isDev && <FindYourCrewAlt />}
