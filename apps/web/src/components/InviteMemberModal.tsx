@@ -22,7 +22,7 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
   const [touched, setTouched] = useState(false)
   const [state, setState] = useState<State>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const [canShare, setCanShare] = useState(false)
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
 
   const trimmed = email.trim()
   const emailValid = EMAIL_RE.test(trimmed)
@@ -33,13 +33,23 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
     : ''
 
   useEffect(() => {
-    setCanShare(typeof navigator !== 'undefined' && !!navigator.share)
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(inviteUrl)
+      setCopyState('copied')
+      setTimeout(() => setCopyState('idle'), 2000)
+    } catch {
+      setCopyState('error')
+      setTimeout(() => setCopyState('idle'), 2000)
+    }
+  }
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
@@ -64,14 +74,6 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
       setErrorMsg(err instanceof Error ? err.message : 'Failed to send invite')
       setState('error')
     }
-  }
-
-  function handleShare() {
-    navigator.share({
-      title: `Join ${tripName} on Pulse`,
-      text: `You're invited to plan the trip "${tripName}" on Pulse.`,
-      url: inviteUrl,
-    }).catch(() => {})
   }
 
   function reset() {
@@ -177,25 +179,38 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
               </Button>
             </form>
 
-            {canShare && (
-              <>
-                <div className="flex items-center gap-3 w-full">
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-xs text-text-subtle">or</span>
-                  <div className="flex-1 h-px bg-border" />
-                </div>
-                <Button variant="outline" className="w-full" onClick={handleShare}>
-                  <svg className="w-4 h-4 mr-2 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="18" cy="5" r="3" />
-                    <circle cx="6" cy="12" r="3" />
-                    <circle cx="18" cy="19" r="3" />
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                  </svg>
-                  Share invite link
-                </Button>
-              </>
-            )}
+            <>
+              <div className="flex items-center gap-3 w-full">
+                <div className="flex-1 h-px bg-border" />
+                <span className="text-xs text-text-subtle">or</span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleCopyLink}
+                disabled={copyState !== 'idle'}
+              >
+                {copyState === 'copied' ? (
+                  <>
+                    <svg className="w-4 h-4 mr-2 inline-block text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Link copied!
+                  </>
+                ) : copyState === 'error' ? (
+                  'Copy failed — try manually'
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    Copy invite link
+                  </>
+                )}
+              </Button>
+            </>
 
             <button
               onClick={onClose}
