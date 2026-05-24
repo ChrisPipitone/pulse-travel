@@ -17,6 +17,8 @@ import { Button } from "@pulse/ui";
 import { ActivityFormModal } from "@/components/ActivityFormModal";
 import { ActivityDetailModal } from "@/components/ActivityDetailModal";
 import { CompatibilityMatrix } from "@/components/CompatibilityMatrix";
+import { FindYourCrew } from "@/components/FindYourCrew";
+import { FindYourCrewAlt } from "@/components/FindYourCrewAlt";
 import { MemberDatesModal } from "@/components/MemberDatesModal";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { MemberSchedulesModal } from "@/components/MemberSchedulesModal";
@@ -28,11 +30,15 @@ import { memberPalette, buildColorMap } from "@/lib/memberColors";
 import type { Rating, Activity } from "@pulse/types";
 import { RATING_LABELS } from "@pulse/types";
 
-type Tab = "activities" | "matrix";
+const isDev = process.env.NODE_ENV === "development";
+
+type Tab = "activities" | "crew" | "crew-alt" | "matrix";
 
 const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
   activities: { short: "Activities", full: "Activities" },
-  matrix: { short: "Find your crew", full: "Find your crew" },
+  crew:       { short: "Find your crew", full: "Find your crew" },
+  "crew-alt": { short: "Crew alt", full: "Crew (alt)" },
+  matrix:     { short: "Matrix", full: "Matrix" },
 };
 
 const ratingColor: Record<Rating, string> = {
@@ -112,7 +118,7 @@ export default function TripPage({
   const [showSchedulesModal, setShowSchedulesModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [tab, setTab] = useState<Tab>("activities");
+  const [tab, setTab] = useState<Tab>("crew");
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const pendingDeleteRef = useRef<string | null>(null);
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -556,7 +562,7 @@ export default function TripPage({
           <div className="flex-1 min-w-0 flex flex-col gap-5">
             {/* Tab bar */}
             <div className="flex border-b border-border">
-              {(["activities", "matrix"] as Tab[]).map((t) => (
+              {(["activities", "crew", ...(isDev ? ["crew-alt" as Tab] : []), "matrix"] as Tab[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -564,7 +570,7 @@ export default function TripPage({
                     tab === t
                       ? "text-text-primary border-accent"
                       : "text-text-muted border-transparent hover:text-text-primary"
-                  }`}
+                  } ${t === "crew-alt" ? "opacity-60" : ""}`}
                 >
                   <span className="sm:hidden">{TAB_LABELS[t].short}</span>
                   <span className="hidden sm:inline">{TAB_LABELS[t].full}</span>
@@ -826,7 +832,13 @@ export default function TripPage({
                 );
               })()}
 
-            {/* Matrix tab */}
+            {/* Find your crew tab (D2 — primary) */}
+            {tab === "crew" && <FindYourCrew />}
+
+            {/* Crew alt tab (B2 — dev only) */}
+            {tab === "crew-alt" && isDev && <FindYourCrewAlt />}
+
+            {/* Matrix tab — other compatibility views */}
             {tab === "matrix" && <CompatibilityMatrix />}
           </div>
         </div>
