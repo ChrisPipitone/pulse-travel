@@ -19,20 +19,28 @@ Italy trip — family + friends. Some attend a wedding for a subset of days. Eve
 - Fields: name, location/region, estimated duration, category
 
 ### Rating System
-- **MUST** — non-negotiable
-- **WANT** — would love to do
-- **MEH** — indifferent / skip
+- **MUST** — non-negotiable, definite crew member for this activity
+- **WANT** — conditional crew; in unless timing/logistics conflict
+- **MAYBE** — flexible / indifferent; joins if it works out, no loss if not
+- **SKIP** — not interested; excluded from crew entirely
 
 ### Compatibility Matrix
 The core differentiator. **Not** just a rating grid — the goal is to answer "who should do what together?"
 
 #### Compatibility Model
 - **Excited set** per member = activities they rated MUST or WANT
-- **MEH = neutral**, not a conflict. MEH means "I'll go or skip — doesn't define my trip." MEH is excluded from compatibility calculations entirely.
+- **MAYBE = flexible**, not a conflict. Means "I'll go or skip — doesn't define my trip." Excluded from compatibility calculations entirely.
 - **Jaccard similarity** between two members = `|shared excited activities| / |union of excited activities|`
   - Example: Sara excited about 5, Marco about 5, share 3 → `3/7 = 43%`
 - Multi-person Jaccard: `|intersection of all excited sets| / |union of all excited sets|`
 - Unrated activities are excluded (not enough signal)
+
+#### Key Product Insight — Potential Crew vs Actual Crew
+> **The crew shown in Find Your Crew is the *potential* crew — everyone who'd go under ideal conditions. The itinerary is where the *actual* crew per scheduled instance gets resolved.**
+
+Find Your Crew does not need to solve timing. It shows who *would* go. Timing conflicts are an itinerary problem, not a crew problem. A group of 4 who all MUST an activity may split into 2+2 at scheduling time if other MUSTs conflict — that is expected and correct behaviour.
+
+MUST = definite crew. WANT = conditional crew (in unless timing knocks them out). This distinction must be visually preserved in the Find Your Crew card — two tiers, not one flat group.
 
 #### Five Matrix Views
 All five views are always available. Multiple views exist because different people parse data differently — more views = more likely someone finds their ideal read.
@@ -55,9 +63,16 @@ All five views are always available. Multiple views exist because different peop
 - Activities filtered/sorted by who is present
 
 ### Itinerary Builder
-- Drag activities onto calendar
-- Auto-suggest: group activities on days when most interested members overlap
-- Sub-group splitting: surface MUST/WANT items for partial-attendance days
+See `docs/ITINERARY_DESIGN.md` for full design. Summary:
+
+- **Layer 1 — Who:** MUST+WANT crew per activity (resolved in Find Your Crew)
+- **Layer 2 — Where:** Activity `region` field clusters activities to the same days by proximity (Rome activities on Rome days, etc.)
+- **Layer 3 — When:** Manual day assignment for MVP; member drags/assigns activities to calendar days constrained by arrival/departure dates and logical region grouping
+- **Layer 4 — Conflict resolution:** If Person A has two MUSTs that can't share a day, they do both at different times than other crew members — the crew splits per scheduled instance. This is expected and correct.
+
+Non-crew members can always be added to any scheduled instance at any time — the crew is a default invite list, not a locked roster.
+
+**Future consideration:** Same activity, different date windows (e.g. "Rome Mar 21–23 vs Rome Mar 23–25") — allows sub-groups to schedule the same activity independently. Post-MVP scope.
 
 ## Out of Scope (MVP)
 - No booking integration, no payments, no maps, no real-time chat
@@ -83,7 +98,7 @@ All five views are always available. Multiple views exist because different peop
 - **TripIt** — individual only, no group voting
 - **Google Trips** — dead
 - **Notion/Sheets DIY** — what people actually use; our real competition
-- **Differentiator**: MUST/WANT/MEH matrix + date-aware group splitting is genuinely novel
+- **Differentiator**: MUST/WANT/MAYBE/SKIP matrix + potential-crew-to-actual-crew resolution via itinerary is genuinely novel
 
 ## Viability
 - Pain point: real, universal, underserved in group niche
