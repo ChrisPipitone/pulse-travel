@@ -12,7 +12,7 @@ vi.mock('../useSession', () => ({
   useSession: () => ({ user: { id: 'u1' }, session: null, loading: false }),
 }))
 
-const existingRating: ActivityRating = { id: 'r1', activity_id: 'a1', user_id: 'u1', rating: 'MEH' }
+const existingRating: ActivityRating = { id: 'r1', activity_id: 'a1', user_id: 'u1', rating: 'MAYBE' }
 
 describe('useRateActivity', () => {
   let client: ReturnType<typeof createMockClient>
@@ -48,9 +48,9 @@ describe('useRateActivity', () => {
 
     await act(async () => { await result.current.rateActivity('a1', 'MUST') })
 
-    // Store rolled back to original MEH rating
+    // Store rolled back to original MAYBE rating
     const stored = useTripStore.getState().ratings.find((r) => r.activity_id === 'a1')
-    expect(stored?.rating).toBe('MEH')
+    expect(stored?.rating).toBe('MAYBE')
     expect(result.current.error).toBeTruthy()
   })
 
@@ -68,8 +68,8 @@ describe('useRateActivity', () => {
 
     const { result } = renderHookWithClient(() => useRateActivity(), client)
 
-    // 'MEH' is the existing rating — tapping it again should toggle off
-    act(() => { result.current.rateActivity('a1', 'MEH') })
+    // 'MAYBE' is the existing rating — tapping it again should toggle off (deselect)
+    act(() => { result.current.rateActivity('a1', 'MAYBE') })
 
     expect(useTripStore.getState().ratings.find((r) => r.activity_id === 'a1')).toBeUndefined()
 
@@ -81,7 +81,7 @@ describe('useRateActivity', () => {
     vi.mocked(client.from).mockReturnValue({ delete: deleteMock } as never)
 
     const { result } = renderHookWithClient(() => useRateActivity(), client)
-    await act(async () => { await result.current.rateActivity('a1', 'MEH') })
+    await act(async () => { await result.current.rateActivity('a1', 'MAYBE') })
 
     expect(deleteMock).toHaveBeenCalled()
   })
@@ -92,10 +92,10 @@ describe('useRateActivity', () => {
     } as never)
 
     const { result } = renderHookWithClient(() => useRateActivity(), client)
-    await act(async () => { await result.current.rateActivity('a1', 'MEH') })
+    await act(async () => { await result.current.rateActivity('a1', 'MAYBE') })
 
     const stored = useTripStore.getState().ratings.find((r) => r.activity_id === 'a1')
-    expect(stored?.rating).toBe('MEH')
+    expect(stored?.rating).toBe('MAYBE')
     expect(result.current.error).toBeTruthy()
   })
 })

@@ -1,4 +1,11 @@
-export type Rating = 'MUST' | 'WANT' | 'MEH'
+export type Rating = 'MUST' | 'WANT' | 'MAYBE' | 'SKIP'
+
+export const RATING_LABELS: Record<Rating, string> = {
+  MUST:  "Can't miss",
+  WANT:  'Want to',
+  MAYBE: 'Maybe',
+  SKIP:  'Skip',
+}
 
 export type Theme = 'modern' | 'editorial'
 
@@ -63,6 +70,7 @@ export interface CompatibilityScore {
   score: number
   must_count: number
   want_count: number
-  meh_count: number
+  maybe_count: number
+  skip_count: number
   ratings: Record<string, Rating>
 }

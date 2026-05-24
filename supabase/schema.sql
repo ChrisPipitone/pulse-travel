@@ -1,6 +1,6 @@
 -- ── Types ───────────────────────────────────────────────────────────────────
 
-create type rating as enum ('MUST', 'WANT', 'MEH');
+create type rating as enum ('MUST', 'WANT', 'MAYBE', 'SKIP');
 
 -- ── Lookup tables ────────────────────────────────────────────────────────────
 

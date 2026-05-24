@@ -17,12 +17,12 @@ export function useCompatibilityMatrix(): MatrixState {
       .map((activity) => {
         const activityRatings = ratings.filter((r) => r.activity_id === activity.id)
 
-        const must_count = activityRatings.filter((r) => r.rating === 'MUST').length
-        const want_count = activityRatings.filter((r) => r.rating === 'WANT').length
-        const meh_count  = activityRatings.filter((r) => r.rating === 'MEH').length
+        const must_count  = activityRatings.filter((r) => r.rating === 'MUST').length
+        const want_count  = activityRatings.filter((r) => r.rating === 'WANT').length
+        const maybe_count = activityRatings.filter((r) => r.rating === 'MAYBE').length
+        const skip_count  = activityRatings.filter((r) => r.rating === 'SKIP').length
 
-        // MUST weighted 3× WANT so "3 people MUST" beats "10 people WANT".
-        // MEH contributes nothing — it's a deliberate non-vote.
+        // MUST weighted 3× WANT. MAYBE and SKIP contribute nothing to score.
         const score = must_count * 3 + want_count * 1
 
         // Keyed by user_id so the matrix UI can look up any member's rating in O(1).
@@ -30,7 +30,7 @@ export function useCompatibilityMatrix(): MatrixState {
           activityRatings.map((r) => [r.user_id, r.rating])
         )
 
-        return { activity_id: activity.id, score, must_count, want_count, meh_count, ratings: ratingsMap }
+        return { activity_id: activity.id, score, must_count, want_count, maybe_count, skip_count, ratings: ratingsMap }
       })
       .sort((a, b) => b.score - a.score)
   }, [activities, ratings])

@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 import { memberPalette, buildColorMap } from "@/lib/memberColors";
 import type { Rating, Activity } from "@pulse/types";
+import { RATING_LABELS } from "@pulse/types";
 
 type Tab = "activities" | "matrix";
 
@@ -35,9 +36,10 @@ const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
 };
 
 const ratingColor: Record<Rating, string> = {
-  MUST: "bg-must text-must-text",
-  WANT: "bg-want text-want-text",
-  MEH: "bg-meh text-meh-text",
+  MUST:  "bg-must  text-must-text",
+  WANT:  "bg-want  text-want-text",
+  MAYBE: "bg-maybe text-maybe-text",
+  SKIP:  "bg-skip  text-skip-text",
 };
 
 function formatDateRange(start: string, end: string) {
@@ -641,7 +643,7 @@ export default function TripPage({
                                   <span
                                     className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] shrink-0 ${ratingColor[myRating.rating]}`}
                                   >
-                                    {myRating.rating}
+                                    {RATING_LABELS[myRating.rating]}
                                   </span>
                                 ) : (
                                   <span className="text-[11px] px-2 py-0.5 rounded-[var(--radius-badge)] bg-accent/8 border border-accent/20 text-accent shrink-0">

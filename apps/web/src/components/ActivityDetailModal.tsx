@@ -11,24 +11,27 @@ import type { Activity, ActivityRating, Member, Rating } from '@pulse/types'
 // may not be the best mobile pattern.
 
 const ratingColor: Record<Rating, string> = {
-  MUST: 'bg-must text-must-text',
-  WANT: 'bg-want text-want-text',
-  MEH:  'bg-meh text-meh-text',
+  MUST:  'bg-must  text-must-text',
+  WANT:  'bg-want  text-want-text',
+  MAYBE: 'bg-maybe text-maybe-text',
+  SKIP:  'bg-skip  text-skip-text',
 }
 
 const ratingRing: Record<Rating, string> = {
-  MUST: 'ring-must',
-  WANT: 'ring-want',
-  MEH:  'ring-meh',
+  MUST:  'ring-must',
+  WANT:  'ring-want',
+  MAYBE: 'ring-maybe',
+  SKIP:  'ring-skip',
 }
 
 const ratingLabel: Record<Rating, string> = {
-  MUST: 'Must',
-  WANT: 'Want',
-  MEH:  'Meh',
+  MUST:  "Can't miss",
+  WANT:  'Want to',
+  MAYBE: 'Maybe',
+  SKIP:  'Skip',
 }
 
-const ratings: Rating[] = ['MUST', 'WANT', 'MEH']
+const ratings: Rating[] = ['MUST', 'WANT', 'MAYBE', 'SKIP']
 
 type Props = {
   open: boolean

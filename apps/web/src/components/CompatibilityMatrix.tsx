@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useTripStore } from '@pulse/store'
 import { useCompatibilityMatrix } from '@pulse/hooks'
 import type { Activity, Member, Rating, CompatibilityScore } from '@pulse/types'
+import { RATING_LABELS } from '@pulse/types'
 import { memberPalette, buildColorMap } from '@/lib/memberColors'
 
 const ACT_PER_PAGE = 10
@@ -18,13 +19,13 @@ const VIEWS: ViewMeta[] = [
     id: 'crew',
     label: 'Rundown',
     shortLabel: 'Rundown',
-    description: 'Every activity at a glance — who\'s a MUST, who\'s a WANT, who\'s a MEH. Ranked by excitement.',
+    description: "Every activity at a glance — who can't miss it, who wants to, who's flexible. Ranked by excitement.",
   },
   {
     id: 'twin',
     label: 'Travel twin',
     shortLabel: 'Twin',
-    description: 'Pairwise compatibility based on shared MUST + WANT overlap. Higher % = more similar vacation style. MEH is ignored — it means "I\'ll go either way."',
+    description: "Pairwise compatibility based on shared Can't miss + Want to overlap. Higher % = more similar vacation style. Maybe is ignored — it means \"I'll go either way.\"",
   },
   {
     id: 'activities-rows',
@@ -49,9 +50,10 @@ const VIEWS: ViewMeta[] = [
 // ── Styles ────────────────────────────────────────────────────────────────
 
 const cellStyle: Record<Rating, string> = {
-  MUST: 'bg-cell-must text-must-text',
-  WANT: 'bg-cell-want text-want-text',
-  MEH:  'bg-cell-meh text-meh-text',
+  MUST:  'bg-cell-must  text-must-text',
+  WANT:  'bg-cell-want  text-want-text',
+  MAYBE: 'bg-cell-maybe text-maybe-text',
+  SKIP:  'bg-cell-skip  text-skip-text',
 }
 
 // Stable per-member colors — same person = same color in every view
@@ -371,11 +373,12 @@ function MembersRowsTable({ members, activities, scores, maxScore, colorMap }: {
 
 // ── View 3: Who's in — activities × rating buckets, member avatars in cells
 
-const ROSTER_RATINGS: Rating[] = ['MUST', 'WANT', 'MEH']
+const ROSTER_RATINGS: Rating[] = ['MUST', 'WANT', 'MAYBE', 'SKIP']
 const rosterBadge: Record<Rating, string> = {
-  MUST: 'bg-cell-must text-must-text',
-  WANT: 'bg-cell-want text-want-text',
-  MEH:  'bg-cell-meh text-meh-text',
+  MUST:  'bg-cell-must  text-must-text',
+  WANT:  'bg-cell-want  text-want-text',
+  MAYBE: 'bg-cell-maybe text-maybe-text',
+  SKIP:  'bg-cell-skip  text-skip-text',
 }
 
 function RosterCards({ activities, scores, members, maxScore, colorMap }: {
@@ -389,7 +392,7 @@ function RosterCards({ activities, scores, members, maxScore, colorMap }: {
     <div className="flex flex-col divide-y divide-border">
       {activities.map((activity, i) => {
         const score = scores[i]
-        const byRating: Record<Rating, Member[]> = { MUST: [], WANT: [], MEH: [] }
+        const byRating: Record<Rating, Member[]> = { MUST: [], WANT: [], MAYBE: [], SKIP: [] }
         const unrated: Member[] = []
         for (const m of members) {
           const r = score?.ratings[m.id] as Rating | undefined
@@ -408,7 +411,7 @@ function RosterCards({ activities, scores, members, maxScore, colorMap }: {
             <div className="flex flex-col gap-1.5">
               {ROSTER_RATINGS.map(r => byRating[r].length > 0 && (
                 <div key={r} className="flex items-center gap-2">
-                  <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-[var(--radius-badge)] text-[9px] font-bold w-10 justify-center ${rosterBadge[r]}`}>{r}</span>
+                  <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-[var(--radius-badge)] text-[9px] font-bold w-12 justify-center ${rosterBadge[r]}`}>{RATING_LABELS[r]}</span>
                   <AvatarGroup members={byRating[r]} colorMap={colorMap} cap={6} />
                 </div>
               ))}
@@ -446,7 +449,7 @@ function RosterTable({ activities, scores, members, maxScore, colorMap }: {
             <th className="sticky left-0 z-10 bg-bg-card text-left px-4 py-3 text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[140px]">Activity</th>
             {ROSTER_RATINGS.map(r => (
               <th key={r} className="px-3 py-3 text-left align-bottom min-w-[100px]">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold ${rosterBadge[r]}`}>{r}</span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold ${rosterBadge[r]}`}>{RATING_LABELS[r]}</span>
               </th>
             ))}
             <th className="px-3 py-3 text-left align-bottom text-[10px] font-semibold text-text-subtle uppercase tracking-wide min-w-[80px]">Unrated</th>
@@ -456,7 +459,7 @@ function RosterTable({ activities, scores, members, maxScore, colorMap }: {
         <tbody>
           {activities.map((activity, i) => {
             const score = scores[i]
-            const byRating: Record<Rating, Member[]> = { MUST: [], WANT: [], MEH: [] }
+            const byRating: Record<Rating, Member[]> = { MUST: [], WANT: [], MAYBE: [], SKIP: [] }
             const unrated: Member[] = []
             for (const m of members) {
               const r = score?.ratings[m.id] as Rating | undefined
@@ -496,7 +499,7 @@ interface CrewRow {
   score: CompatibilityScore | undefined
   mustMembers: Member[]
   wantMembers: Member[]
-  mehMembers: Member[]
+  maybeMembers: Member[]
   excitedCount: number
 }
 
@@ -507,7 +510,7 @@ function CrewCards({ rows, maxScore, colorMap }: {
 }) {
   return (
     <div className="flex flex-col gap-3">
-      {rows.map(({ activity, score, mustMembers, wantMembers, mehMembers, excitedCount }) => {
+      {rows.map(({ activity, score, mustMembers, wantMembers, maybeMembers, excitedCount }) => {
         const isEmpty = excitedCount === 0
         return (
           <div
@@ -535,7 +538,7 @@ function CrewCards({ rows, maxScore, colorMap }: {
                 {mustMembers.length > 0 && (
                   <div className="flex items-start gap-3">
                     <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-must text-must-text">
-                      MUST
+                      Can't miss
                     </span>
                     <AvatarGroup members={mustMembers} colorMap={colorMap} />
                   </div>
@@ -543,17 +546,17 @@ function CrewCards({ rows, maxScore, colorMap }: {
                 {wantMembers.length > 0 && (
                   <div className="flex items-start gap-3">
                     <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-want text-want-text">
-                      WANT
+                      Want to
                     </span>
                     <AvatarGroup members={wantMembers} colorMap={colorMap} />
                   </div>
                 )}
-                {mehMembers.length > 0 && (
+                {maybeMembers.length > 0 && (
                   <div className="flex items-start gap-3 opacity-50">
-                    <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-meh text-meh-text">
-                      MEH
+                    <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-maybe text-maybe-text">
+                      Maybe
                     </span>
-                    <AvatarGroup members={mehMembers} colorMap={colorMap} />
+                    <AvatarGroup members={maybeMembers} colorMap={colorMap} />
                   </div>
                 )}
               </div>
@@ -732,16 +735,16 @@ export function CompatibilityMatrix() {
     orderedActivities
       .map(activity => {
         const score = matrix.find(s => s.activity_id === activity.id)
-        const mustMembers = members.filter(m => score?.ratings[m.id] === 'MUST')
-        const wantMembers = members.filter(m => score?.ratings[m.id] === 'WANT')
-        const mehMembers  = members.filter(m => score?.ratings[m.id] === 'MEH')
-        return { activity, score, mustMembers, wantMembers, mehMembers, excitedCount: mustMembers.length + wantMembers.length }
+        const mustMembers  = members.filter(m => score?.ratings[m.id] === 'MUST')
+        const wantMembers  = members.filter(m => score?.ratings[m.id] === 'WANT')
+        const maybeMembers = members.filter(m => score?.ratings[m.id] === 'MAYBE')
+        return { activity, score, mustMembers, wantMembers, maybeMembers, excitedCount: mustMembers.length + wantMembers.length }
       })
       .sort((a, b) => b.excitedCount - a.excitedCount || (b.score?.score ?? 0) - (a.score?.score ?? 0)),
     [orderedActivities, matrix, members]
   )
 
-  // View 5: Jaccard similarity — excited set = MUST + WANT only, MEH excluded
+  // View 5: Jaccard similarity — excited set = MUST + WANT only, MAYBE/SKIP excluded
   const jaccardMatrix = useMemo((): Map<string, Map<string, number | null>> => {
     const excitedSets = new Map<string, Set<string>>()
     for (const m of members) {
@@ -816,7 +819,7 @@ export function CompatibilityMatrix() {
     return (
       <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-14 flex flex-col items-center gap-2 text-center">
         <p className="text-sm font-medium text-text-primary">No ratings yet</p>
-        <p className="text-xs text-text-muted max-w-xs">Rate activities as MUST, WANT, or MEH — the matrix will show who's excited about what.</p>
+        <p className="text-xs text-text-muted max-w-xs">Rate activities to see who's excited about what.</p>
       </div>
     )
   }
@@ -891,10 +894,10 @@ export function CompatibilityMatrix() {
         {/* Legend: adapts to view */}
         {(isActRows || isMemRows) && (
           <div className="flex items-center gap-3">
-            {(['MUST', 'WANT', 'MEH'] as Rating[]).map(r => (
+            {(['MUST', 'WANT', 'MAYBE', 'SKIP'] as Rating[]).map(r => (
               <div key={r} className="flex items-center gap-1">
                 <div className={`w-3 h-3 rounded-sm ${cellStyle[r]}`} />
-                <span className="text-[10px] text-text-muted">{r}</span>
+                <span className="text-[10px] text-text-muted">{r === 'MUST' ? "Can't miss" : r === 'WANT' ? 'Want to' : r === 'MAYBE' ? 'Maybe' : 'Skip'}</span>
               </div>
             ))}
             <div className="flex items-center gap-1">

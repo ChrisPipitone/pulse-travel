@@ -7,7 +7,7 @@ type Size = 'sm' | 'md' | 'lg'
 const variantStyles: Record<Variant, { container: string; text: string }> = {
   primary: { container: 'bg-accent rounded-[var(--radius-btn)]', text: 'text-white' },
   outline: { container: 'border border-border rounded-lg',       text: 'text-text-primary' },
-  ghost:   { container: 'bg-meh rounded-lg',                     text: 'text-accent' },
+  ghost:   { container: 'bg-maybe rounded-lg',                    text: 'text-accent' },
 }
 
 const sizeStyles: Record<Size, { container: string; text: string }> = {

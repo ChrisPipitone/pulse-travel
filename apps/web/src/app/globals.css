@@ -17,12 +17,15 @@
   --must-text:    #FFFFFF;
   --want-bg:      #00C9A7;
   --want-text:    #FFFFFF;
-  --meh-bg:       #FFF0A0;
-  --meh-text:     #8B7400;
+  --maybe-bg:     #FFF0A0;
+  --maybe-text:   #8B7400;
+  --skip-bg:      #EDECEA;
+  --skip-text:    #6B6864;
 
   --cell-must:    #FF5C35;
   --cell-want:    #00C9A7;
-  --cell-meh:     #FFE566;
+  --cell-maybe:   #FFE566;
+  --cell-skip:    #D8D6D1;
   --cell-empty:   #ECEAE4;
 
   --radius-card:  16px;
@@ -49,12 +52,15 @@
   --must-text:    #FFFFFF;
   --want-bg:      #D4A96A;
   --want-text:    #FFFFFF;
-  --meh-bg:       #FFF0A0;
-  --meh-text:     #8B7400;
+  --maybe-bg:     #FFF0A0;
+  --maybe-text:   #8B7400;
+  --skip-bg:      #EDE9E4;
+  --skip-text:    #6B6560;
 
   --cell-must:    #C4603A;
   --cell-want:    #EFC98A;
-  --cell-meh:     #FFE566;
+  --cell-maybe:   #FFE566;
+  --cell-skip:    #D5D0CA;
   --cell-empty:   #F7F4F0;
 
   --radius-card:  8px;
@@ -79,11 +85,14 @@
   --color-must-text:    var(--must-text);
   --color-want:         var(--want-bg);
   --color-want-text:    var(--want-text);
-  --color-meh:          var(--meh-bg);
-  --color-meh-text:     var(--meh-text);
+  --color-maybe:        var(--maybe-bg);
+  --color-maybe-text:   var(--maybe-text);
+  --color-skip:         var(--skip-bg);
+  --color-skip-text:    var(--skip-text);
   --color-cell-must:    var(--cell-must);
   --color-cell-want:    var(--cell-want);
-  --color-cell-meh:     var(--cell-meh);
+  --color-cell-maybe:   var(--cell-maybe);
+  --color-cell-skip:    var(--cell-skip);
   --color-cell-empty:   var(--cell-empty);
 }
 
