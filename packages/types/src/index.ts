@@ -35,6 +35,16 @@ export interface ActivityCategory {
   icon?: string
 }
 
+export interface Stop {
+  id: string
+  trip_id: string
+  name: string
+  date?: string | null
+  position: number
+  created_by: string
+  created_at: string
+}
+
 export interface Activity {
   id: string
   trip_id: string
@@ -45,6 +55,7 @@ export interface Activity {
   region?: string | null
   duration_hours?: number | null
   category_id?: string | null
+  stop_id?: string | null
   added_by: string
   created_at: string
 }

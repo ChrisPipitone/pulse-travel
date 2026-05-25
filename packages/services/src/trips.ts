@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Trip, Activity, ActivityRating, Member } from '@pulse/types'
+import type { Trip, Activity, ActivityRating, Member, Stop } from '@pulse/types'
 
 export type TripMemberAvatar = { id: string; name: string; avatar_url?: string | null }
 export type TripSummary = Trip & { member_count: number; member_avatars: TripMemberAvatar[] }
@@ -163,7 +163,7 @@ export async function getRatings(client: SupabaseClient, activityIds: string[]):
 export async function updateActivity(
   client: SupabaseClient,
   id: string,
-  fields: Partial<Pick<Activity, 'name' | 'description' | 'url' | 'location' | 'region' | 'duration_hours' | 'category_id'>>
+  fields: Partial<Pick<Activity, 'name' | 'description' | 'url' | 'location' | 'region' | 'duration_hours' | 'category_id' | 'stop_id'>>
 ): Promise<Activity | null> {
   const { data, error } = await client.from('activities').update(fields).eq('id', id).select().single()
   if (error) throw new Error(error.message)
@@ -233,6 +233,60 @@ export async function sendInviteEmail(
     email,
     options: { emailRedirectTo: inviteUrl, shouldCreateUser: true },
   })
+  if (error) throw new Error(error.message)
+}
+
+export async function listStops(client: SupabaseClient, tripId: string): Promise<Stop[]> {
+  const { data, error } = await client
+    .from('stops')
+    .select('*')
+    .eq('trip_id', tripId)
+    .order('position')
+    .order('created_at')
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
+export async function createStop(
+  client: SupabaseClient,
+  tripId: string,
+  name: string,
+  date: string | null,
+  userId: string,
+): Promise<Stop> {
+  const { data: existing } = await client
+    .from('stops')
+    .select('position')
+    .eq('trip_id', tripId)
+    .order('position', { ascending: false })
+    .limit(1)
+  const nextPos = existing?.[0] ? existing[0].position + 1 : 0
+
+  const { data, error } = await client
+    .from('stops')
+    .insert({ trip_id: tripId, name: name.trim(), date: date || null, position: nextPos, created_by: userId })
+    .select()
+    .single()
+  if (error) throw new Error(error.message)
+  return data as Stop
+}
+
+export async function updateStop(
+  client: SupabaseClient,
+  stopId: string,
+  fields: { name?: string; date?: string | null },
+): Promise<Stop> {
+  const patch: Record<string, unknown> = {}
+  if (fields.name !== undefined) patch.name = fields.name.trim()
+  if ('date' in fields) patch.date = fields.date || null
+
+  const { data, error } = await client.from('stops').update(patch).eq('id', stopId).select().single()
+  if (error) throw new Error(error.message)
+  return data as Stop
+}
+
+export async function deleteStop(client: SupabaseClient, stopId: string): Promise<void> {
+  const { error } = await client.from('stops').delete().eq('id', stopId)
   if (error) throw new Error(error.message)
 }
 

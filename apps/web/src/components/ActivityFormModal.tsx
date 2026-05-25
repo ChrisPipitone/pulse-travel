@@ -3,18 +3,21 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button, Input } from '@pulse/ui'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import type { Stop } from '@pulse/types'
 
 type Fields = {
   name: string
   location: string
   description: string
   url: string
+  stop_id: string | null
 }
 
 type Props = {
   open: boolean
   title: string
   initial?: Partial<Fields>
+  stops?: Stop[]
   loading?: boolean
   error?: string | null
   submitLabel?: string
@@ -22,8 +25,8 @@ type Props = {
   onSubmit: (fields: Fields) => Promise<void>
 }
 
-export function ActivityFormModal({ open, title, initial, loading, error, submitLabel = 'Save', onClose, onSubmit }: Props) {
-  const [fields, setFields] = useState<Fields>({ name: '', location: '', description: '', url: '' })
+export function ActivityFormModal({ open, title, initial, stops = [], loading, error, submitLabel = 'Save', onClose, onSubmit }: Props) {
+  const [fields, setFields] = useState<Fields>({ name: '', location: '', description: '', url: '', stop_id: null })
   const modalRef = useRef<HTMLDivElement>(null)
   useFocusTrap(modalRef, !!open)
 
@@ -34,6 +37,7 @@ export function ActivityFormModal({ open, title, initial, loading, error, submit
         location: initial?.location ?? '',
         description: initial?.description ?? '',
         url: initial?.url ?? '',
+        stop_id: initial?.stop_id ?? null,
       })
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -47,7 +51,7 @@ export function ActivityFormModal({ open, title, initial, loading, error, submit
 
   if (!open) return null
 
-  function set(field: keyof Fields) {
+  function set(field: keyof Pick<Fields, 'name' | 'location' | 'description' | 'url'>) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
       setFields((prev) => ({ ...prev, [field]: e.target.value }))
   }
@@ -67,6 +71,7 @@ export function ActivityFormModal({ open, title, initial, loading, error, submit
       location: fields.location.trim(),
       description: fields.description.trim(),
       url: fields.url.trim(),
+      stop_id: fields.stop_id,
     })
   }
 
@@ -85,6 +90,24 @@ export function ActivityFormModal({ open, title, initial, loading, error, submit
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input label="Activity *" id="act-name" placeholder="Colosseum Tour" required autoFocus maxLength={100} value={fields.name} onChange={set('name')} />
           <Input label="Location" id="act-location" placeholder="Rome" maxLength={100} value={fields.location} onChange={set('location')} />
+          {stops.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-text-muted" htmlFor="act-stop">
+                Stop
+              </label>
+              <select
+                id="act-stop"
+                value={fields.stop_id ?? ''}
+                onChange={(e) => setFields((prev) => ({ ...prev, stop_id: e.target.value || null }))}
+                className="w-full text-sm bg-bg border border-border rounded-lg px-3 py-2 text-text-primary outline-none focus:border-accent/50 appearance-none"
+              >
+                <option value="">No stop</option>
+                {stops.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <Input label="Description" id="act-description" placeholder="Optional details" maxLength={500} value={fields.description} onChange={set('description')} />
           <div className="flex flex-col gap-1.5">
             <Input label="URL" id="act-url" type="url" placeholder="https://…" maxLength={2000} value={fields.url} onChange={set('url')} />

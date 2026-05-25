@@ -4,7 +4,7 @@ import { useSupabase } from './SupabaseContext'
 import { useTripStore } from '@pulse/store'
 import { updateActivity as updateActivityService, deleteActivity as deleteActivityService } from '@pulse/services'
 
-type ActivityFields = Partial<Pick<Activity, 'name' | 'description' | 'url' | 'location' | 'region' | 'duration_hours' | 'category_id'>>
+type ActivityFields = Partial<Pick<Activity, 'name' | 'description' | 'url' | 'location' | 'region' | 'duration_hours' | 'category_id' | 'stop_id'>>
 
 type ActivityActionsState = {
   updateActivity: (id: string, fields: ActivityFields) => Promise<boolean>

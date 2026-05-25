@@ -24,6 +24,7 @@ import { MemberDatesModal } from "@/components/MemberDatesModal";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { MemberSchedulesModal } from "@/components/MemberSchedulesModal";
 import { InviteMemberModal } from "@/components/InviteMemberModal";
+import { StopsPanel } from "@/components/StopsPanel";
 import { FadeReveal } from "@/components/FadeReveal";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
@@ -92,6 +93,7 @@ export default function TripPage({
   const colorMap = useMemo(() => buildColorMap(members), [members]);
   const activities = useTripStore((s) => s.activities);
   const ratings = useTripStore((s) => s.ratings);
+  const stops = useTripStore((s) => s.stops);
 
   const { addActivity, loading: adding, error: addError } = useAddActivity();
   const {
@@ -159,6 +161,7 @@ export default function TripPage({
     location: string;
     description: string;
     url: string;
+    stop_id: string | null;
   }) {
     const ok = await addActivity({
       trip_id: id,
@@ -166,6 +169,7 @@ export default function TripPage({
       location: fields.location || null,
       description: fields.description || null,
       url: fields.url || null,
+      stop_id: fields.stop_id || null,
       region: null,
       duration_hours: null,
       category_id: null,
@@ -181,6 +185,7 @@ export default function TripPage({
     location: string;
     description: string;
     url: string;
+    stop_id: string | null;
   }) {
     if (modal.mode !== "edit") return;
     const ok = await updateActivity(modal.activity.id, {
@@ -188,6 +193,7 @@ export default function TripPage({
       location: fields.location || null,
       description: fields.description || null,
       url: fields.url || null,
+      stop_id: fields.stop_id ?? undefined,
     });
     if (ok) {
       setModal({ mode: "closed" });
@@ -523,6 +529,9 @@ export default function TripPage({
               );
             })()}
 
+            {/* Stops */}
+            <StopsPanel tripId={id} userId={userId} tripOwnerId={trip.created_by} />
+
             {/* Invite */}
             <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
               <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">
@@ -585,6 +594,26 @@ export default function TripPage({
                 const visibleActivities = activities.filter(
                   (a) => !hiddenActivityIds.has(a.id),
                 );
+
+                // Group by stop when stops exist; flat list otherwise.
+                type Group = { stopId: string | null; label: string | null; date: string | null; acts: typeof visibleActivities }
+                const groups: Group[] = stops.length > 0
+                  ? [
+                      ...stops.map((s) => ({
+                        stopId: s.id,
+                        label: s.name,
+                        date: s.date ?? null,
+                        acts: visibleActivities.filter((a) => a.stop_id === s.id),
+                      })),
+                      {
+                        stopId: null,
+                        label: 'Unassigned',
+                        date: null,
+                        acts: visibleActivities.filter((a) => !a.stop_id),
+                      },
+                    ].filter((g) => g.stopId === null || g.acts.length > 0)
+                  : [{ stopId: null, label: null, date: null, acts: visibleActivities }]
+
                 return (
                   <>
                     <div className="flex items-center justify-between">
@@ -602,7 +631,7 @@ export default function TripPage({
                       </Button>
                     </div>
 
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-5">
                       {visibleActivities.length === 0 && (
                         <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
                           <p className="text-sm font-medium text-text-primary">
@@ -613,7 +642,22 @@ export default function TripPage({
                           </p>
                         </div>
                       )}
-                      {visibleActivities.map((activity) => {
+                      {groups.map((group) => (
+                        <div key={group.stopId ?? '__unassigned'} className="flex flex-col gap-2">
+                          {group.label && (
+                            <div className="flex items-center gap-2">
+                              <div className="w-1.5 h-1.5 rounded-full bg-accent/60 shrink-0" />
+                              <span className="text-xs font-semibold text-text-subtle uppercase tracking-widest">
+                                {group.label}
+                              </span>
+                              {group.date && (
+                                <span className="text-[10px] font-medium text-accent">
+                                  {new Date(group.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {group.acts.map((activity) => {
                         const activityRatings = ratings.filter(
                           (r) => r.activity_id === activity.id,
                         );
@@ -828,6 +872,8 @@ export default function TripPage({
                           </div>
                         );
                       })}
+                        </div>
+                      ))}
                     </div>
                   </>
                 );
@@ -913,6 +959,7 @@ export default function TripPage({
         open={modal.mode === "add"}
         title="Add Activity"
         submitLabel="Add"
+        stops={stops}
         loading={adding}
         error={addError}
         onClose={() => setModal({ mode: "closed" })}
@@ -942,6 +989,7 @@ export default function TripPage({
       <ActivityFormModal
         open={modal.mode === "edit"}
         title="Edit Activity"
+        stops={stops}
         initial={
           modal.mode === "edit"
             ? {
@@ -949,6 +997,7 @@ export default function TripPage({
                 location: modal.activity.location ?? "",
                 description: modal.activity.description ?? "",
                 url: modal.activity.url ?? "",
+                stop_id: modal.activity.stop_id ?? null,
               }
             : undefined
         }
