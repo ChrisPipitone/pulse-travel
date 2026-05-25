@@ -39,7 +39,8 @@ export interface Stop {
   id: string
   trip_id: string
   name: string
-  date?: string | null
+  date_from?: string | null
+  date_to?: string | null
   position: number
   created_by: string
   created_at: string

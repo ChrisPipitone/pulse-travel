@@ -596,23 +596,25 @@ export default function TripPage({
                 );
 
                 // Group by stop when stops exist; flat list otherwise.
-                type Group = { stopId: string | null; label: string | null; date: string | null; acts: typeof visibleActivities }
+                type Group = { stopId: string | null; label: string | null; dateFrom: string | null; dateTo: string | null; acts: typeof visibleActivities }
                 const groups: Group[] = stops.length > 0
                   ? [
                       ...stops.map((s) => ({
                         stopId: s.id,
                         label: s.name,
-                        date: s.date ?? null,
+                        dateFrom: s.date_from ?? null,
+                        dateTo: s.date_to ?? null,
                         acts: visibleActivities.filter((a) => a.stop_id === s.id),
                       })),
                       {
                         stopId: null,
                         label: 'Unassigned',
-                        date: null,
+                        dateFrom: null,
+                        dateTo: null,
                         acts: visibleActivities.filter((a) => !a.stop_id),
                       },
                     ].filter((g) => g.stopId === null || g.acts.length > 0)
-                  : [{ stopId: null, label: null, date: null, acts: visibleActivities }]
+                  : [{ stopId: null, label: null, dateFrom: null, dateTo: null, acts: visibleActivities }]
 
                 return (
                   <>
@@ -650,11 +652,14 @@ export default function TripPage({
                               <span className="text-xs font-semibold text-text-subtle uppercase tracking-widest">
                                 {group.label}
                               </span>
-                              {group.date && (
-                                <span className="text-[10px] font-medium text-accent">
-                                  {new Date(group.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                </span>
-                              )}
+                              {(group.dateFrom || group.dateTo) && (() => {
+                                const fmt = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                                const label = group.dateFrom && group.dateTo
+                                  ? `${fmt(group.dateFrom)} – ${fmt(group.dateTo)}`
+                                  : group.dateFrom ? `From ${fmt(group.dateFrom)}`
+                                  : `Until ${fmt(group.dateTo!)}`
+                                return <span className="text-[10px] font-medium text-accent">{label}</span>
+                              })()}
                             </div>
                           )}
                           {group.acts.map((activity) => {

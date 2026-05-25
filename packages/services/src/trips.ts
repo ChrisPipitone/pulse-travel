@@ -251,7 +251,8 @@ export async function createStop(
   client: SupabaseClient,
   tripId: string,
   name: string,
-  date: string | null,
+  dateFrom: string | null,
+  dateTo: string | null,
   userId: string,
 ): Promise<Stop> {
   const { data: existing } = await client
@@ -264,7 +265,7 @@ export async function createStop(
 
   const { data, error } = await client
     .from('stops')
-    .insert({ trip_id: tripId, name: name.trim(), date: date || null, position: nextPos, created_by: userId })
+    .insert({ trip_id: tripId, name: name.trim(), date_from: dateFrom || null, date_to: dateTo || null, position: nextPos, created_by: userId })
     .select()
     .single()
   if (error) throw new Error(error.message)
@@ -274,11 +275,12 @@ export async function createStop(
 export async function updateStop(
   client: SupabaseClient,
   stopId: string,
-  fields: { name?: string; date?: string | null },
+  fields: { name?: string; date_from?: string | null; date_to?: string | null },
 ): Promise<Stop> {
   const patch: Record<string, unknown> = {}
   if (fields.name !== undefined) patch.name = fields.name.trim()
-  if ('date' in fields) patch.date = fields.date || null
+  if ('date_from' in fields) patch.date_from = fields.date_from || null
+  if ('date_to' in fields) patch.date_to = fields.date_to || null
 
   const { data, error } = await client.from('stops').update(patch).eq('id', stopId).select().single()
   if (error) throw new Error(error.message)

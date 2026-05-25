@@ -4,8 +4,8 @@ import { useTripStore } from '@pulse/store'
 import { createStop, updateStop, deleteStop } from '@pulse/services'
 
 type StopActionsState = {
-  createStop: (tripId: string, name: string, date: string | null) => Promise<boolean>
-  updateStop: (stopId: string, fields: { name?: string; date?: string | null }) => Promise<boolean>
+  createStop: (tripId: string, name: string, dateFrom: string | null, dateTo: string | null) => Promise<boolean>
+  updateStop: (stopId: string, fields: { name?: string; date_from?: string | null; date_to?: string | null }) => Promise<boolean>
   deleteStop: (stopId: string) => Promise<boolean>
   loading: boolean
   error: string | null
@@ -17,13 +17,13 @@ export function useStopActions(): StopActionsState {
   const [error, setError] = useState<string | null>(null)
   const { addStop, updateStop: updateStoreStop, removeStop } = useTripStore()
 
-  async function create(tripId: string, name: string, date: string | null): Promise<boolean> {
+  async function create(tripId: string, name: string, dateFrom: string | null, dateTo: string | null): Promise<boolean> {
     setLoading(true)
     setError(null)
     try {
       const { data: { user } } = await client.auth.getUser()
       if (!user) return false
-      const stop = await createStop(client, tripId, name, date, user.id)
+      const stop = await createStop(client, tripId, name, dateFrom, dateTo, user.id)
       addStop(stop)
       return true
     } catch (e) {
@@ -34,7 +34,7 @@ export function useStopActions(): StopActionsState {
     }
   }
 
-  async function update(stopId: string, fields: { name?: string; date?: string | null }): Promise<boolean> {
+  async function update(stopId: string, fields: { name?: string; date_from?: string | null; date_to?: string | null }): Promise<boolean> {
     setLoading(true)
     setError(null)
     try {
@@ -65,4 +65,5 @@ export function useStopActions(): StopActionsState {
   }
 
   return { createStop: create, updateStop: update, deleteStop: remove, loading, error }
+
 }
