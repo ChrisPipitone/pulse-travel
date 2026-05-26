@@ -7,10 +7,9 @@ import { useCompatibilityMatrix } from "@pulse/hooks";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { Activity, Member, Rating } from "@pulse/types";
 import { MemberAvatar } from "@/components/MemberAvatar";
-import { FindYourCrew } from "./FindYourCrew";
 import { GroupiesMemberCard, type MemberCategoryChip } from "./GroupiesMemberCard";
 import { TravelTwinCard } from "./TravelTwinCard";
-type MainView = "groupies" | "travelTwin" | "cards";
+type MainView = "groupies" | "travelTwin";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Pairwise Jaccard helpers
@@ -264,18 +263,6 @@ function ViewToggle({ view, setView }: { view: MainView; setView: (v: MainView) 
         </svg>
         Travel Twin
       </button>
-      <button
-        onClick={() => setView("cards")}
-        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
-          view === "cards" ? "bg-accent text-white shadow-sm" : "text-text-muted hover:text-text-primary"
-        }`}
-      >
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-          <rect x="2" y="3" width="12" height="4" rx="1" />
-          <rect x="2" y="9" width="12" height="4" rx="1" />
-        </svg>
-        By Activity
-      </button>
     </div>
   )
 }
@@ -472,7 +459,6 @@ export function FindYourCrewOverview() {
         </>
       )}
 
-      {mainView === "cards" && <FindYourCrew />}
 
       {selectedSummary && (
         <MemberDetailModal
