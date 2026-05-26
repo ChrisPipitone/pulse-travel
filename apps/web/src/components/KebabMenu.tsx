@@ -25,9 +25,9 @@ export function KebabMenu({ items }: { items: Item[] }) {
         aria-label="More options"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
-          <circle cx="7" cy="2.5" r="1.2" />
+          <circle cx="2.5" cy="7" r="1.2" />
           <circle cx="7" cy="7" r="1.2" />
-          <circle cx="7" cy="11.5" r="1.2" />
+          <circle cx="11.5" cy="7" r="1.2" />
         </svg>
       </button>
       {open && (
