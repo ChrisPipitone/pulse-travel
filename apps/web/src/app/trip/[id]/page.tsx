@@ -10,6 +10,7 @@ import {
   useUpdateTrip,
   useDeleteTrip,
   useRemoveMember,
+  useStopActions,
 } from "@pulse/hooks";
 import { useTripStore } from "@pulse/store";
 import { ActivityFormModal } from "@/components/ActivityFormModal";
@@ -21,13 +22,14 @@ import { CreateTripModal } from "@/components/CreateTripModal";
 import { MemberSchedulesModal } from "@/components/MemberSchedulesModal";
 import { InviteMemberModal } from "@/components/InviteMemberModal";
 import { StopsPanel } from "@/components/StopsPanel";
+import { StopFormModal } from "@/components/StopFormModal";
 import { TripTimeline } from "@/components/TripTimeline";
 import { FadeReveal } from "@/components/FadeReveal";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { KebabMenu } from "@/components/KebabMenu";
-import type { Activity } from "@pulse/types";
+import type { Activity, Stop } from "@pulse/types";
 
 type Tab = "activities" | "timeline" | "crew" | "matrix";
 
@@ -67,6 +69,11 @@ type ModalState =
   | { mode: "add" }
   | { mode: "edit"; activity: Activity };
 
+type StopModalState =
+  | { mode: "closed" }
+  | { mode: "add" }
+  | { mode: "edit"; stop: Stop };
+
 export default function TripPage({
   params,
 }: {
@@ -93,12 +100,14 @@ export default function TripPage({
   } = useUpdateMemberDates();
   const { updateTrip, loading: updating, error: updateError } = useUpdateTrip();
   const { deleteTrip } = useDeleteTrip();
+  const { createStop, updateStop, loading: stopLoading, error: stopError } = useStopActions();
   const { removeMember, removingId, error: removeError } = useRemoveMember();
   const router = useRouter();
 
   const { showToast } = useToast();
 
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
+  const [stopModal, setStopModal] = useState<StopModalState>({ mode: "closed" });
   const [showDatesModal, setShowDatesModal] = useState(false);
   const [showEditTrip, setShowEditTrip] = useState(false);
   const [showSchedulesModal, setShowSchedulesModal] = useState(false);
@@ -229,6 +238,17 @@ export default function TripPage({
       },
       5000,
     );
+  }
+
+  async function handleAddStop(fields: { name: string; date_from: string | null; date_to: string | null }) {
+    const ok = await createStop(id, fields.name, fields.date_from, fields.date_to);
+    if (ok) setStopModal({ mode: "closed" });
+  }
+
+  async function handleEditStop(fields: { name: string; date_from: string | null; date_to: string | null }) {
+    if (stopModal.mode !== "edit") return;
+    const ok = await updateStop(stopModal.stop.id, { name: fields.name, date_from: fields.date_from, date_to: fields.date_to });
+    if (ok) setStopModal({ mode: "closed" });
   }
 
   function handleCopyInvite() {
@@ -422,7 +442,13 @@ export default function TripPage({
             })()}
 
             {/* Stops */}
-            <StopsPanel tripId={id} userId={userId} tripOwnerId={trip.created_by} />
+            <StopsPanel
+              tripId={id}
+              userId={userId}
+              tripOwnerId={trip.created_by}
+              onOpenAdd={() => setStopModal({ mode: "add" })}
+              onOpenEdit={(stop) => setStopModal({ mode: "edit", stop })}
+            />
 
             {/* Invite */}
             <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
@@ -539,6 +565,27 @@ export default function TripPage({
         onRemoveMember={removeMember}
         removingMemberId={removingId}
         removeError={removeError}
+      />
+
+      <StopFormModal
+        open={stopModal.mode === "add"}
+        title="Add stop"
+        submitLabel="Add stop"
+        loading={stopLoading}
+        error={stopError}
+        onClose={() => setStopModal({ mode: "closed" })}
+        onSubmit={handleAddStop}
+      />
+
+      <StopFormModal
+        open={stopModal.mode === "edit"}
+        title="Edit stop"
+        submitLabel="Save"
+        loading={stopLoading}
+        error={stopError}
+        initial={stopModal.mode === "edit" ? { name: stopModal.stop.name, date_from: stopModal.stop.date_from, date_to: stopModal.stop.date_to } : undefined}
+        onClose={() => setStopModal({ mode: "closed" })}
+        onSubmit={handleEditStop}
       />
 
       <ActivityFormModal
