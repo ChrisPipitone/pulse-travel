@@ -24,13 +24,11 @@ const SORT_LABELS: Record<SortKey, string> = {
 interface CrewRowData {
   activity: Activity;
   mustMembers: Member[];
-  wantMembers: Member[];
   maybeMembers: Member[];
   skipMembers: Member[];
   unratedMembers: Member[];
   myRating: Rating | null;
   mustCount: number;
-  wantCount: number;
   maybeCount: number;
 }
 
@@ -57,28 +55,33 @@ function PinIcon() {
 
 // ── Avatar chip (with name label) ─────────────────────────────────────────────
 
+const CHIP_RING: Record<Rating, string> = {
+  MUST:  'var(--must-bg)',
+  MAYBE: '#B8960A',
+  SKIP:  'var(--text-subtle)',
+}
+
 function AvatarChip({
   member,
   isYou = false,
   soft = false,
+  rating,
 }: {
   member: Member;
   isYou?: boolean;
   soft?: boolean;
+  rating?: Rating;
 }) {
+  const ring = isYou && rating ? CHIP_RING[rating] : undefined
   return (
     <div
       className={`flex items-center gap-1.5 bg-bg-card border border-border rounded-full pl-1 pr-2.5 py-1 text-xs font-medium text-text-primary ${soft ? "opacity-65" : ""}`}
+      style={{
+        outline: ring ? `1.5px solid ${ring}` : undefined,
+        outlineOffset: ring ? '2px' : undefined,
+      }}
     >
-      <span
-        style={
-          isYou
-            ? { boxShadow: `0 0 0 2px var(--accent), 0 0 0 3.5px var(--bg-card)`, borderRadius: "9999px", display: "inline-flex" }
-            : undefined
-        }
-      >
-        <MemberAvatar name={member.name} avatarUrl={member.avatar_url} size="sm" />
-      </span>
+      <MemberAvatar name={member.name} avatarUrl={member.avatar_url} size="sm" />
       <span>{isYou ? "You" : member.name.split(" ")[0]}</span>
     </div>
   );
@@ -93,12 +96,6 @@ function StatusPill({ rating }: { rating: Rating | null }) {
         ✓ Going
       </span>
     );
-  if (rating === "WANT")
-    return (
-      <span className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full bg-want text-want-text whitespace-nowrap">
-        Likely going
-      </span>
-    );
   if (rating === "MAYBE")
     return (
       <span
@@ -106,6 +103,12 @@ function StatusPill({ rating }: { rating: Rating | null }) {
         style={{ background: "rgba(255,229,102,.7)", color: "#7A6200" }}
       >
         Maybe
+      </span>
+    );
+  if (rating === "SKIP")
+    return (
+      <span className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap bg-border text-text-muted">
+        Skipping
       </span>
     );
   return (
@@ -119,21 +122,21 @@ function StatusPill({ rating }: { rating: Rating | null }) {
 
 function AvatarRow({
   mustMembers,
-  wantMembers,
+  maybeMembers,
   userId,
 }: {
   mustMembers: Member[];
-  wantMembers: Member[];
+  maybeMembers: Member[];
   userId?: string;
 }) {
-  const allShown = [...mustMembers, ...wantMembers].slice(0, 5);
-  const overflow = mustMembers.length + wantMembers.length - allShown.length;
+  const allShown = [...mustMembers, ...maybeMembers].slice(0, 5);
+  const overflow = mustMembers.length + maybeMembers.length - allShown.length;
   const mustSet = new Set(mustMembers.map((m) => m.id));
   return (
     <div className="flex items-center">
       <div className="flex">
         {allShown.map((m, i) => {
-          const isWant = !mustSet.has(m.id);
+          const isMaybe = !mustSet.has(m.id);
           const isYou = m.id === userId;
           return (
             <span
@@ -141,13 +144,17 @@ function AvatarRow({
               title={m.name}
               style={{
                 marginLeft: i > 0 ? "-6px" : 0,
-                opacity: isWant ? 0.6 : 1,
-                boxShadow: isYou ? "0 0 0 2px var(--accent)" : undefined,
+                opacity: isMaybe ? 0.6 : 1,
                 borderRadius: "9999px",
                 display: "inline-flex",
               }}
             >
-              <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="md" overlap={i > 0} />
+              <MemberAvatar
+                name={m.name}
+                avatarUrl={m.avatar_url}
+                size="md"
+                overlap={i > 0}
+              />
             </span>
           );
         })}
@@ -161,20 +168,14 @@ function AvatarRow({
   );
 }
 
-// ── Two-tier crew block (WANT/MAYBE/Unrated states) ───────────────────────────
+// ── Two-tier crew block ───────────────────────────────────────────────────────
 
 function TierBlock({
   mustMembers,
-  wantMembers,
   maybeMembers,
-  userId,
-  myRating,
 }: {
   mustMembers: Member[];
-  wantMembers: Member[];
   maybeMembers: Member[];
-  userId?: string;
-  myRating: Rating | null;
 }) {
   return (
     <div className="flex flex-col">
@@ -182,7 +183,13 @@ function TierBlock({
         <div className="flex items-center gap-2 py-0.5">
           <div className="flex">
             {mustMembers.map((m, i) => (
-              <MemberAvatar key={m.id} name={m.name} avatarUrl={m.avatar_url} size="md" overlap={i > 0} />
+              <MemberAvatar
+                key={m.id}
+                name={m.name}
+                avatarUrl={m.avatar_url}
+                size="md"
+                overlap={i > 0}
+              />
             ))}
           </div>
           <span className="text-xs text-text-muted truncate">
@@ -191,42 +198,28 @@ function TierBlock({
         </div>
       )}
 
-      {mustMembers.length > 0 && wantMembers.length > 0 && (
+      {mustMembers.length > 0 && maybeMembers.length > 0 && (
         <div className="h-px bg-border my-1" />
       )}
 
-      {wantMembers.length > 0 && (
+      {maybeMembers.length > 0 && (
         <div className="flex items-center gap-2 py-0.5 opacity-60">
           <div className="flex">
-            {wantMembers.map((m, i) => (
-              <MemberAvatar key={m.id} name={m.name} avatarUrl={m.avatar_url} size="md" overlap={i > 0} />
+            {maybeMembers.map((m, i) => (
+              <MemberAvatar
+                key={m.id}
+                name={m.name}
+                avatarUrl={m.avatar_url}
+                size="md"
+                overlap={i > 0}
+              />
             ))}
           </div>
           <span className="text-xs text-text-muted truncate">
-            {wantMembers.map((m) => m.name.split(" ")[0]).join(", ")}
+            {maybeMembers.map((m) => m.name.split(" ")[0]).join(", ")}
           </span>
         </div>
       )}
-
-      {/* Maybe row — only if user is in maybe, de-emphasized */}
-      {maybeMembers.length > 0 &&
-        (myRating === "MAYBE" || myRating === null) && (
-          <div className="flex items-center gap-2 py-0.5 mt-0.5 opacity-35">
-            <div className="w-1.5 h-1.5 rounded-full bg-maybe-text shrink-0" />
-            <div className="flex">
-              {maybeMembers.slice(0, 3).map((m, i) => (
-                <MemberAvatar key={m.id} name={m.name} avatarUrl={m.avatar_url} size="sm" overlap={i > 0} />
-              ))}
-            </div>
-            <span className="text-[10px] text-text-subtle truncate">
-              {maybeMembers
-                .slice(0, 2)
-                .map((m) => (m.id === userId ? "You" : m.name.split(" ")[0]))
-                .join(", ")}{" "}
-              maybe
-            </span>
-          </div>
-        )}
     </div>
   );
 }
@@ -235,11 +228,9 @@ function TierBlock({
 
 function CrewFooter({
   mustCount,
-  wantCount,
   maybeCount,
 }: {
   mustCount: number;
-  wantCount: number;
   maybeCount: number;
 }) {
   return (
@@ -250,14 +241,6 @@ function CrewFooter({
           style={{ background: "rgba(255,92,53,.1)", color: "var(--must-bg)" }}
         >
           {mustCount} going
-        </span>
-      )}
-      {wantCount > 0 && (
-        <span
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: "rgba(0,201,167,.1)", color: "var(--want-bg)" }}
-        >
-          {wantCount} likely
         </span>
       )}
       {maybeCount > 0 && (
@@ -287,7 +270,6 @@ function CrewModalD2({
   const {
     activity,
     mustMembers,
-    wantMembers,
     maybeMembers,
     skipMembers,
     unratedMembers,
@@ -304,49 +286,19 @@ function CrewModalD2({
     onRate(r);
   }
 
-  // What's-next content by rating
-  const nextCallout =
-    myRating === "MUST"
-      ? {
-          icon: "🤝",
-          head: `You're in — ${mustMembers.length} people confirmed.`,
-          sub: "Plan it to lock in dates and finalize your crew.",
-        }
-      : myRating === "WANT"
-        ? {
-            icon: "⏳",
-            head: "You're in — pending timing.",
-            sub: "Plan it to see who makes the final cut.",
-          }
-        : myRating === "MAYBE"
-          ? {
-              icon: "🤔",
-              head: "You're on the sidelines.",
-              sub: "Join the crew if you want in — change your rating to commit.",
-            }
-          : {
-              icon: "👋",
-              head: `${mustMembers.length + wantMembers.length} people have opinions — what's yours?`,
-              sub: "Rate it and see where you land in the crew.",
-            };
+  const likelyLabel = "If it works out";
 
-  // Members in likely section — mark "you" distinctly
-  const likelyLabel =
-    myRating === "WANT"
-      ? "Likely — including you"
-      : "Likely — in unless timing conflicts";
-
-  const showOthers = maybeMembers.length > 0 || skipMembers.length > 0;
+  const showOthers = skipMembers.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-[520px] max-h-[92vh] sm:max-h-[86vh] overflow-y-auto flex flex-col"
+        className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-[600px] max-h-[92vh] sm:max-h-[86vh] overflow-y-auto flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-4 border-b border-border sticky top-0 bg-bg-card z-10">
+        <div className="flex items-start justify-between gap-3 px-6 pt-5 pb-4 border-b border-border sticky top-0 bg-bg-card z-10">
           <div className="min-w-0 flex-1">
             <p className="text-[17px] font-bold text-text-primary leading-snug">
               {activity.name}
@@ -380,7 +332,7 @@ function CrewModalD2({
         </div>
 
         {/* Body */}
-        <div className="flex flex-col gap-3.5 px-5 py-4 flex-1">
+        <div className="flex flex-col gap-5 px-6 py-5 flex-1">
           {/* Definite crew */}
           {mustMembers.length > 0 && (
             <div
@@ -395,22 +347,18 @@ function CrewModalD2({
                   className="w-[7px] h-[7px] rounded-full shrink-0"
                   style={{ background: "var(--must-bg)" }}
                 />
-                Definite crew
+                Counting on it
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {mustMembers.map((m) => (
-                  <AvatarChip
-                    key={m.id}
-                    member={m}
-                    isYou={m.id === userId}
-                  />
+                  <AvatarChip key={m.id} member={m} isYou={m.id === userId} rating="MUST" />
                 ))}
               </div>
             </div>
           )}
 
-          {/* Likely crew */}
-          {wantMembers.length > 0 && (
+          {/* Open to it crew */}
+          {maybeMembers.length > 0 && (
             <div
               className="rounded-xl p-3 flex flex-col gap-2.5"
               style={{
@@ -422,73 +370,33 @@ function CrewModalD2({
                 <span
                   className="w-[7px] h-[7px] rounded-full shrink-0 border-[1.5px]"
                   style={{
-                    borderColor: "var(--want-bg)",
+                    borderColor: "#B8960A",
                     background: "transparent",
                   }}
                 />
                 {likelyLabel}
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {wantMembers.map((m) => (
-                  <AvatarChip
-                    key={m.id}
-                    member={m}
-                    isYou={m.id === userId}
-                    soft={m.id !== userId}
-                  />
+                {maybeMembers.map((m) => (
+                  <AvatarChip key={m.id} member={m} isYou={m.id === userId} soft={m.id !== userId} rating="MAYBE" />
                 ))}
               </div>
             </div>
           )}
 
-          {/* D2 others — maybe + skip in one bg card */}
+          {/* Skip */}
           {showOthers && (
             <div
               className="rounded-[10px] flex flex-col divide-y divide-black/5"
               style={{ background: "var(--bg)" }}
             >
-              {maybeMembers.length > 0 && (
-                <div className="flex items-center gap-2 flex-wrap px-3.5 py-1.5">
-                  <span
-                    className="text-[10px] font-bold uppercase tracking-[.06em] w-12 shrink-0"
-                    style={{ color: "#A08000" }}
-                  >
-                    Maybe
-                  </span>
-                  {maybeMembers.map((m) => {
-                    const isYou = m.id === userId;
-                    return (
-                      <div
-                        key={m.id}
-                        className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-text-muted"
-                        style={{
-                          background: "rgba(255,229,102,.22)",
-                          border: isYou
-                            ? "1.5px solid rgba(255,92,53,.25)"
-                            : undefined,
-                        }}
-                      >
-                        <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="sm" />
-                        <span>{isYou ? "You" : m.name.split(" ")[0]}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
               {skipMembers.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap px-3.5 py-1.5">
                   <span className="text-[10px] font-bold uppercase tracking-[.06em] w-12 shrink-0 text-text-subtle">
                     Skipping
                   </span>
                   {skipMembers.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-text-muted opacity-55"
-                      style={{ background: "rgba(0,0,0,.03)" }}
-                    >
-                      <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="sm" />
-                      <span>{m.name.split(" ")[0]}</span>
-                    </div>
+                    <AvatarChip key={m.id} member={m} isYou={m.id === userId} soft={m.id !== userId} rating="SKIP" />
                   ))}
                 </div>
               )}
@@ -507,81 +415,79 @@ function CrewModalD2({
               yet.
             </p>
           )}
-
-          {/* What's next callout */}
-          <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
-            <span className="text-[22px] shrink-0">{nextCallout.icon}</span>
-            <div>
-              <p className="text-[13px] font-semibold text-text-primary leading-snug">
-                {nextCallout.head}
-              </p>
-              <p className="text-[11px] text-text-muted mt-0.5 leading-snug">
-                {nextCallout.sub}
-              </p>
-            </div>
-          </div>
         </div>
 
-        {/* Actions */}
-        <div className="border-t border-border px-5 py-4 flex flex-col gap-2.5 shrink-0">
-          {myRating === "MAYBE" ? (
-            <button
-              onClick={() => handleRate("WANT")}
-              disabled={ratingLoading}
-              className="w-full flex items-center justify-center py-3 px-5 text-[13px] font-semibold rounded-[var(--radius-btn)] border border-accent text-accent bg-transparent hover:bg-accent/5 transition-colors disabled:opacity-50"
-            >
-              Join the crew →
-            </button>
-          ) : myRating === null ? (
-            <div className="grid grid-cols-4 gap-1.5">
-              {(["MUST", "WANT", "MAYBE", "SKIP"] as Rating[]).map((r) => {
-                const labels: Record<Rating, string> = {
-                  MUST: "Can't miss",
-                  WANT: "Want to",
-                  MAYBE: "Maybe",
-                  SKIP: "Skip",
-                };
+        {/* Rating footer */}
+        <div className="border-t border-border px-6 py-4 flex flex-col gap-4 shrink-0 sticky bottom-0 bg-bg-card">
+          {/* Contextual callout */}
+          {pendingRating === null ? (
+            <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
+              <span className="text-[22px] shrink-0">👋</span>
+              <div>
+                <p className="text-[13px] font-semibold text-text-primary leading-snug">
+                  {mustMembers.length + maybeMembers.length}{' '}people have opinions — what&apos;s yours?
+                </p>
+                <p className="text-[11px] text-text-muted mt-0.5">Rate it and see where you land in the crew.</p>
+              </div>
+            </div>
+          ) : pendingRating === "MUST" ? (
+            <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
+              <span className="text-[22px] shrink-0">🤝</span>
+              <div>
+                <p className="text-[13px] font-semibold text-text-primary leading-snug">
+                  You&apos;re in — {mustMembers.length} confirmed.
+                </p>
+                <p className="text-[11px] text-text-muted mt-0.5">Plan it to lock in dates and finalize your crew.</p>
+              </div>
+            </div>
+          ) : pendingRating === "MAYBE" ? (
+            <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
+              <span className="text-[22px] shrink-0">🤔</span>
+              <div>
+                <p className="text-[13px] font-semibold text-text-primary leading-snug">
+                  You&apos;re flexible — in if the timing or vibe is right.
+                </p>
+                <p className="text-[11px] text-text-muted mt-0.5">Upgrade to Can&apos;t miss if you don&apos;t want to miss it.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
+              <span className="text-[22px] shrink-0">👋</span>
+              <div>
+                <p className="text-[13px] font-semibold text-text-primary leading-snug">
+                  You&apos;re out — not your thing.
+                </p>
+                <p className="text-[11px] text-text-muted mt-0.5">Change your rating if you want in.</p>
+              </div>
+            </div>
+          )}
+
+          {/* Your rating chips */}
+          <div className="flex flex-col gap-2">
+            <p className="text-[10px] font-bold text-text-subtle uppercase tracking-widest">Your Rating</p>
+            <div className="grid grid-cols-3 gap-2">
+              {(["MUST", "MAYBE", "SKIP"] as Rating[]).map((r) => {
                 const active = pendingRating === r;
-                const activeStyles: Record<Rating, string> = {
-                  MUST: "bg-must/[.13] border-must text-must",
-                  WANT: "bg-want/[.13] border-want text-want",
-                  MAYBE: "border-[#B8960A] text-[#7A6200]",
-                  SKIP: "bg-skip border-skip-text/50 text-skip-text",
+                const cfg: Record<Rating, { label: string; activeCls: string; ghostCls: string }> = {
+                  MUST: { label: "Can't miss", activeCls: "bg-must text-must-text border-transparent", ghostCls: "border-must/40 text-must/60" },
+                  MAYBE: { label: "Maybe", activeCls: "bg-[#FFE566] text-[#7A6200] border-transparent", ghostCls: "border-[#B8960A]/40 text-[#7A6200]/60" },
+                  SKIP: { label: "Skip", activeCls: "bg-text-subtle/30 text-text-primary border-text-subtle/40", ghostCls: "border-border text-text-subtle" },
                 };
                 return (
                   <button
                     key={r}
                     onClick={() => handleRate(r)}
                     disabled={ratingLoading}
-                    className={`py-2.5 rounded-xl border text-[11px] font-semibold transition-all disabled:opacity-50 ${
-                      active
-                        ? `${activeStyles[r]} font-bold`
-                        : "border-border text-text-muted hover:border-accent/40 hover:text-text-primary"
-                    } ${r === "MAYBE" && active ? "bg-[rgba(255,229,102,.45)]" : ""}`}
+                    className={`min-h-[44px] flex items-center justify-center rounded-xl border text-[11px] font-bold transition-all disabled:opacity-50 ${
+                      active ? cfg[r].activeCls : `bg-transparent ${cfg[r].ghostCls} hover:opacity-80`
+                    }`}
                   >
-                    {labels[r]}
+                    {cfg[r].label}
                   </button>
                 );
               })}
             </div>
-          ) : (
-            <>
-              <button className="w-full flex items-center justify-center gap-2 py-3 px-5 text-sm font-semibold rounded-[var(--radius-btn)] bg-accent text-white hover:opacity-90 transition-opacity">
-                Plan with your crew
-                <span className="text-[9px] font-bold uppercase bg-white/25 text-white px-1.5 py-0.5 rounded-full">
-                  Soon
-                </span>
-              </button>
-              {myRating === "MUST" && (
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 px-5 text-xs font-medium rounded-[var(--radius-btn)] border border-border text-text-muted hover:border-accent/40 hover:text-accent transition-colors">
-                  Nudge unvoted members
-                  <span className="text-[9px] font-bold uppercase bg-border text-text-subtle px-1.5 py-0.5 rounded-full">
-                    Soon
-                  </span>
-                </button>
-              )}
-            </>
-          )}
+          </div>
         </div>
 
       </div>
@@ -609,30 +515,24 @@ function CrewCard({
   const {
     activity,
     mustMembers,
-    wantMembers,
     maybeMembers,
     myRating,
     mustCount,
-    wantCount,
     maybeCount,
   } = row;
 
   const stripeColor =
     myRating === "MUST"
       ? "var(--must-bg)"
-      : myRating === "WANT"
-        ? "var(--want-bg)"
-        : myRating === "MAYBE"
-          ? "#FFE566"
-          : "#E8E6E0";
+      : myRating === "MAYBE"
+        ? "#FFE566"
+        : "#E8E6E0";
   const cardBg =
     myRating === "MUST"
       ? "linear-gradient(135deg,rgba(255,92,53,.04) 0%,var(--bg-card) 55%)"
-      : myRating === "WANT"
-        ? "linear-gradient(135deg,rgba(0,201,167,.04) 0%,var(--bg-card) 55%)"
-        : "var(--bg-card)";
+      : "var(--bg-card)";
 
-  const isEmpty = mustCount === 0 && wantCount === 0;
+  const isEmpty = mustCount === 0 && maybeCount === 0;
 
   return (
     <div
@@ -672,20 +572,17 @@ function CrewCard({
 
         {/* Crew display */}
         {isEmpty ? (
-          <p className="text-xs text-text-subtle">Nobody's excited yet.</p>
+          <p className="text-xs text-text-subtle">Nobody&apos;s excited yet.</p>
         ) : myRating === "MUST" ? (
           <AvatarRow
             mustMembers={mustMembers}
-            wantMembers={wantMembers}
+            maybeMembers={maybeMembers}
             userId={userId}
           />
         ) : (
           <TierBlock
             mustMembers={mustMembers}
-            wantMembers={wantMembers}
             maybeMembers={maybeMembers}
-            userId={userId}
-            myRating={myRating}
           />
         )}
 
@@ -693,7 +590,6 @@ function CrewCard({
         {!isEmpty && (
           <CrewFooter
             mustCount={mustCount}
-            wantCount={wantCount}
             maybeCount={maybeCount}
           />
         )}
@@ -744,9 +640,6 @@ export function FindYourCrew({
         const mustMembers = members.filter(
           (m) => ratingMap.get(m.id) === "MUST",
         );
-        const wantMembers = members.filter(
-          (m) => ratingMap.get(m.id) === "WANT",
-        );
         const maybeMembers = members.filter(
           (m) => ratingMap.get(m.id) === "MAYBE",
         );
@@ -759,19 +652,17 @@ export function FindYourCrew({
         return {
           activity,
           mustMembers,
-          wantMembers,
           maybeMembers,
           skipMembers,
           unratedMembers,
           myRating,
           mustCount: mustMembers.length,
-          wantCount: wantMembers.length,
           maybeCount: maybeMembers.length,
         };
       })
       .sort((a, b) => {
         if (sortKey === "by-stop") {
-          return b.mustCount * 3 + b.wantCount - (a.mustCount * 3 + a.wantCount);
+          return b.mustCount * 3 + b.maybeCount - (a.mustCount * 3 + a.maybeCount);
         }
         if (sortKey === "my-recs") {
           const aMe = a.activity.added_by === userId ? 0 : 1;
@@ -779,15 +670,15 @@ export function FindYourCrew({
           if (aMe !== bMe) return aMe - bMe;
         }
         if (sortKey === "cant-miss") {
-          const TIER: Record<string, number> = { MUST: 0, WANT: 1, MAYBE: 2, SKIP: 3 };
-          const av = a.myRating ? (TIER[a.myRating] ?? 4) : 4;
-          const bv = b.myRating ? (TIER[b.myRating] ?? 4) : 4;
+          const TIER: Record<string, number> = { MUST: 0, MAYBE: 1, SKIP: 2 };
+          const av = a.myRating ? (TIER[a.myRating] ?? 3) : 3;
+          const bv = b.myRating ? (TIER[b.myRating] ?? 3) : 3;
           if (av !== bv) return av - bv;
         }
         if (sortKey === "newest") {
           return new Date(b.activity.created_at).getTime() - new Date(a.activity.created_at).getTime();
         }
-        return b.mustCount * 3 + b.wantCount - (a.mustCount * 3 + a.wantCount);
+        return b.mustCount * 3 + b.maybeCount - (a.mustCount * 3 + a.maybeCount);
       });
   }, [activities, members, ratings, userId, sortKey]);
 
