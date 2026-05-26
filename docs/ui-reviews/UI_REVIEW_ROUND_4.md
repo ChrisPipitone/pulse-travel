@@ -27,17 +27,17 @@ From Round 2, still open:
 
 ### MODEL CLEANUP — dead tokens after WANT→MAYBE merge
 
-- [ ] **MC1** — `globals.css` retains `--want-bg`, `--want-text`, `--cell-want` in both themes, and `--color-want`, `--color-want-text`, `--color-cell-want` in `@theme inline`. WANT is removed from the model and no production component reads these. Dead tokens confuse any future reader. Remove all seven. While there: `--accent-2` exists in both themes but is not mapped in `@theme inline` (unlike every other token) and was the same value as `--want-bg`. Confirm it's unused; remove if so. **[Impact: MED — low effort, eliminates false signal that WANT exists]**
+- [x] **MC1** — `globals.css` retains `--want-bg`, `--want-text`, `--cell-want` in both themes, and `--color-want`, `--color-want-text`, `--color-cell-want` in `@theme inline`. WANT is removed from the model and no production component reads these. Dead tokens confuse any future reader. Remove all seven. While there: `--accent-2` exists in both themes but is not mapped in `@theme inline` (unlike every other token) and was the same value as `--want-bg`. Confirm it's unused; remove if so. **[Impact: MED — low effort, eliminates false signal that WANT exists]**
 
 ### COLOR — contrast failure
 
-- [ ] **CC1** — MAYBE rating pill background `--maybe-bg: #FFF0A0` is near-invisible on white cards (`bg-bg-card: #FFFFFF`). Contrast ratio ≈ 1.07:1 — a flat failure. Affects the group ratings section in `ActivityDetailModal` and any chip that uses `bg-maybe`. `--cell-maybe: #FFE566` is already noticeably darker. Align: change `--maybe-bg` to `#FFE566` (modern theme) and `#FFE566` (editorial) to match the cell color and pass contrast. FindYourCrew's rating chips hardcode `bg-[#FFE566]` — consistent after this fix, so update `--maybe-bg` to match rather than the reverse. **[Impact: HIGH — current state is visually broken for MAYBE ratings]**
+- [x] **CC1** — MAYBE rating pill background `--maybe-bg: #FFF0A0` is near-invisible on white cards (`bg-bg-card: #FFFFFF`). Contrast ratio ≈ 1.07:1 — a flat failure. Affects the group ratings section in `ActivityDetailModal` and any chip that uses `bg-maybe`. `--cell-maybe: #FFE566` is already noticeably darker. Align: change `--maybe-bg` to `#FFE566` (modern theme) and `#FFE566` (editorial) to match the cell color and pass contrast. FindYourCrew's rating chips hardcode `bg-[#FFE566]` — consistent after this fix, so update `--maybe-bg` to match rather than the reverse. **[Impact: HIGH — current state is visually broken for MAYBE ratings]**
 
 ### MOBILE — touch targets
 
-- [ ] **MT1** — All four modal close buttons use `p-1.5` + 16px icon ≈ 25×25px square — same touch target problem as R2/V4 (which fixed activity card edit icons). Fix: change `p-1.5` to `p-2.5` on close buttons in `ActivityDetailModal`, `ActivityFormModal`, `CreateTripModal`, `MemberDatesModal`. Result: ~41px square, acceptable. **[Impact: HIGH — currently untappable on mobile]**
+- [x] **MT1** — All four modal close buttons use `p-1.5` + 16px icon ≈ 25×25px square — same touch target problem as R2/V4 (which fixed activity card edit icons). Fix: change `p-1.5` to `p-2.5` on close buttons in `ActivityDetailModal`, `ActivityFormModal`, `CreateTripModal`, `MemberDatesModal`. Result: ~41px square, acceptable. **[Impact: HIGH — currently untappable on mobile]**
 
-- [ ] **MT2** — `ActivityDetailModal` and `ActivityFormModal` and `MemberDatesModal` lack `max-h-[90dvh] overflow-y-auto` on the inner modal div. `CreateTripModal` already has it (correct). On mobile with virtual keyboard raised, these modals will overflow off-screen — form fields hidden, no scroll to reach them. Add `max-h-[90dvh] overflow-y-auto` to all three. **[Impact: HIGH — form fields unreachable on mobile with keyboard open]**
+- [x] **MT2** — `ActivityDetailModal` and `ActivityFormModal` and `MemberDatesModal` lack `max-h-[90dvh] overflow-y-auto` on the inner modal div. `CreateTripModal` already has it (correct). On mobile with virtual keyboard raised, these modals will overflow off-screen — form fields hidden, no scroll to reach them. Add `max-h-[90dvh] overflow-y-auto` to all three. **[Impact: HIGH — form fields unreachable on mobile with keyboard open]**
 
 ### COMPONENT — semantic color misuse
 
