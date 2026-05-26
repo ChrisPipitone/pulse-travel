@@ -7,6 +7,7 @@ import { useSession } from "@pulse/hooks";
 import { useRateActivity } from "@pulse/hooks";
 import type { Activity, Member, Rating, Stop } from "@pulse/types";
 import { MemberAvatar } from "@/components/MemberAvatar";
+import { KebabMenu } from "@/components/KebabMenu";
 
 type SortKey = "popular" | "my-recs" | "cant-miss" | "newest" | "by-stop";
 
@@ -276,18 +277,12 @@ function CrewModalD2({
   onClose,
   onRate,
   ratingLoading,
-  canEdit,
-  onEdit,
-  onDelete,
 }: {
   row: CrewRowData;
   userId?: string;
   onClose: () => void;
   onRate: (r: Rating) => void;
   ratingLoading: boolean;
-  canEdit?: boolean;
-  onEdit?: () => void;
-  onDelete?: () => void;
 }) {
   const {
     activity,
@@ -586,26 +581,6 @@ function CrewModalD2({
           )}
         </div>
 
-        {canEdit && (onEdit || onDelete) && (
-          <div className="px-5 py-3.5 border-t border-border flex items-center gap-2">
-            {onEdit && (
-              <button
-                onClick={onEdit}
-                className="flex-1 py-2 text-[12px] font-semibold rounded-[var(--radius-btn)] border border-border text-text-muted hover:border-accent/40 hover:text-accent transition-colors"
-              >
-                Edit
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={onDelete}
-                className="flex-1 py-2 text-[12px] font-semibold rounded-[var(--radius-btn)] border border-border text-text-muted hover:border-red-300 hover:text-red-500 transition-colors"
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -616,11 +591,17 @@ function CrewModalD2({
 function CrewCard({
   row,
   userId,
+  canEdit,
   onOpen,
+  onEdit,
+  onDelete,
 }: {
   row: CrewRowData;
   userId?: string;
+  canEdit?: boolean;
   onOpen: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   const {
     activity,
@@ -660,7 +641,7 @@ function CrewCard({
       <div className="w-1 shrink-0" style={{ background: stripeColor }} />
 
       <div className="flex-1 min-w-0 px-4 py-3.5 flex flex-col gap-2.5">
-        {/* Top row: name + pill */}
+        {/* Top row: name + (kebab / status pill) */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-sm font-bold text-text-primary leading-snug">
@@ -673,7 +654,17 @@ function CrewCard({
               </div>
             )}
           </div>
-          <StatusPill rating={myRating} />
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            {canEdit && (onEdit || onDelete) && (
+              <KebabMenu
+                items={[
+                  ...(onEdit ? [{ label: "Edit", onClick: onEdit }] : []),
+                  ...(onDelete ? [{ label: "Delete", danger: true as const, onClick: onDelete }] : []),
+                ]}
+              />
+            )}
+            <StatusPill rating={myRating} />
+          </div>
         </div>
 
         {/* Crew display */}
@@ -834,7 +825,10 @@ export function FindYourCrew({
             key={row.activity.id}
             row={row}
             userId={userId}
+            canEdit={canEditActivity(row.activity)}
             onOpen={() => setOpenId(row.activity.id)}
+            onEdit={onEdit ? () => onEdit(row.activity) : undefined}
+            onDelete={onDelete ? () => onDelete(row.activity) : undefined}
           />
         ))}
       </div>
@@ -921,9 +915,6 @@ export function FindYourCrew({
           onClose={() => setOpenId(null)}
           onRate={(r) => rateActivity(openRow.activity.id, r)}
           ratingLoading={ratingLoading}
-          canEdit={canEditActivity(openRow.activity)}
-          onEdit={onEdit ? () => { setOpenId(null); onEdit(openRow.activity); } : undefined}
-          onDelete={onDelete ? () => { setOpenId(null); onDelete(openRow.activity); } : undefined}
         />
       )}
     </>

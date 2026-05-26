@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useTripStore } from '@pulse/store'
 import { useStopActions } from '@pulse/hooks'
+import { useToast } from '@/components/ToastProvider'
+import { KebabMenu } from '@/components/KebabMenu'
 import type { Stop } from '@pulse/types'
 
 type Props = {
@@ -22,56 +24,94 @@ function formatStopDates(from?: string | null, to?: string | null): string | nul
   return null
 }
 
-function canManage(stop: Stop, userId: string | undefined, tripOwnerId: string) {
-  return stop.created_by === userId || tripOwnerId === userId
-}
-
 export function StopsPanel({ tripId, userId, tripOwnerId }: Props) {
   const stops = useTripStore((s) => s.stops)
   const activities = useTripStore((s) => s.activities)
-  const { createStop, deleteStop, loading } = useStopActions()
+  const { createStop, updateStop, deleteStop, loading } = useStopActions()
+  const { showToast } = useToast()
+
+  const isOwner = userId === tripOwnerId
 
   const [adding, setAdding] = useState(false)
   const [newName, setNewName] = useState('')
   const [newFrom, setNewFrom] = useState('')
   const [newTo, setNewTo] = useState('')
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editFrom, setEditFrom] = useState('')
+  const [editTo, setEditTo] = useState('')
+
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
+  const timerRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   const countByStop = activities.reduce<Record<string, number>>((acc, a) => {
     if (a.stop_id) acc[a.stop_id] = (acc[a.stop_id] ?? 0) + 1
     return acc
   }, {})
 
-  function resetForm() {
+  function resetAddForm() {
     setNewName(''); setNewFrom(''); setNewTo(''); setAdding(false)
+  }
+
+  function startEdit(stop: Stop) {
+    setEditingId(stop.id)
+    setEditName(stop.name)
+    setEditFrom(stop.date_from ?? '')
+    setEditTo(stop.date_to ?? '')
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditName(''); setEditFrom(''); setEditTo('')
   }
 
   async function handleAdd() {
     const name = newName.trim()
     if (!name) return
     const ok = await createStop(tripId, name, newFrom || null, newTo || null)
-    if (ok) resetForm()
+    if (ok) resetAddForm()
   }
 
-  async function handleDelete(stop: Stop) {
-    if (deletingId === stop.id) {
+  async function handleSaveEdit(stop: Stop) {
+    const name = editName.trim()
+    if (!name) return
+    const ok = await updateStop(stop.id, {
+      name,
+      date_from: editFrom || null,
+      date_to: editTo || null,
+    })
+    if (ok) cancelEdit()
+  }
+
+  function handleDelete(stop: Stop) {
+    setHiddenIds((prev) => new Set(prev).add(stop.id))
+    const timer = setTimeout(async () => {
+      timerRef.current.delete(stop.id)
+      setHiddenIds((prev) => { const s = new Set(prev); s.delete(stop.id); return s })
       await deleteStop(stop.id)
-      setDeletingId(null)
-    } else {
-      setDeletingId(stop.id)
-      setTimeout(() => setDeletingId((cur) => cur === stop.id ? null : cur), 3000)
-    }
+    }, 4000)
+    timerRef.current.set(stop.id, timer)
+    showToast(
+      `"${stop.name}" deleted`,
+      () => {
+        clearTimeout(timerRef.current.get(stop.id))
+        timerRef.current.delete(stop.id)
+        setHiddenIds((prev) => { const s = new Set(prev); s.delete(stop.id); return s })
+      },
+      4000,
+    )
   }
 
-  const dateError = newFrom && newTo && newFrom > newTo
-    ? 'Start must be before end'
-    : null
+  const addDateError = newFrom && newTo && newFrom > newTo ? 'Start must be before end' : null
+  const editDateError = editFrom && editTo && editFrom > editTo ? 'Start must be before end' : null
+  const visibleStops = stops.filter((s) => !hiddenIds.has(s.id))
 
   return (
     <div className="bg-bg-card rounded-[var(--radius-card)] border border-border p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <h2 className="text-xs font-semibold text-text-subtle uppercase tracking-widest">Stops</h2>
-        {!adding && (
+        {isOwner && !adding && (
           <button
             onClick={() => setAdding(true)}
             className="text-xs font-medium text-accent hover:text-accent/80 transition-colors"
@@ -81,20 +121,77 @@ export function StopsPanel({ tripId, userId, tripOwnerId }: Props) {
         )}
       </div>
 
-      {stops.length === 0 && !adding && (
+      {visibleStops.length === 0 && !adding && (
         <p className="text-xs text-text-muted italic">
-          No stops yet. Add legs like "Rome" or "Amalfi" to group activities.
+          No stops yet. Add legs like &quot;Rome&quot; or &quot;Amalfi&quot; to group activities.
         </p>
       )}
 
-      {stops.length > 0 && (
+      {visibleStops.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          {stops.map((stop) => {
+          {visibleStops.map((stop) => {
             const count = countByStop[stop.id] ?? 0
-            const isPending = deletingId === stop.id
             const dateStr = formatStopDates(stop.date_from, stop.date_to)
+
+            if (editingId === stop.id) {
+              return (
+                <div key={stop.id} className="flex flex-col gap-2 py-1.5 border-t border-border">
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Stop name"
+                    maxLength={100}
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveEdit(stop)
+                      if (e.key === 'Escape') cancelEdit()
+                    }}
+                    className="w-full text-xs bg-bg border border-border rounded-lg px-2.5 py-1.5 text-text-primary placeholder:text-text-subtle outline-none focus:border-accent/50"
+                  />
+                  <div className="flex gap-2">
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-[10px] text-text-subtle font-medium">From</label>
+                      <input
+                        type="date"
+                        value={editFrom}
+                        onChange={(e) => setEditFrom(e.target.value)}
+                        className="w-full text-xs bg-bg border border-border rounded-lg px-2 py-1.5 text-text-primary outline-none focus:border-accent/50"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-[10px] text-text-subtle font-medium">To</label>
+                      <input
+                        type="date"
+                        value={editTo}
+                        min={editFrom || undefined}
+                        onChange={(e) => setEditTo(e.target.value)}
+                        className="w-full text-xs bg-bg border border-border rounded-lg px-2 py-1.5 text-text-primary outline-none focus:border-accent/50"
+                      />
+                    </div>
+                  </div>
+                  {editDateError && <p className="text-[10px] text-red-500 -mt-0.5">{editDateError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={cancelEdit}
+                      className="flex-1 text-xs font-medium text-text-muted border border-border rounded-lg py-1.5 hover:bg-bg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleSaveEdit(stop)}
+                      disabled={!editName.trim() || !!editDateError || loading}
+                      className="flex-1 text-xs font-medium text-white bg-accent rounded-lg py-1.5 disabled:opacity-40 hover:opacity-90 transition-opacity"
+                    >
+                      {loading ? 'Saving…' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              )
+            }
+
             return (
-              <div key={stop.id} className="flex items-center gap-2 group">
+              <div key={stop.id} className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent/50 shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <span className="text-xs font-medium text-text-primary truncate block">{stop.name}</span>
@@ -112,20 +209,13 @@ export function StopsPanel({ tripId, userId, tripOwnerId }: Props) {
                     )}
                   </div>
                 </div>
-                {canManage(stop, userId, tripOwnerId) && (
-                  <button
-                    onClick={() => handleDelete(stop)}
-                    disabled={loading}
-                    className={`shrink-0 p-1 rounded transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-40 ${
-                      isPending ? 'text-red-500 bg-red-500/10 opacity-100' : 'text-text-muted hover:text-red-500 hover:bg-bg'
-                    }`}
-                    title={isPending ? 'Tap again to confirm' : 'Delete stop'}
-                    aria-label={isPending ? 'Confirm delete stop' : 'Delete stop'}
-                  >
-                    <svg width="11" height="11" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5" />
-                    </svg>
-                  </button>
+                {isOwner && (
+                  <KebabMenu
+                    items={[
+                      { label: 'Edit', onClick: () => startEdit(stop) },
+                      { label: 'Delete', danger: true, onClick: () => handleDelete(stop) },
+                    ]}
+                  />
                 )}
               </div>
             )
@@ -144,7 +234,7 @@ export function StopsPanel({ tripId, userId, tripOwnerId }: Props) {
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleAdd()
-              if (e.key === 'Escape') resetForm()
+              if (e.key === 'Escape') resetAddForm()
             }}
             className="w-full text-xs bg-bg border border-border rounded-lg px-2.5 py-1.5 text-text-primary placeholder:text-text-subtle outline-none focus:border-accent/50"
           />
@@ -169,18 +259,18 @@ export function StopsPanel({ tripId, userId, tripOwnerId }: Props) {
               />
             </div>
           </div>
-          {dateError && <p className="text-[10px] text-red-500 -mt-0.5">{dateError}</p>}
-          {!dateError && <p className="text-[10px] text-text-subtle -mt-0.5">Dates optional</p>}
+          {addDateError && <p className="text-[10px] text-red-500 -mt-0.5">{addDateError}</p>}
+          {!addDateError && <p className="text-[10px] text-text-subtle -mt-0.5">Dates optional</p>}
           <div className="flex gap-2">
             <button
-              onClick={resetForm}
+              onClick={resetAddForm}
               className="flex-1 text-xs font-medium text-text-muted border border-border rounded-lg py-1.5 hover:bg-bg transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleAdd}
-              disabled={!newName.trim() || !!dateError || loading}
+              disabled={!newName.trim() || !!addDateError || loading}
               className="flex-1 text-xs font-medium text-white bg-accent rounded-lg py-1.5 disabled:opacity-40 hover:opacity-90 transition-opacity"
             >
               {loading ? 'Adding…' : 'Add stop'}

@@ -26,6 +26,7 @@ import { FadeReveal } from "@/components/FadeReveal";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 import { MemberAvatar } from "@/components/MemberAvatar";
+import { KebabMenu } from "@/components/KebabMenu";
 import type { Activity } from "@pulse/types";
 
 type Tab = "activities" | "timeline" | "crew" | "matrix";
@@ -91,7 +92,7 @@ export default function TripPage({
     error: datesError,
   } = useUpdateMemberDates();
   const { updateTrip, loading: updating, error: updateError } = useUpdateTrip();
-  const { deleteTrip, loading: deleting } = useDeleteTrip();
+  const { deleteTrip } = useDeleteTrip();
   const { removeMember, removingId, error: removeError } = useRemoveMember();
   const router = useRouter();
 
@@ -104,32 +105,12 @@ export default function TripPage({
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("crew");
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
-  const pendingDeleteRef = useRef<string | null>(null);
-  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(
     new Set(),
   );
   const undoTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map(),
   );
-
-  function requestDelete(key: string, ms = 3000) {
-    if (pendingDeleteRef.current === key) {
-      clearTimeout(deleteTimerRef.current!);
-      pendingDeleteRef.current = null;
-      setPendingDeleteId(null);
-      return true;
-    }
-    clearTimeout(deleteTimerRef.current!);
-    pendingDeleteRef.current = key;
-    setPendingDeleteId(key);
-    deleteTimerRef.current = setTimeout(() => {
-      pendingDeleteRef.current = null;
-      setPendingDeleteId(null);
-    }, ms);
-    return false;
-  }
 
   const userId = session?.user.id;
   const isOwner = !!userId && trip?.created_by === userId;
@@ -184,7 +165,6 @@ export default function TripPage({
   }
 
   async function handleDelete(activity: Activity) {
-    if (!requestDelete(activity.id, 3000)) return;
     setHiddenActivityIds((prev) => new Set(prev).add(activity.id));
     const timer = setTimeout(async () => {
       undoTimersRef.current.delete(activity.id);
@@ -231,7 +211,6 @@ export default function TripPage({
   }
 
   async function handleDeleteTrip() {
-    if (!requestDelete("trip", 5000)) return;
     const tripId = trip!.id;
     const tripName = trip!.name;
     router.replace("/");
@@ -336,49 +315,12 @@ export default function TripPage({
                   </p>
                 </div>
                 {isOwner && (
-                  <div className="flex items-center gap-0.5 shrink-0">
-                    <button
-                      onClick={() => setShowEditTrip(true)}
-                      className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
-                      title="Edit trip"
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={handleDeleteTrip}
-                      disabled={deleting}
-                      className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${pendingDeleteId === "trip" ? "text-red-500 bg-red-500/10" : "text-text-muted hover:text-red-500 hover:bg-bg"}`}
-                      title={
-                        pendingDeleteId === "trip"
-                          ? "Tap again to confirm delete"
-                          : "Delete trip"
-                      }
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 14 14"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M1.5 3.5h11M4.5 3.5V2.5a1 1 0 011-1h3a1 1 0 011 1v1M5.5 6.5v4M8.5 6.5v4M2.5 3.5l.75 8.25a1 1 0 001 .75h5.5a1 1 0 001-.75L11.5 3.5" />
-                      </svg>
-                    </button>
-                  </div>
+                  <KebabMenu
+                    items={[
+                      { label: "Edit trip", onClick: () => setShowEditTrip(true) },
+                      { label: "Delete trip", danger: true, onClick: handleDeleteTrip },
+                    ]}
+                  />
                 )}
               </div>
 
