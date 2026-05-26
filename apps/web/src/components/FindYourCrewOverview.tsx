@@ -302,8 +302,7 @@ export function FindYourCrewOverview() {
   const { matrix } = useCompatibilityMatrix()
 
   const [mainView, setMainView] = useState<MainView>("groupies")
-  const [groupiesQuery, setGroupiesQuery] = useState("")
-  const [twinQuery, setTwinQuery] = useState("")
+  const [query, setQuery] = useState("")
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null)
 
   const memberSummaries = useMemo(
@@ -339,21 +338,16 @@ export function FindYourCrewOverview() {
   }, [memberSummaries])
 
   // Filter helpers
-  const q1 = groupiesQuery.toLowerCase().trim()
-  const filteredForGroupies = q1
+  const q = query.toLowerCase().trim()
+  const filteredMembers = q
     ? memberSummaries.filter(ms =>
-        ms.member.name.toLowerCase().includes(q1) ||
-        (ms.member.email?.toLowerCase().includes(q1) ?? false)
+        ms.member.name.toLowerCase().includes(q) ||
+        (ms.member.email?.toLowerCase().includes(q) ?? false)
       )
     : memberSummaries
 
-  const q2 = twinQuery.toLowerCase().trim()
-  const filteredForTwin = q2
-    ? memberSummaries.filter(ms =>
-        ms.member.name.toLowerCase().includes(q2) ||
-        (ms.member.email?.toLowerCase().includes(q2) ?? false)
-      )
-    : memberSummaries
+  const filteredForGroupies = filteredMembers
+  const filteredForTwin = filteredMembers
 
   // Deduplicate Travel Twin pairs — only show one card per unique {A, B} pair.
   // Within a filtered list, the first member encountered "owns" the pair card.
@@ -394,11 +388,11 @@ export function FindYourCrewOverview() {
 
   return (
     <div className="flex flex-col gap-3">
-      <ViewToggle view={mainView} setView={setMainView} />
+      <SearchBar value={query} onChange={setQuery} />
+      <ViewToggle view={mainView} setView={(v) => { setMainView(v); setQuery("") }} />
 
       {mainView === "groupies" && (
         <>
-          <SearchBar value={groupiesQuery} onChange={setGroupiesQuery} />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[7px]">
             {filteredForGroupies.length === 0 ? (
               <p className="text-sm text-text-subtle text-center py-8 sm:col-span-2">No members match.</p>
@@ -431,7 +425,6 @@ export function FindYourCrewOverview() {
 
       {mainView === "travelTwin" && (
         <>
-          <SearchBar value={twinQuery} onChange={setTwinQuery} placeholder="Search members…" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[7px]">
             {dedupedForTwin.length === 0 ? (
               <p className="text-sm text-text-subtle text-center py-8 sm:col-span-2">No members match.</p>
