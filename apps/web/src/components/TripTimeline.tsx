@@ -389,19 +389,18 @@ export function TripTimeline() {
               {unassigned.length}
             </span>
           </div>
-          <div className="border-2 border-dashed border-text-subtle/30 rounded-[var(--radius-card)] p-2">
-            <div className="bg-bg-card rounded-xl overflow-hidden">
-              {unassigned.map(activity => (
+          <div className="border-2 border-dashed border-text-subtle/30 rounded-[var(--radius-card)] p-2 flex flex-col gap-1.5">
+            {unassigned.map(activity => (
+              <div key={activity.id} className="bg-bg-card rounded-xl border border-border shadow-sm overflow-hidden [&>div]:border-t-0">
                 <ActivityRow
-                  key={activity.id}
                   activity={activity}
                   members={members}
                   ratings={ratings}
                   isOpen={openActivityIds.has(activity.id)}
                   onToggle={() => toggleActivity(activity.id)}
                 />
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
