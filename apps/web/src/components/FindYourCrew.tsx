@@ -859,7 +859,7 @@ export function FindYourCrew({
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] text-text-subtle">Sort:</span>
           <div className="flex items-center gap-0.5 bg-bg-card border border-border rounded-lg p-0.5">
-            {(Object.keys(SORT_LABELS) as SortKey[]).filter(k => k !== "by-stop" || stops.length > 0).map((k) => (
+            {(Object.keys(SORT_LABELS) as SortKey[]).map((k) => (
               <button
                 key={k}
                 onClick={() => setSortKey(k)}
