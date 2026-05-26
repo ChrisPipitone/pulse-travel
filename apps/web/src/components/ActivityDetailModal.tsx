@@ -78,7 +78,7 @@ export function ActivityDetailModal({
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div ref={modalRef} className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-md shadow-lg overflow-hidden">
+      <div ref={modalRef} className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-md shadow-lg overflow-hidden max-h-[90dvh] overflow-y-auto">
 
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-start justify-between gap-4">
@@ -91,7 +91,7 @@ export function ActivityDetailModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
+            className="shrink-0 p-2.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
               <path d="M3 3l10 10M13 3L3 13"/>

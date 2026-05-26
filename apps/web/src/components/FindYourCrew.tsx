@@ -314,7 +314,7 @@ function CrewModalD2({
             <StatusPill rating={myRating} />
             <button
               onClick={onClose}
-            className="shrink-0 text-text-subtle hover:text-text-primary p-1 rounded-lg transition-colors mt-1"
+            className="shrink-0 text-text-subtle hover:text-text-primary p-2.5 rounded-lg transition-colors"
           >
             <svg
               width="16"

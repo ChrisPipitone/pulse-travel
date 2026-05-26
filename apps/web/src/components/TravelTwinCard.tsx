@@ -69,12 +69,12 @@ export function TravelTwinCard({
             <span className="font-normal text-text-muted text-[10px] flex-shrink-0">↔</span>
             <span className="truncate max-w-[60px]">{firstName(topTwin.member)}</span>
           </div>
-          <div className="text-[10px] font-bold text-accent-2 bg-[rgba(0,201,167,0.1)] rounded-[8px] px-[6px] py-px whitespace-nowrap">
+          <div className="text-[10px] font-bold text-accent bg-accent/10 rounded-[8px] px-[6px] py-px whitespace-nowrap">
             {compatLabel(topTwin.score)}
           </div>
           <div
             className="w-full h-[1.5px] rounded-[1px] mt-[3px] opacity-35"
-            style={{ background: 'linear-gradient(90deg, #FF5C35, #00C9A7)' }}
+            style={{ background: 'linear-gradient(90deg, var(--accent), transparent)' }}
           />
         </div>
 
