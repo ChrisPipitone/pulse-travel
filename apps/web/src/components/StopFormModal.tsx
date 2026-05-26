@@ -54,7 +54,7 @@ export function StopFormModal({ open, title, initial, loading, error, submitLabe
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div ref={modalRef} className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-sm p-6 flex flex-col gap-5 shadow-lg">
+      <div ref={modalRef} className="modal-panel relative w-full max-w-md bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] p-6 flex flex-col gap-5 shadow-xl max-h-[90dvh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">{title}</h2>
           <button onClick={onClose} aria-label="Close" className="shrink-0 p-1.5 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors">
@@ -64,38 +64,34 @@ export function StopFormModal({ open, title, initial, loading, error, submitLabe
           </button>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <Input label="Stop name *" id="stop-name" placeholder="Rome" required autoFocus maxLength={100} value={fields.name} onChange={(e) => setFields((p) => ({ ...p, name: e.target.value }))} />
-          <div className="flex gap-3">
-            <div className="flex-1 flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-text-muted" htmlFor="stop-from">From</label>
-              <input
-                id="stop-from"
+          <Input label="Stop name" placeholder="Rome" required autoFocus maxLength={100} value={fields.name} onChange={(e) => setFields((p) => ({ ...p, name: e.target.value }))} />
+          <div className="flex flex-col gap-1.5">
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="From"
                 type="date"
                 value={fields.date_from}
                 onChange={(e) => setFields((p) => ({ ...p, date_from: e.target.value }))}
-                className="w-full text-sm bg-bg border border-border rounded-lg px-3 py-2 text-text-primary outline-none focus:border-accent/50"
               />
-            </div>
-            <div className="flex-1 flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-text-muted" htmlFor="stop-to">To</label>
-              <input
-                id="stop-to"
+              <Input
+                label="To"
                 type="date"
                 value={fields.date_to}
                 min={fields.date_from || undefined}
                 onChange={(e) => setFields((p) => ({ ...p, date_to: e.target.value }))}
-                className="w-full text-sm bg-bg border border-border rounded-lg px-3 py-2 text-text-primary outline-none focus:border-accent/50"
               />
             </div>
+            {dateError
+              ? <p className="text-xs text-red-500">{dateError}</p>
+              : <p className="text-xs text-text-muted">Dates optional</p>
+            }
           </div>
-          {dateError && <p className="text-xs text-red-500 -mt-2">{dateError}</p>}
-          {!dateError && <p className="text-xs text-text-subtle -mt-2">Dates optional</p>}
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex gap-2 pt-1">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1" disabled={loading}>
+            <Button type="button" variant="outline" className="flex-1" onClick={onClose} disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!canSubmit} className="flex-1">
+            <Button type="submit" className="flex-1" disabled={!canSubmit}>
               {loading ? 'Saving…' : submitLabel}
             </Button>
           </div>
