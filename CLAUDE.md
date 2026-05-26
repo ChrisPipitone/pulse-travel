@@ -98,13 +98,46 @@ Non-crew members can always be added to any scheduled instance at any time — t
 - **TripIt** — individual only, no group voting
 - **Google Trips** — dead
 - **Notion/Sheets DIY** — what people actually use; our real competition
-- **Differentiator**: MUST/WANT/MAYBE/SKIP matrix + potential-crew-to-actual-crew resolution via itinerary is genuinely novel
+- **Frienzy** — all-in-one travel OS (chat, expense split, AI itinerary, booking, location share); iOS only, 4.8★/190 reviews, $9/mo Pro. No compatibility model — assumes everyone does everything together. Not a direct competitor; complementary.
+- **Differentiator**: MUST/WANT/MAYBE/SKIP matrix + potential-crew-to-actual-crew resolution via itinerary is genuinely novel; Frienzy confirms the gap by not touching it
 
 ## Viability
 - Pain point: real, universal, underserved in group niche
 - Technical complexity: medium-low MVP, medium with real-time collab
 - Revenue ceiling: modest standalone; strong with ***REMOVED*** + freemium
 - Verdict: solid side project / passive income vehicle
+
+## Product Strategy & Differentiation
+
+> **Always keep this in mind when building, designing, or suggesting features.**
+
+### The defensible lane
+- **Frienzy / Wanderlog = logistics coordination** — after decisions are made
+- **Pulse = decision intelligence** — before logistics start
+- The gap nobody owns: "who should do what together?" Stay in it.
+- One-sentence positioning: *Pulse answers "who should do what together" before you plan anything — no other tool does that.*
+
+### What makes us distinct
+- MUST/WANT/MAYBE/SKIP vocabulary — not stars, not thumbs, captures commitment level
+- Find Your Crew — potential crew per activity, two-tier (MUST vs WANT), nobody else has it
+- Travel Twin — pairwise Jaccard compatibility, immediately legible
+- Per-member date ranges — crew is real (overlapping presence), not theoretical
+- Potential crew → actual crew pipeline — Find Your Crew surfaces who would go; itinerary resolves who actually goes given timing conflicts
+
+### Planned features that deepen the core (prioritised)
+1. **Overlap calendar** — days × members grid, activity crew dots overlaid on days everyone is present. Turns potential crew into real crew without manual scheduling. Highest leverage, nothing like it exists.
+2. **Gap detector** — surface conflicts early: "Sara's Rome MUSTs need 3 days but her crew only overlaps for 2."
+3. **Crew card (shareable)** — per-activity card with MUST/WANT avatars + overlap dates, one-tap share to WhatsApp. Every share is an ad.
+4. **Sub-trip clustering** — given ratings + dates, suggest "these 4 activities cluster in Rome on days 3–5 with 80% crew overlap." MVP = manual; v2 = smart.
+
+### What NOT to build (stay out of these lanes)
+- Expense tracking → Splitwise owns it
+- Real-time chat → WhatsApp group already open
+- Booking engine → premature; ***REMOVED*** play is post-traction
+- AI itinerary generation from docs/photos → Frienzy's lane, feature not differentiator
+
+### Launch identity checklist
+Every v1 release must ship: MUST/WANT/MAYBE/SKIP rating, Find Your Crew view, Travel Twin view, per-member arrival/departure dates, share-link onboarding under 60 seconds, and the overlap calendar. If any of these are missing, the identity is not established.
 
 ---
 
