@@ -175,8 +175,6 @@ function StopCard({
   stopActivities,
   members,
   ratings,
-  isOpen,
-  onToggle,
   openActivityIds,
   onToggleActivity,
 }: {
@@ -184,8 +182,6 @@ function StopCard({
   stopActivities: Activity[];
   members: Member[];
   ratings: ActivityRating[];
-  isOpen: boolean;
-  onToggle: () => void;
   openActivityIds: Set<string>;
   onToggleActivity: (id: string) => void;
 }) {
@@ -229,16 +225,7 @@ function StopCard({
       </div>
 
       {/* Card */}
-      <div
-        className={`flex-1 min-w-0 bg-bg-card rounded-[var(--radius-card)] border overflow-hidden mb-3 cursor-pointer transition-all duration-150 ${
-          isOpen
-            ? "border-accent/35 shadow-md -translate-y-px"
-            : "border-border hover:border-accent/20 hover:shadow-sm"
-        }`}
-        onClick={onToggle}
-        role="button"
-        aria-expanded={isOpen}
-      >
+      <div className="flex-1 min-w-0 bg-bg-card rounded-[var(--radius-card)] border border-border overflow-hidden mb-3">
         {/* Header */}
         <div className="flex items-center gap-2.5 px-4 py-3">
           <div className="flex-1 min-w-0">
@@ -254,18 +241,6 @@ function StopCard({
               {stopActivities.length} {stopActivities.length === 1 ? "activity" : "activities"}
             </span>
           )}
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            className={`text-text-subtle shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-          >
-            <path d="M4 6l4 4 4-4" />
-          </svg>
         </div>
 
         {/* Tier block — always visible when there are ratings */}
@@ -310,28 +285,24 @@ function StopCard({
           </div>
         )}
 
-        {/* Activity list (expanded) */}
-        {isOpen && (
-          <>
-            {stopActivities.length === 0 ? (
-              <div className="border-t border-border px-4 py-4 text-[12px] text-text-subtle text-center">
-                No activities assigned to this stop.
-              </div>
-            ) : (
-              <div className="border-t border-border">
-                {stopActivities.map(activity => (
-                  <ActivityRow
-                    key={activity.id}
-                    activity={activity}
-                    members={members}
-                    ratings={ratings}
-                    isOpen={openActivityIds.has(activity.id)}
-                    onToggle={() => onToggleActivity(activity.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </>
+        {/* Activity list — always visible */}
+        {stopActivities.length === 0 ? (
+          <div className="border-t border-border px-4 py-4 text-[12px] text-text-subtle text-center">
+            No activities assigned to this stop.
+          </div>
+        ) : (
+          <div className="border-t border-border">
+            {stopActivities.map(activity => (
+              <ActivityRow
+                key={activity.id}
+                activity={activity}
+                members={members}
+                ratings={ratings}
+                isOpen={openActivityIds.has(activity.id)}
+                onToggle={() => onToggleActivity(activity.id)}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>
@@ -346,16 +317,7 @@ export function TripTimeline() {
   const members = useTripStore(s => s.members);
   const ratings = useTripStore(s => s.ratings);
 
-  const [openStopIds, setOpenStopIds] = useState<Set<string>>(new Set());
   const [openActivityIds, setOpenActivityIds] = useState<Set<string>>(new Set());
-
-  function toggleStop(id: string) {
-    setOpenStopIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  }
 
   function toggleActivity(id: string) {
     setOpenActivityIds(prev => {
@@ -410,8 +372,6 @@ export function TripTimeline() {
             stopActivities={activitiesByStop.get(stop.id) ?? []}
             members={members}
             ratings={ratings}
-            isOpen={openStopIds.has(stop.id)}
-            onToggle={() => toggleStop(stop.id)}
             openActivityIds={openActivityIds}
             onToggleActivity={toggleActivity}
           />
