@@ -877,7 +877,7 @@ export function FindYourCrew({
       </div>
 
       {sortKey === "by-stop" ? (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           {sortedStops.map((stop) => {
             const stopRows = rows.filter((r) => r.activity.stop_id === stop.id);
             if (stopRows.length === 0) return null;
@@ -885,8 +885,9 @@ export function FindYourCrew({
             return (
               <div key={stop.id} className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-text-primary">{stop.name}</span>
-                  {dateLabel && <span className="text-[11px] text-text-muted">{dateLabel}</span>}
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent/60 shrink-0" />
+                  <span className="text-xs font-semibold text-text-subtle uppercase tracking-widest">{stop.name}</span>
+                  {dateLabel && <span className="text-[10px] font-medium text-accent">{dateLabel}</span>}
                 </div>
                 {renderCards(stopRows)}
               </div>
@@ -898,7 +899,10 @@ export function FindYourCrew({
             if (unassigned.length === 0) return null;
             return (
               <div className="flex flex-col gap-2">
-                <span className="text-xs font-bold text-text-muted">Unassigned</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-border shrink-0" />
+                  <span className="text-xs font-semibold text-text-subtle uppercase tracking-widest">Unassigned</span>
+                </div>
                 {renderCards(unassigned)}
               </div>
             );
