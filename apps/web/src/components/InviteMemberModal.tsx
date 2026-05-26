@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useModalEscape } from '@/hooks/useModalEscape'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
 import { sendInviteEmail, isEmailTripMember } from '@pulse/services'
@@ -32,13 +33,7 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
     ? `${window.location.origin}/join?code=${inviteCode}`
     : ''
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
+  useModalEscape(onClose)
 
   async function handleCopyLink() {
     try {
@@ -84,12 +79,9 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.45)' }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="bg-bg-card rounded-[var(--radius-card)] border border-border w-full max-w-md shadow-xl flex flex-col items-center gap-5 px-8 py-8">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-md shadow-xl flex flex-col items-center gap-5 px-8 py-8">
 
         {/* Icon */}
         <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">

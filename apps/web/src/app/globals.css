@@ -35,6 +35,10 @@
 
   --font-display: 'DM Sans', sans-serif;
   --font-body:    'DM Sans', sans-serif;
+
+  --spine-node:   #9E978E;
+  --spine-empty:  #E8E6E0;
+  --spine-line:   #E8E6E0;
 }
 
 /* ── Theme: editorial ──────────────────────────────────────── */
@@ -70,6 +74,10 @@
 
   --font-display: 'Playfair Display', serif;
   --font-body:    'Inter', sans-serif;
+
+  --spine-node:   #9E978E;
+  --spine-empty:  #E8E6E0;
+  --spine-line:   #E8E6E0;
 }
 
 @theme inline {

@@ -35,11 +35,9 @@ export function SetDisplayNameModal() {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.45)' }}
-    >
-      <div className="bg-bg-card rounded-[var(--radius-card)] border border-border w-full max-w-sm shadow-xl flex flex-col items-center gap-5 px-8 py-8">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-sm shadow-xl flex flex-col items-center gap-5 px-8 py-8">
         <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">
           <svg className="w-7 h-7 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
