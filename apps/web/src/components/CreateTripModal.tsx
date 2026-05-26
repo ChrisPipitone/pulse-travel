@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
 import { useToast } from '@/components/ToastProvider'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { memberPalette, buildColorMap } from '@/lib/memberColors'
+import { useModalEscape } from '@/hooks/useModalEscape'
+import { MemberAvatar } from '@/components/MemberAvatar'
 import type { Member } from '@pulse/types'
 
 type Fields = {
@@ -46,8 +47,6 @@ export function CreateTripModal({
   const removeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [hiddenMemberIds, setHiddenMemberIds] = useState<Set<string>>(new Set())
   const undoMemberTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
-  const memberColorMap = useMemo(() => buildColorMap(members ?? []), [members])
-
   function handleRemoveClick(memberId: string) {
     if (pendingRemoveRef.current === memberId) {
       clearTimeout(removeTimerRef.current!)
@@ -89,12 +88,7 @@ export function CreateTripModal({
     })
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  useModalEscape(onClose)
 
   if (!open) return null
 
@@ -187,19 +181,12 @@ export function CreateTripModal({
           <div className="flex flex-col gap-3 border-t border-border pt-5">
             <h3 className="text-sm font-semibold text-text-primary">Members</h3>
             <div className="flex flex-col gap-1">
-              {members.filter(m => !hiddenMemberIds.has(m.id)).map((m, i) => {
+              {members.filter(m => !hiddenMemberIds.has(m.id)).map((m) => {
                 const isOwner = m.id === ownerId
                 const isRemoving = removingMemberId === m.id
-                const palette = memberPalette(memberColorMap.get(m.id) ?? i)
                 return (
                   <div key={m.id} className="flex items-center gap-3 py-1">
-                    {m.avatar_url ? (
-                      <img src={m.avatar_url} alt={m.name} className="w-7 h-7 rounded-full object-cover shrink-0" />
-                    ) : (
-                      <span className="w-7 h-7 rounded-full flex items-center justify-center font-medium text-xs shrink-0" style={{ backgroundColor: palette.bg, color: palette.fg }}>
-                        {m.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
+                    <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="lg" />
                     <span className="text-sm text-text-primary flex-1 truncate">{m.name}</span>
                     {isOwner ? (
                       <span className="text-xs text-text-subtle px-1">Owner</span>

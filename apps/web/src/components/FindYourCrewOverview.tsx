@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useRef } from "react";
+import { useModalEscape } from "@/hooks/useModalEscape";
 import { useTripStore } from "@pulse/store";
 import { useCompatibilityMatrix } from "@pulse/hooks";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { Activity, Member, Rating } from "@pulse/types";
-import { memberPalette } from "@/lib/memberColors";
+import { MemberAvatar } from "@/components/MemberAvatar";
 import { FindYourCrew } from "./FindYourCrew";
 import { GroupiesMemberCard, type MemberCategoryChip } from "./GroupiesMemberCard";
 import { TravelTwinCard } from "./TravelTwinCard";
-
 type MainView = "groupies" | "travelTwin" | "cards";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -98,10 +98,9 @@ const ratingPillStyle: Record<Rating, string> = {
 }
 
 function MemberDetailModal({
-  member, colorIndex, musts, wants, activities, memberRatings, open, onClose,
+  member, musts, wants, activities, memberRatings, open, onClose,
 }: {
   member: Member | null
-  colorIndex: number
   musts: number
   wants: number
   activities: Activity[]
@@ -112,19 +111,12 @@ function MemberDetailModal({
   const panelRef = useRef<HTMLDivElement>(null)
   useFocusTrap(panelRef, open)
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  useModalEscape(onClose)
 
   if (!open || !member) return null
 
-  const palette = memberPalette(colorIndex)
   const [firstName, ...rest] = member.name.trim().split(' ')
   const lastName = rest.join(' ')
-  const initials = member.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
   const total = musts + wants
 
   const byRating = RATING_ORDER
@@ -141,12 +133,7 @@ function MemberDetailModal({
       >
         {/* Header */}
         <div className="flex items-center gap-[10px] px-[18px] pt-4 pb-3 border-b border-border sticky top-0 bg-bg-card z-10 flex-shrink-0">
-          <div
-            className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-[12px] font-extrabold flex-shrink-0"
-            style={{ backgroundColor: palette.bg, color: palette.fg }}
-          >
-            {initials}
-          </div>
+          <MemberAvatar name={member.name} avatarUrl={member.avatar_url} size="xl" className="flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="text-base font-bold leading-tight">
               {firstName}{lastName && <span className="font-normal text-text-muted"> {lastName}</span>}
@@ -246,7 +233,7 @@ function TripPulseStrip({ activityCount, memberCount, ratedCount, topActivity, t
 
 function ViewToggle({ view, setView }: { view: MainView; setView: (v: MainView) => void }) {
   return (
-    <div className="flex items-center gap-0.5 bg-bg-card border border-border rounded-lg p-0.5 self-start">
+    <div className="flex flex-wrap items-center gap-0.5 bg-bg-card border border-border rounded-lg p-0.5 self-start">
       <button
         onClick={() => setView("groupies")}
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
@@ -491,7 +478,6 @@ export function FindYourCrewOverview() {
         <MemberDetailModal
           open={selectedMemberId !== null}
           member={selectedSummary.member}
-          colorIndex={selectedSummary.colorIndex}
           musts={selectedSummary.musts}
           wants={selectedSummary.wants}
           activities={activities}

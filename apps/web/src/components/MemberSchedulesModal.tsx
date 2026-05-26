@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import { memberPalette } from '@/lib/memberColors'
+import { useModalEscape } from '@/hooks/useModalEscape'
+import { MemberAvatar } from '@/components/MemberAvatar'
 import type { Member } from '@pulse/types'
 
 function formatMemberDates(arrival?: string, departure?: string): string | null {
@@ -17,22 +18,16 @@ function formatMemberDates(arrival?: string, departure?: string): string | null 
 type Props = {
   open: boolean
   members: Member[]
-  colorMap: Map<string, number>
   userId: string | undefined
   onEditDates: () => void
   onClose: () => void
 }
 
-export function MemberSchedulesModal({ open, members, colorMap, userId, onEditDates, onClose }: Props) {
+export function MemberSchedulesModal({ open, members, userId, onEditDates, onClose }: Props) {
   const modalRef = useRef<HTMLDivElement>(null)
   useFocusTrap(modalRef, open)
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  useModalEscape(onClose)
 
   if (!open) return null
 
@@ -42,10 +37,10 @@ export function MemberSchedulesModal({ open, members, colorMap, userId, onEditDa
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
         ref={modalRef}
-        className="relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-sm shadow-lg flex flex-col max-h-[80vh]"
+        className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-sm shadow-lg flex flex-col max-h-[80vh]"
       >
         {/* Header */}
         <div className="px-5 pt-5 pb-3 flex items-center justify-between shrink-0">
@@ -69,19 +64,9 @@ export function MemberSchedulesModal({ open, members, colorMap, userId, onEditDa
           {sorted.map((m) => {
             const isMe = m.id === userId
             const dateStr = formatMemberDates(m.arrival_date, m.departure_date)
-            const palette = memberPalette(colorMap.get(m.id) ?? 0)
             return (
               <div key={m.id} className="flex items-center gap-2.5">
-                {m.avatar_url ? (
-                  <img src={m.avatar_url} alt={m.name} className="w-7 h-7 rounded-full object-cover shrink-0" />
-                ) : (
-                  <span
-                    className="w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs shrink-0"
-                    style={{ backgroundColor: palette.bg, color: palette.fg }}
-                  >
-                    {m.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
+                <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="lg" />
                 <div className="flex flex-col leading-tight min-w-0 flex-1">
                   <span className="text-xs font-medium text-text-primary">
                     {m.name.split(' ')[0]}{isMe && <span className="text-text-muted font-normal"> (you)</span>}

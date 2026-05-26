@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useModalEscape } from '@/hooks/useModalEscape'
 import { FadeReveal } from './FadeReveal'
-import { memberPalette, buildColorMap } from '@/lib/memberColors'
+import { MemberAvatar } from '@/components/MemberAvatar'
 import type { Activity, ActivityRating, Member, Rating } from '@pulse/types'
 
 // TODO(mobile): revisit rating UX for touch — consider long-press popover or
@@ -55,15 +56,9 @@ export function ActivityDetailModal({
   const [justRated, setJustRated] = useState(false)
   const [ratingsExpanded, setRatingsExpanded] = useState(false)
   const modalRef = useRef<HTMLDivElement>(null)
-  const colorMap = useMemo(() => buildColorMap(members), [members])
   useFocusTrap(modalRef, open)
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  useModalEscape(onClose)
 
   useEffect(() => {
     if (!justRated || ratingLoading) return
@@ -169,17 +164,10 @@ export function ActivityDetailModal({
                 <div className="flex flex-col gap-1.5">
                   {visible.map((member) => {
                     const r = memberRatings.find((ar) => ar.user_id === member.id)!
-                    const palette = memberPalette(colorMap.get(member.id) ?? 0)
                     return (
                       <div key={member.id} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          {member.avatar_url ? (
-                            <img src={member.avatar_url} alt={member.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
-                          ) : (
-                            <span className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ backgroundColor: palette.bg, color: palette.fg }}>
-                              {member.name.charAt(0).toUpperCase()}
-                            </span>
-                          )}
+                          <MemberAvatar name={member.name} avatarUrl={member.avatar_url} size="md" />
                           <span className="text-sm text-text-primary">{member.name.split(' ')[0]}</span>
                         </div>
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] ${ratingColor[r.rating]}`}>

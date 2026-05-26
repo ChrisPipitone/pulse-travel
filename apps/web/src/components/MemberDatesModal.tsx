@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button, Input } from '@pulse/ui'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useModalEscape } from '@/hooks/useModalEscape'
 
 type Props = {
   open: boolean
@@ -32,12 +33,7 @@ export function MemberDatesModal({
     }
   }, [open, initialArrival, initialDeparture])
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  useModalEscape(onClose)
 
   if (!open) return null
 
