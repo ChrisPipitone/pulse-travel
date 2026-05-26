@@ -347,7 +347,7 @@ function CrewModalD2({
       >
         {/* Header */}
         <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-4 border-b border-border sticky top-0 bg-bg-card z-10">
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-[17px] font-bold text-text-primary leading-snug">
               {activity.name}
             </p>
@@ -358,8 +358,10 @@ function CrewModalD2({
               </div>
             )}
           </div>
-          <button
-            onClick={onClose}
+          <div className="flex items-center gap-2 shrink-0 mt-0.5">
+            <StatusPill rating={myRating} />
+            <button
+              onClick={onClose}
             className="shrink-0 text-text-subtle hover:text-text-primary p-1 rounded-lg transition-colors mt-1"
           >
             <svg
@@ -373,7 +375,8 @@ function CrewModalD2({
             >
               <path d="M3 3l10 10M13 3L3 13" />
             </svg>
-          </button>
+            </button>
+          </div>
         </div>
 
         {/* Body */}
