@@ -6,7 +6,7 @@ type Size = 'sm' | 'md' | 'lg'
 const variantStyles: Record<Variant, string> = {
   primary: 'bg-accent text-white hover:opacity-90 rounded-[var(--radius-btn)]',
   outline: 'border border-border text-text-primary hover:bg-bg rounded-lg',
-  ghost:   'text-accent hover:bg-maybe rounded-lg',
+  ghost:   'text-accent hover:bg-bg rounded-lg',
 }
 
 const sizeStyles: Record<Size, string> = {

@@ -41,19 +41,19 @@ From Round 2, still open:
 
 ### COMPONENT — semantic color misuse
 
-- [ ] **CG1** — `Button.tsx` ghost variant: `hover:bg-maybe` uses the MAYBE rating semantic color (`#FFF0A0`) as a generic UI hover state. Rating colors should only appear in rating contexts. Ghost hover should be neutral. Change to `hover:bg-bg`. **[Impact: MED]**
+- [x] **CG1** — `Button.tsx` ghost variant: `hover:bg-maybe` uses the MAYBE rating semantic color (`#FFF0A0`) as a generic UI hover state. Rating colors should only appear in rating contexts. Ghost hover should be neutral. Change to `hover:bg-bg`. **[Impact: MED]**
 
 ### LOADING — skeleton mismatch
 
-- [ ] **LS1** — Default tab on trip page is `"crew"` (`FindYourCrewOverview` — member card grid). Loading skeleton shows 4 activity-style rows with rating chip placeholders. The skeleton previews what `"activities"` looks like, but crew loads first. Fix: change default tab from `"crew"` to `"activities"` so the skeleton matches. If crew-first is intentional product behavior, update the skeleton to show member card placeholders instead. **[Impact: MED — causes visible layout jump on load]**
+- [x] **LS1** — Default tab on trip page is `"crew"` (`FindYourCrewOverview` — member card grid). Loading skeleton shows 4 activity-style rows with rating chip placeholders. The skeleton previews what `"activities"` looks like, but crew loads first. Fix: change default tab from `"crew"` to `"activities"` so the skeleton matches. If crew-first is intentional product behavior, update the skeleton to show member card placeholders instead. **[Impact: MED — causes visible layout jump on load]**
 
 ### ACCESSIBILITY — tab semantics
 
-- [ ] **AC1** — Trip page tab bar uses plain `<button>` elements with no ARIA roles. Assistive tech cannot identify this as a tab interface. Add `role="tablist"` to the container `<div>`, `role="tab"` and `aria-selected={tab === t}` to each button. Two attributes per element. **[Impact: MED]**
+- [x] **AC1** — Trip page tab bar uses plain `<button>` elements with no ARIA roles. Assistive tech cannot identify this as a tab interface. Add `role="tablist"` to the container `<div>`, `role="tab"` and `aria-selected={tab === t}` to each button. Two attributes per element. **[Impact: MED]**
 
 ### INTERACTION — accordion behavior (from R3/IX1)
 
-- [ ] **IX1** — `TripTimeline` stop accordion is single-open: opening one stop closes all others. On desktop (lg: layout), users comparing "Rome activities vs Amalfi activities" must toggle back and forth. R3 recommended multi-open. Fix: change `openStopId: string | null` to `openStopIds: Set<string>` (same pattern as `openActivityIds` already uses). One stop can stay open while another is opened. **[Impact: MED]**
+- [x] **IX1** — `TripTimeline` stop accordion is single-open: opening one stop closes all others. On desktop (lg: layout), users comparing "Rome activities vs Amalfi activities" must toggle back and forth. R3 recommended multi-open. Fix: change `openStopId: string | null` to `openStopIds: Set<string>` (same pattern as `openActivityIds` already uses). One stop can stay open while another is opened. **[Impact: MED]**
 
 ---
 

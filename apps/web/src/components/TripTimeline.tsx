@@ -346,11 +346,15 @@ export function TripTimeline() {
   const members = useTripStore(s => s.members);
   const ratings = useTripStore(s => s.ratings);
 
-  const [openStopId, setOpenStopId] = useState<string | null>(null);
+  const [openStopIds, setOpenStopIds] = useState<Set<string>>(new Set());
   const [openActivityIds, setOpenActivityIds] = useState<Set<string>>(new Set());
 
   function toggleStop(id: string) {
-    setOpenStopId(prev => prev === id ? null : id);
+    setOpenStopIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   }
 
   function toggleActivity(id: string) {
@@ -406,7 +410,7 @@ export function TripTimeline() {
             stopActivities={activitiesByStop.get(stop.id) ?? []}
             members={members}
             ratings={ratings}
-            isOpen={openStopId === stop.id}
+            isOpen={openStopIds.has(stop.id)}
             onToggle={() => toggleStop(stop.id)}
             openActivityIds={openActivityIds}
             onToggleActivity={toggleActivity}

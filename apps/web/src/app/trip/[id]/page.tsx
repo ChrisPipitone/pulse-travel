@@ -111,7 +111,7 @@ export default function TripPage({
   const [showSchedulesModal, setShowSchedulesModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [tab, setTab] = useState<Tab>("crew");
+  const [tab, setTab] = useState<Tab>("activities");
   const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(
     new Set(),
   );
@@ -487,10 +487,12 @@ export default function TripPage({
           {/* ── Main content ─────────────────────────────────────── */}
           <div className="flex-1 min-w-0 flex flex-col gap-5">
             {/* Tab bar */}
-            <div className="flex border-b border-border">
+            <div role="tablist" className="flex border-b border-border">
               {(["activities", "timeline", "crew"] as Tab[]).map((t) => (
                 <button
                   key={t}
+                  role="tab"
+                  aria-selected={tab === t}
                   onClick={() => setTab(t)}
                   className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
                     tab === t
