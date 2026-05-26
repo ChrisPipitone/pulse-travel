@@ -401,24 +401,11 @@ export default function TripPage({
                             </span>
                           </div>
                           {isMe && (
-                            <button
-                              onClick={() => setShowDatesModal(true)}
-                              className="p-1 text-text-muted hover:text-text-primary transition-colors shrink-0"
-                              title="Edit my dates"
-                            >
-                              <svg
-                                width="11"
-                                height="11"
-                                viewBox="0 0 14 14"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M9.5 1.5l3 3-8 8H1.5v-3l8-8z" />
-                              </svg>
-                            </button>
+                            <KebabMenu
+                              items={[
+                                { label: "Edit dates", onClick: () => setShowDatesModal(true) },
+                              ]}
+                            />
                           )}
                         </div>
                       );

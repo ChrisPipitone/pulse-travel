@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useModalEscape } from '@/hooks/useModalEscape'
 import { MemberAvatar } from '@/components/MemberAvatar'
+import { KebabMenu } from '@/components/KebabMenu'
 import type { Member } from '@pulse/types'
 
 function formatMemberDates(arrival?: string, departure?: string): string | null {
@@ -74,12 +75,11 @@ export function MemberSchedulesModal({ open, members, userId, onEditDates, onClo
                   <span className="text-[11px] text-text-muted">{dateStr ?? 'Full trip'}</span>
                 </div>
                 {isMe && (
-                  <button
-                    onClick={() => { onClose(); onEditDates() }}
-                    className="shrink-0 text-xs text-accent hover:opacity-75 transition-opacity font-medium"
-                  >
-                    Edit
-                  </button>
+                  <KebabMenu
+                    items={[
+                      { label: 'Edit dates', onClick: () => { onClose(); onEditDates() } },
+                    ]}
+                  />
                 )}
               </div>
             )
