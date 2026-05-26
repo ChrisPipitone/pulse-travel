@@ -389,7 +389,7 @@ export function TripTimeline() {
               {unassigned.length}
             </span>
           </div>
-          <div className="border-2 border-dashed border-border/70 rounded-[var(--radius-card)] p-2">
+          <div className="border-2 border-dashed border-text-subtle/30 rounded-[var(--radius-card)] p-2">
             <div className="bg-bg-card rounded-xl overflow-hidden">
               {unassigned.map(activity => (
                 <ActivityRow
