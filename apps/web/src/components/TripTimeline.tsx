@@ -225,7 +225,7 @@ function StopCard({
       </div>
 
       {/* Card */}
-      <div className="flex-1 min-w-0 bg-bg-card rounded-[var(--radius-card)] border border-border overflow-hidden mb-3">
+      <div className="flex-1 min-w-0 bg-bg-card rounded-[var(--radius-card)] border border-border overflow-hidden mb-3 shadow-sm">
         {/* Header */}
         <div className="flex items-center gap-2.5 px-4 py-3">
           <div className="flex-1 min-w-0">
@@ -389,17 +389,19 @@ export function TripTimeline() {
               {unassigned.length}
             </span>
           </div>
-          <div className="bg-bg-card border border-dashed border-border rounded-[var(--radius-card)] overflow-hidden">
-            {unassigned.map(activity => (
-              <ActivityRow
-                key={activity.id}
-                activity={activity}
-                members={members}
-                ratings={ratings}
-                isOpen={openActivityIds.has(activity.id)}
-                onToggle={() => toggleActivity(activity.id)}
-              />
-            ))}
+          <div className="border-2 border-dashed border-border/70 rounded-[var(--radius-card)] p-2">
+            <div className="bg-bg-card rounded-xl overflow-hidden">
+              {unassigned.map(activity => (
+                <ActivityRow
+                  key={activity.id}
+                  activity={activity}
+                  members={members}
+                  ratings={ratings}
+                  isOpen={openActivityIds.has(activity.id)}
+                  onToggle={() => toggleActivity(activity.id)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}
