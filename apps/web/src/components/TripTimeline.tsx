@@ -7,7 +7,7 @@ import type { Rating, Stop, Activity, Member, ActivityRating } from "@pulse/type
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
-type StopTier = "must" | "want" | "skip";
+type StopTier = "must" | "maybe" | "skip";
 
 function getMemberStopTier(
   memberId: string,
@@ -18,7 +18,7 @@ function getMemberStopTier(
     .filter(r => r.user_id === memberId && activityIds.includes(r.activity_id))
     .map(r => r.rating);
   if (memberRatings.includes("MUST")) return "must";
-  if (memberRatings.includes("WANT")) return "want";
+  if (memberRatings.includes("MAYBE")) return "maybe";
   if (memberRatings.length > 0) return "skip";
   return null;
 }
@@ -41,12 +41,11 @@ function formatStopDates(from?: string | null, to?: string | null) {
 
 const ratingPill: Record<Rating, string> = {
   MUST:  "bg-[rgba(255,92,53,0.12)] text-must",
-  WANT:  "bg-[rgba(0,201,167,0.12)] text-want",
   MAYBE: "bg-[#FFF8D6] text-[#8a6e00]",
   SKIP:  "bg-[#EDECEA] text-[#888]",
 };
 
-const RATING_ORDER: Rating[] = ["MUST", "WANT", "MAYBE", "SKIP"];
+const RATING_ORDER: Rating[] = ["MUST", "MAYBE", "SKIP"];
 
 // ─── Ratings grid (per-activity drill-down) ───────────────────────────────
 
@@ -119,7 +118,7 @@ function ActivityRow({
   onToggle: () => void;
 }) {
   const excitedCount = ratings.filter(
-    r => r.activity_id === activity.id && (r.rating === "MUST" || r.rating === "WANT")
+    r => r.activity_id === activity.id && (r.rating === "MUST" || r.rating === "MAYBE")
   ).length;
 
   return (
@@ -195,17 +194,17 @@ function StopCard({
   const activityIds = stopActivities.map(a => a.id);
 
   const mustMembers: Member[] = [];
-  const wantMembers: Member[] = [];
+  const maybeMembers: Member[] = [];
   const skipMembers: Member[] = [];
 
   for (const m of members) {
     const tier = getMemberStopTier(m.id, activityIds, ratings);
     if (tier === "must") mustMembers.push(m);
-    else if (tier === "want") wantMembers.push(m);
+    else if (tier === "maybe") maybeMembers.push(m);
     else if (tier === "skip") skipMembers.push(m);
   }
 
-  const hasTiers = mustMembers.length > 0 || wantMembers.length > 0 || skipMembers.length > 0;
+  const hasTiers = mustMembers.length > 0 || maybeMembers.length > 0 || skipMembers.length > 0;
 
   return (
     <div className="flex items-start gap-3">
@@ -284,13 +283,13 @@ function StopCard({
                 </div>
               </div>
             )}
-            {wantMembers.length > 0 && (
+            {maybeMembers.length > 0 && (
               <div className="flex items-start gap-2.5">
-                <span className="text-[9px] font-bold uppercase tracking-[0.06em] text-want w-8 shrink-0 pt-1">
-                  WANT
+                <span className="text-[9px] font-bold uppercase tracking-[0.06em] text-[#8a6e00] w-8 shrink-0 pt-1">
+                  MAYBE
                 </span>
                 <div className="flex flex-wrap gap-2.5">
-                  {wantMembers.map(m => (
+                  {maybeMembers.map(m => (
                     <MemberAvatar key={m.id} name={m.name} avatarUrl={m.avatar_url} withLabel />
                   ))}
                 </div>

@@ -56,7 +56,7 @@ describe('useRateActivity', () => {
 
   it('calls upsertRating with correct args', async () => {
     const { result } = renderHookWithClient(() => useRateActivity(), client)
-    await act(async () => { await result.current.rateActivity('a1', 'WANT') })
+    await act(async () => { await result.current.rateActivity('a1', 'MAYBE') })
 
     expect(client.from).toHaveBeenCalledWith('activity_ratings')
   })

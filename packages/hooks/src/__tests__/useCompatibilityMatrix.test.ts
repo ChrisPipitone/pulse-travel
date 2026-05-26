@@ -8,7 +8,7 @@ const activity = (id: string): Activity => ({
   id, trip_id: 't1', name: `Activity ${id}`, added_by: 'u1', created_at: '',
 })
 
-const rating = (activityId: string, userId: string, r: 'MUST' | 'WANT' | 'MAYBE' | 'SKIP'): ActivityRating => ({
+const rating = (activityId: string, userId: string, r: 'MUST' | 'MAYBE' | 'SKIP'): ActivityRating => ({
   id: `${activityId}-${userId}`, activity_id: activityId, user_id: userId, rating: r,
 })
 
@@ -22,13 +22,13 @@ describe('useCompatibilityMatrix', () => {
     expect(result.current.matrix).toEqual([])
   })
 
-  it('scores MUST=3, WANT=1, MAYBE=0, SKIP=0', () => {
+  it('scores MUST=3, MAYBE=1, SKIP=0', () => {
     useTripStore.setState({
       activities: [activity('a1')],
       ratings: [
         rating('a1', 'u1', 'MUST'),
-        rating('a1', 'u2', 'WANT'),
-        rating('a1', 'u3', 'MAYBE'),
+        rating('a1', 'u2', 'MAYBE'),
+        rating('a1', 'u3', 'SKIP'),
       ],
     })
 
@@ -36,8 +36,8 @@ describe('useCompatibilityMatrix', () => {
     const [item] = result.current.matrix
 
     expect(item.must_count).toBe(1)
-    expect(item.want_count).toBe(1)
     expect(item.maybe_count).toBe(1)
+    expect(item.skip_count).toBe(1)
     expect(item.score).toBe(4) // 1×3 + 1×1 + 0
   })
 
@@ -45,9 +45,9 @@ describe('useCompatibilityMatrix', () => {
     useTripStore.setState({
       activities: [activity('a1'), activity('a2'), activity('a3')],
       ratings: [
-        rating('a1', 'u1', 'MAYBE'),                              // score 0
+        rating('a1', 'u1', 'SKIP'),                                // score 0
         rating('a2', 'u1', 'MUST'), rating('a2', 'u2', 'MUST'),   // score 6
-        rating('a3', 'u1', 'WANT'),                               // score 1
+        rating('a3', 'u1', 'MAYBE'),                              // score 1
       ],
     })
 
@@ -70,6 +70,6 @@ describe('useCompatibilityMatrix', () => {
     useTripStore.setState({ activities: [activity('a1')], ratings: [] })
 
     const { result } = renderHook(() => useCompatibilityMatrix())
-    expect(result.current.matrix[0]).toMatchObject({ score: 0, must_count: 0, want_count: 0, maybe_count: 0, skip_count: 0, ratings: {} })
+    expect(result.current.matrix[0]).toMatchObject({ score: 0, must_count: 0, maybe_count: 0, skip_count: 0, ratings: {} })
   })
 })

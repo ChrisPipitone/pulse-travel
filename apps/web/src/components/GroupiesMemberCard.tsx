@@ -11,7 +11,7 @@ export interface TwinPreview {
 
 export interface MemberCategoryChip {
   slug: string
-  level: 'must' | 'want'
+  level: 'must' | 'maybe'
 }
 
 export interface GroupiesMemberCardProps {
@@ -118,7 +118,7 @@ export function GroupiesMemberCard({
                   return (
                     <div
                       key={chip.slug}
-                      className={`flex items-center gap-[4px] px-[8px] py-[3px] rounded-[20px] text-[10px] font-semibold whitespace-nowrap flex-shrink-0 ${chip.level === 'want' ? 'opacity-60' : ''}`}
+                      className={`flex items-center gap-[4px] px-[8px] py-[3px] rounded-[20px] text-[10px] font-semibold whitespace-nowrap flex-shrink-0 ${chip.level === 'maybe' ? 'opacity-60' : ''}`}
                       style={{ background: cfg.bg, color: cfg.color }}
                     >
                       <span style={{ color: cfg.color }}>{cfg.icon}</span>

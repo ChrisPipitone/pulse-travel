@@ -3,7 +3,6 @@ import { RATING_LABELS } from '@pulse/types'
 
 const styles: Record<Rating, string> = {
   MUST:  'bg-must  text-must-text',
-  WANT:  'bg-want  text-want-text',
   MAYBE: 'bg-maybe text-maybe-text',
   SKIP:  'bg-skip  text-skip-text',
 }

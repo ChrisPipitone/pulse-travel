@@ -51,7 +51,6 @@ const VIEWS: ViewMeta[] = [
 
 const cellStyle: Record<Rating, string> = {
   MUST:  'bg-cell-must  text-must-text',
-  WANT:  'bg-cell-want  text-want-text',
   MAYBE: 'bg-cell-maybe text-maybe-text',
   SKIP:  'bg-cell-skip  text-skip-text',
 }
@@ -312,10 +311,9 @@ export function MembersRowsTable({ members, activities, scores, maxScore }: {
 
 // ── View 3: Who's in — activities × rating buckets, member avatars in cells
 
-const ROSTER_RATINGS: Rating[] = ['MUST', 'WANT', 'MAYBE', 'SKIP']
+const ROSTER_RATINGS: Rating[] = ['MUST', 'MAYBE', 'SKIP']
 const rosterBadge: Record<Rating, string> = {
   MUST:  'bg-cell-must  text-must-text',
-  WANT:  'bg-cell-want  text-want-text',
   MAYBE: 'bg-cell-maybe text-maybe-text',
   SKIP:  'bg-cell-skip  text-skip-text',
 }
@@ -330,7 +328,7 @@ function RosterCards({ activities, scores, members, maxScore }: {
     <div className="flex flex-col divide-y divide-border">
       {activities.map((activity, i) => {
         const score = scores[i]
-        const byRating: Record<Rating, Member[]> = { MUST: [], WANT: [], MAYBE: [], SKIP: [] }
+        const byRating: Record<Rating, Member[]> = { MUST: [], MAYBE: [], SKIP: [] }
         const unrated: Member[] = []
         for (const m of members) {
           const r = score?.ratings[m.id] as Rating | undefined
@@ -396,7 +394,7 @@ function RosterTable({ activities, scores, members, maxScore }: {
         <tbody>
           {activities.map((activity, i) => {
             const score = scores[i]
-            const byRating: Record<Rating, Member[]> = { MUST: [], WANT: [], MAYBE: [], SKIP: [] }
+            const byRating: Record<Rating, Member[]> = { MUST: [], MAYBE: [], SKIP: [] }
             const unrated: Member[] = []
             for (const m of members) {
               const r = score?.ratings[m.id] as Rating | undefined
@@ -435,7 +433,6 @@ interface CrewRow {
   activity: Activity
   score: CompatibilityScore | undefined
   mustMembers: Member[]
-  wantMembers: Member[]
   maybeMembers: Member[]
   excitedCount: number
 }
@@ -446,7 +443,7 @@ function CrewCards({ rows, maxScore }: {
 }) {
   return (
     <div className="flex flex-col gap-3">
-      {rows.map(({ activity, score, mustMembers, wantMembers, maybeMembers, excitedCount }) => {
+      {rows.map(({ activity, score, mustMembers, maybeMembers, excitedCount }) => {
         const isEmpty = excitedCount === 0
         return (
           <div
@@ -479,16 +476,8 @@ function CrewCards({ rows, maxScore }: {
                     <AvatarGroup members={mustMembers} />
                   </div>
                 )}
-                {wantMembers.length > 0 && (
-                  <div className="flex items-start gap-3">
-                    <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-want text-want-text">
-                      Want to
-                    </span>
-                    <AvatarGroup members={wantMembers} />
-                  </div>
-                )}
                 {maybeMembers.length > 0 && (
-                  <div className="flex items-start gap-3 opacity-50">
+                  <div className="flex items-start gap-3">
                     <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-maybe text-maybe-text">
                       Maybe
                     </span>
@@ -638,21 +627,20 @@ export function CompatibilityMatrix() {
     [matrix, activities]
   )
 
-  // View 4: re-sort activities by excited-member count (MUST + WANT), score as tiebreaker
+  // View 4: re-sort activities by excited-member count (MUST + MAYBE), score as tiebreaker
   const crewRows = useMemo((): CrewRow[] =>
     orderedActivities
       .map(activity => {
         const score = matrix.find(s => s.activity_id === activity.id)
         const mustMembers  = members.filter(m => score?.ratings[m.id] === 'MUST')
-        const wantMembers  = members.filter(m => score?.ratings[m.id] === 'WANT')
         const maybeMembers = members.filter(m => score?.ratings[m.id] === 'MAYBE')
-        return { activity, score, mustMembers, wantMembers, maybeMembers, excitedCount: mustMembers.length + wantMembers.length }
+        return { activity, score, mustMembers, maybeMembers, excitedCount: mustMembers.length + maybeMembers.length }
       })
       .sort((a, b) => b.excitedCount - a.excitedCount || (b.score?.score ?? 0) - (a.score?.score ?? 0)),
     [orderedActivities, matrix, members]
   )
 
-  // View 5: Jaccard similarity — excited set = MUST + WANT only, MAYBE/SKIP excluded
+  // View 5: Jaccard similarity — excited set = MUST + MAYBE, SKIP excluded
   const jaccardMatrix = useMemo((): Map<string, Map<string, number | null>> => {
     const excitedSets = new Map<string, Set<string>>()
     for (const m of members) {
@@ -660,7 +648,7 @@ export function CompatibilityMatrix() {
         m.id,
         new Set(
           ratings
-            .filter(r => r.user_id === m.id && (r.rating === 'MUST' || r.rating === 'WANT'))
+            .filter(r => r.user_id === m.id && (r.rating === 'MUST' || r.rating === 'MAYBE'))
             .map(r => r.activity_id)
         )
       )
@@ -802,10 +790,10 @@ export function CompatibilityMatrix() {
         {/* Legend: adapts to view */}
         {(isActRows || isMemRows) && (
           <div className="flex items-center gap-3">
-            {(['MUST', 'WANT', 'MAYBE', 'SKIP'] as Rating[]).map(r => (
+            {(['MUST', 'MAYBE', 'SKIP'] as Rating[]).map(r => (
               <div key={r} className="flex items-center gap-1">
                 <div className={`w-3 h-3 rounded-sm ${cellStyle[r]}`} />
-                <span className="text-[10px] text-text-muted">{r === 'MUST' ? "Can't miss" : r === 'WANT' ? 'Want to' : r === 'MAYBE' ? 'Maybe' : 'Skip'}</span>
+                <span className="text-[10px] text-text-muted">{r === 'MUST' ? "Can't miss" : r === 'MAYBE' ? 'Maybe' : 'Skip'}</span>
               </div>
             ))}
             <div className="flex items-center gap-1">

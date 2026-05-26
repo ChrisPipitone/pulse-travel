@@ -42,14 +42,14 @@ function computeMemberSummaries(
   return members.map((member, idx) => {
     const mr = ratings.filter(r => r.user_id === member.id)
     const mustIds = new Set(mr.filter(r => r.rating === 'MUST').map(r => r.activity_id))
-    const wantIds = new Set(mr.filter(r => r.rating === 'WANT').map(r => r.activity_id))
-    const excitedIds = new Set([...mustIds, ...wantIds])
+    const maybeIds = new Set(mr.filter(r => r.rating === 'MAYBE').map(r => r.activity_id))
+    const excitedIds = new Set([...mustIds, ...maybeIds])
     const mustActivities = activities.filter(a => mustIds.has(a.id))
     return {
       member,
       colorIndex: idx,
       musts: mustIds.size,
-      wants: wantIds.size,
+      wants: maybeIds.size,
       mustActivityIds: mustIds,
       excitedIds,
       mustActivities,
@@ -82,16 +82,14 @@ function computeTopTwins(summaries: MemberSummary[], activities: Activity[]): Ma
 // Member detail modal
 // ─────────────────────────────────────────────────────────────────────────────
 
-const RATING_ORDER: Rating[] = ['MUST', 'WANT', 'MAYBE', 'SKIP']
+const RATING_ORDER: Rating[] = ['MUST', 'MAYBE', 'SKIP']
 const RATING_SECTION_LABEL: Record<Rating, string> = {
-  MUST: 'Going',
-  WANT: 'Likely',
+  MUST:  'Going',
   MAYBE: 'Maybe',
-  SKIP: 'Skipping',
+  SKIP:  'Skipping',
 }
 const ratingPillStyle: Record<Rating, string> = {
   MUST:  'bg-[rgba(255,92,53,0.12)] text-must',
-  WANT:  'bg-[rgba(0,201,167,0.12)] text-want',
   MAYBE: 'bg-[#FFF8D6] text-[#8a6e00]',
   SKIP:  'bg-[#EDECEA] text-[#888]',
 }
@@ -324,7 +322,7 @@ export function FindYourCrewOverview() {
   const topActivity = orderedActivities[0] ?? null
   const topCrewCount = topActivity
     ? Object.values(matrix.find(s => s.activity_id === topActivity.id)?.ratings ?? {})
-        .filter(r => r === 'MUST' || r === 'WANT').length
+        .filter(r => r === 'MUST' || r === 'MAYBE').length
     : 0
 
   // Category chips per member — populated once JAB-53 lands (category_id on activities + category lookup)
