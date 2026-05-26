@@ -6,7 +6,6 @@ import { useSession, useUserTrips, useCreateTrip } from "@pulse/hooks";
 import { Button } from "@pulse/ui";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
-import { memberPalette } from "@/lib/memberColors";
 import type { TripSummary, TripMemberAvatar } from "@pulse/services";
 
 function formatDateRange(start?: string | null, end?: string | null) {
@@ -47,8 +46,8 @@ function MemberDots({
             style={{
               marginLeft: i === 0 ? 0 : -6,
               zIndex: shown - i,
-              backgroundColor: memberPalette(i).bg,
-              color: memberPalette(i).fg,
+              backgroundColor: "var(--border)",
+              color: "var(--text-subtle)",
             }}
             className="relative w-6 h-6 rounded-full border-2 border-bg-card flex items-center justify-center text-[9px] font-semibold"
           >

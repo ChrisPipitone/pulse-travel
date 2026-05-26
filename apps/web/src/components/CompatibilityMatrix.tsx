@@ -5,7 +5,7 @@ import { useTripStore } from '@pulse/store'
 import { useCompatibilityMatrix } from '@pulse/hooks'
 import type { Activity, Member, Rating, CompatibilityScore } from '@pulse/types'
 import { RATING_LABELS } from '@pulse/types'
-import { memberPalette, buildColorMap } from '@/lib/memberColors'
+import { MemberAvatar as SharedMemberAvatar } from '@/components/MemberAvatar'
 
 const ACT_PER_PAGE = 10
 const MEM_PER_PAGE = 8
@@ -55,9 +55,6 @@ const cellStyle: Record<Rating, string> = {
   MAYBE: 'bg-cell-maybe text-maybe-text',
   SKIP:  'bg-cell-skip  text-skip-text',
 }
-
-// Stable per-member colors — same person = same color in every view
-function paletteFor(idx: number) { return memberPalette(idx) }
 
 // ── Shared primitives ─────────────────────────────────────────────────────
 
@@ -116,37 +113,8 @@ function Paginator({ page, total, perPage, onChange }: {
   )
 }
 
-// Compact avatar circle + first-name label — consistent color per member
-function MemberAvatar({ member, colorIdx }: { member: Member; colorIdx: number }) {
-  const c = paletteFor(colorIdx)
-  return (
-    <div className="flex flex-col items-center gap-0.5 w-9">
-      {member.avatar_url ? (
-        <img
-          src={member.avatar_url}
-          alt={member.name}
-          className="w-7 h-7 rounded-full object-cover select-none shrink-0"
-          title={member.name}
-        />
-      ) : (
-        <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold select-none shrink-0"
-          style={{ backgroundColor: c.bg, color: c.fg }}
-          title={member.name}
-        >
-          {member.name.charAt(0).toUpperCase()}
-        </div>
-      )}
-      <span className="text-[9px] text-text-muted leading-none text-center w-full truncate" title={member.name}>
-        {member.name.split(' ')[0]}
-      </span>
-    </div>
-  )
-}
-
-function AvatarGroup({ members, colorMap, cap = ROSTER_CAP }: {
+function AvatarGroup({ members, cap = ROSTER_CAP }: {
   members: Member[]
-  colorMap: Map<string, number>
   cap?: number
 }) {
   if (members.length === 0) return <span className="text-[10px] text-text-subtle select-none">—</span>
@@ -155,7 +123,7 @@ function AvatarGroup({ members, colorMap, cap = ROSTER_CAP }: {
   return (
     <div className="flex flex-wrap gap-x-1 gap-y-2">
       {shown.map(m => (
-        <MemberAvatar key={m.id} member={m} colorIdx={colorMap.get(m.id) ?? 0} />
+        <SharedMemberAvatar key={m.id} name={m.name} avatarUrl={m.avatar_url} size="lg" withLabel className="w-9" />
       ))}
       {overflow > 0 && (
         <div className="flex flex-col items-center gap-0.5 w-9">
@@ -171,10 +139,9 @@ function AvatarGroup({ members, colorMap, cap = ROSTER_CAP }: {
 
 // ── View 1: By activity — activities × members, colored rating cells ───────
 
-function ActivitiesRowsTable({ activities, scores, members, maxScore, colorMap }: {
+function ActivitiesRowsTable({ activities, scores, members, maxScore }: {
   activities: Activity[]
   scores: CompatibilityScore[]
-  colorMap: Map<string, number>
   members: Member[]
   maxScore: number
 }) {
@@ -199,13 +166,7 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore, colorMap }
                   return (
                     <div key={m.id} className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5">
-                        {m.avatar_url ? (
-                          <img src={m.avatar_url} alt={m.name} className="w-5 h-5 rounded-full object-cover shrink-0" />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0" style={{ backgroundColor: paletteFor(colorMap.get(m.id) ?? 0).bg, color: paletteFor(colorMap.get(m.id) ?? 0).fg }}>
-                            {m.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                        <SharedMemberAvatar name={m.name} avatarUrl={m.avatar_url} size="sm" />
                         <span className="text-[11px] text-text-muted">{m.name.split(' ')[0]}</span>
                       </div>
                       <div className="w-8 h-8 rounded-[var(--radius-cell)] flex items-center justify-center text-[10px] font-bold shrink-0 select-none">
@@ -229,16 +190,7 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore, colorMap }
             </th>
             {members.map(m => (
               <th key={m.id} className="px-1 py-2.5 text-center min-w-[36px]">
-                {m.avatar_url ? (
-                  <img src={m.avatar_url} alt={m.name} className="w-7 h-7 mx-auto rounded-full object-cover" title={m.name} />
-                ) : (
-                  <div className="w-7 h-7 mx-auto rounded-full flex items-center justify-center text-xs font-semibold" style={{ backgroundColor: paletteFor(colorMap.get(m.id) ?? 0).bg, color: paletteFor(colorMap.get(m.id) ?? 0).fg }} title={m.name}>
-                    {m.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-7 mx-auto">
-                  {m.name.split(' ')[0]}
-                </span>
+                <SharedMemberAvatar name={m.name} avatarUrl={m.avatar_url} size="lg" withLabel />
               </th>
             ))}
             <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-text-muted uppercase tracking-wide min-w-[80px]">Score</th>
@@ -272,12 +224,11 @@ function ActivitiesRowsTable({ activities, scores, members, maxScore, colorMap }
 
 // ── View 2: By member — members × activities, colored rating cells ─────────
 
-export function MembersRowsTable({ members, activities, scores, maxScore, colorMap }: {
+export function MembersRowsTable({ members, activities, scores, maxScore }: {
   members: Member[]
   activities: Activity[]
   scores: CompatibilityScore[]
   maxScore: number
-  colorMap: Map<string, number>
 }) {
   return (
     <>
@@ -286,13 +237,7 @@ export function MembersRowsTable({ members, activities, scores, maxScore, colorM
         {members.map(m => (
           <div key={m.id} className="px-3 py-3 flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              {m.avatar_url ? (
-                <img src={m.avatar_url} alt={m.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
-              ) : (
-                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0" style={{ backgroundColor: paletteFor(colorMap.get(m.id) ?? 0).bg, color: paletteFor(colorMap.get(m.id) ?? 0).fg }}>
-                  {m.name.charAt(0).toUpperCase()}
-                </div>
-              )}
+              <SharedMemberAvatar name={m.name} avatarUrl={m.avatar_url} size="md" />
               <span className="text-xs font-semibold text-text-primary">{m.name.split(' ')[0]}</span>
             </div>
             <div className="flex flex-col gap-1">
@@ -333,13 +278,7 @@ export function MembersRowsTable({ members, activities, scores, maxScore, colorM
             <tr key={m.id} className="border-b border-border last:border-0 hover:bg-bg/40 transition-colors">
               <td className="sticky left-0 z-10 bg-bg-card px-3 py-2.5 align-middle">
                 <div className="flex items-center gap-1.5">
-                  {m.avatar_url ? (
-                    <img src={m.avatar_url} alt={m.name} className="w-6 h-6 rounded-full object-cover shrink-0" />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold shrink-0" style={{ backgroundColor: paletteFor(colorMap.get(m.id) ?? 0).bg, color: paletteFor(colorMap.get(m.id) ?? 0).fg }}>
-                      {m.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <SharedMemberAvatar name={m.name} avatarUrl={m.avatar_url} size="md" />
                   <span className="text-xs font-medium text-text-primary truncate max-w-[60px]">{m.name.split(' ')[0]}</span>
                 </div>
               </td>
@@ -381,12 +320,11 @@ const rosterBadge: Record<Rating, string> = {
   SKIP:  'bg-cell-skip  text-skip-text',
 }
 
-function RosterCards({ activities, scores, members, maxScore, colorMap }: {
+function RosterCards({ activities, scores, members, maxScore }: {
   activities: Activity[]
   scores: CompatibilityScore[]
   members: Member[]
   maxScore: number
-  colorMap: Map<string, number>
 }) {
   return (
     <div className="flex flex-col divide-y divide-border">
@@ -412,13 +350,13 @@ function RosterCards({ activities, scores, members, maxScore, colorMap }: {
               {ROSTER_RATINGS.map(r => byRating[r].length > 0 && (
                 <div key={r} className="flex items-center gap-2">
                   <span className={`shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-[var(--radius-badge)] text-[9px] font-bold w-12 justify-center ${rosterBadge[r]}`}>{RATING_LABELS[r]}</span>
-                  <AvatarGroup members={byRating[r]} colorMap={colorMap} cap={6} />
+                  <AvatarGroup members={byRating[r]} cap={6} />
                 </div>
               ))}
               {unrated.length > 0 && (
                 <div className="flex items-center gap-2 opacity-40">
                   <span className="shrink-0 text-[9px] font-semibold text-text-subtle uppercase w-10 text-center">–</span>
-                  <AvatarGroup members={unrated} colorMap={colorMap} cap={6} />
+                  <AvatarGroup members={unrated} cap={6} />
                 </div>
               )}
             </div>
@@ -429,18 +367,17 @@ function RosterCards({ activities, scores, members, maxScore, colorMap }: {
   )
 }
 
-function RosterTable({ activities, scores, members, maxScore, colorMap }: {
+function RosterTable({ activities, scores, members, maxScore }: {
   activities: Activity[]
   scores: CompatibilityScore[]
   members: Member[]
   maxScore: number
-  colorMap: Map<string, number>
 }) {
   return (
     <>
       {/* Mobile: card layout */}
       <div className="sm:hidden">
-        <RosterCards activities={activities} scores={scores} members={members} maxScore={maxScore} colorMap={colorMap} />
+        <RosterCards activities={activities} scores={scores} members={members} maxScore={maxScore} />
       </div>
       {/* Desktop: table */}
       <table className="hidden sm:table w-full border-collapse text-sm">
@@ -474,11 +411,11 @@ function RosterTable({ activities, scores, members, maxScore, colorMap }: {
                 </td>
                 {ROSTER_RATINGS.map(r => (
                   <td key={r} className="px-3 py-3 align-top">
-                    <AvatarGroup members={byRating[r]} colorMap={colorMap} />
+                    <AvatarGroup members={byRating[r]} />
                   </td>
                 ))}
                 <td className="px-3 py-3 align-top opacity-50">
-                  <AvatarGroup members={unrated} colorMap={colorMap} />
+                  <AvatarGroup members={unrated} />
                 </td>
                 <td className="px-3 py-3 align-middle">
                   <ScoreBar score={score?.score ?? 0} max={maxScore} />
@@ -503,10 +440,9 @@ interface CrewRow {
   excitedCount: number
 }
 
-function CrewCards({ rows, maxScore, colorMap }: {
+function CrewCards({ rows, maxScore }: {
   rows: CrewRow[]
   maxScore: number
-  colorMap: Map<string, number>
 }) {
   return (
     <div className="flex flex-col gap-3">
@@ -540,7 +476,7 @@ function CrewCards({ rows, maxScore, colorMap }: {
                     <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-must text-must-text">
                       Can't miss
                     </span>
-                    <AvatarGroup members={mustMembers} colorMap={colorMap} />
+                    <AvatarGroup members={mustMembers} />
                   </div>
                 )}
                 {wantMembers.length > 0 && (
@@ -548,7 +484,7 @@ function CrewCards({ rows, maxScore, colorMap }: {
                     <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-want text-want-text">
                       Want to
                     </span>
-                    <AvatarGroup members={wantMembers} colorMap={colorMap} />
+                    <AvatarGroup members={wantMembers} />
                   </div>
                 )}
                 {maybeMembers.length > 0 && (
@@ -556,7 +492,7 @@ function CrewCards({ rows, maxScore, colorMap }: {
                     <span className="shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded-[var(--radius-badge)] text-[10px] font-bold bg-cell-maybe text-maybe-text">
                       Maybe
                     </span>
-                    <AvatarGroup members={maybeMembers} colorMap={colorMap} />
+                    <AvatarGroup members={maybeMembers} />
                   </div>
                 )}
               </div>
@@ -576,10 +512,9 @@ function CrewCards({ rows, maxScore, colorMap }: {
 
 // ── View 5: Travel twin — N×N Jaccard compatibility heatmap ──────────────
 
-function TwinGrid({ members, jaccardMatrix, colorMap }: {
+function TwinGrid({ members, jaccardMatrix }: {
   members: Member[]
   jaccardMatrix: Map<string, Map<string, number | null>>
-  colorMap: Map<string, number>
 }) {
   // Build unique pairs sorted by compatibility for mobile list
   const pairs = useMemo(() => {
@@ -598,18 +533,12 @@ function TwinGrid({ members, jaccardMatrix, colorMap }: {
       {/* Mobile: sorted pair list */}
       <div className="sm:hidden flex flex-col divide-y divide-border">
         {pairs.map(({ a, b, pct }) => {
-          const ca = paletteFor(colorMap.get(a.id) ?? 0)
-          const cb = paletteFor(colorMap.get(b.id) ?? 0)
           return (
             <div key={`${a.id}-${b.id}`} className="px-4 py-3 flex items-center gap-3">
               <div className="flex items-center gap-1 shrink-0">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: ca.bg, color: ca.fg }}>
-                  {a.name.charAt(0).toUpperCase()}
-                </div>
+                <SharedMemberAvatar name={a.name} avatarUrl={a.avatar_url} size="lg" />
                 <span className="text-[10px] text-text-muted">↔</span>
-                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: cb.bg, color: cb.fg }}>
-                  {b.name.charAt(0).toUpperCase()}
-                </div>
+                <SharedMemberAvatar name={b.name} avatarUrl={b.avatar_url} size="lg" />
               </div>
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="text-xs text-text-muted truncate">{a.name.split(' ')[0]} & {b.name.split(' ')[0]}</span>
@@ -634,38 +563,20 @@ function TwinGrid({ members, jaccardMatrix, colorMap }: {
           <thead>
             <tr className="border-b border-border">
               <th className="sticky left-0 z-10 bg-bg-card min-w-[112px] w-28" />
-              {members.map(m => {
-                const c = paletteFor(colorMap.get(m.id) ?? 0)
-                return (
-                  <th key={m.id} className="px-1.5 py-3 text-center min-w-[52px]">
-                    <div
-                      className="w-8 h-8 mx-auto rounded-full flex items-center justify-center text-xs font-bold select-none"
-                      style={{ backgroundColor: c.bg, color: c.fg }}
-                      title={m.name}
-                    >
-                      {m.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-[9px] text-text-subtle mt-0.5 block truncate w-10 mx-auto">
-                      {m.name.split(' ')[0]}
-                    </span>
-                  </th>
-                )
-              })}
+              {members.map(m => (
+                <th key={m.id} className="px-1.5 py-3 text-center min-w-[52px]">
+                  <SharedMemberAvatar name={m.name} avatarUrl={m.avatar_url} size="lg" withLabel />
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {members.map(rowMember => {
-              const c = paletteFor(colorMap.get(rowMember.id) ?? 0)
               return (
                 <tr key={rowMember.id} className="border-b border-border last:border-0">
                   <td className="sticky left-0 z-10 bg-bg-card px-3 py-2 align-middle">
                     <div className="flex items-center gap-2">
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold select-none shrink-0"
-                        style={{ backgroundColor: c.bg, color: c.fg }}
-                      >
-                        {rowMember.name.charAt(0).toUpperCase()}
-                      </div>
+                      <SharedMemberAvatar name={rowMember.name} avatarUrl={rowMember.avatar_url} size="md" />
                       <span className="text-xs font-medium text-text-primary truncate max-w-[72px]">
                         {rowMember.name.split(' ')[0]}
                       </span>
@@ -726,9 +637,6 @@ export function CompatibilityMatrix() {
     () => matrix.map(s => activities.find(a => a.id === s.activity_id)).filter((a): a is Activity => !!a),
     [matrix, activities]
   )
-
-  // Stable color index per member — index in full members array
-  const colorMap = useMemo(() => buildColorMap(members), [members])
 
   // View 4: re-sort activities by excited-member count (MUST + WANT), score as tiebreaker
   const crewRows = useMemo((): CrewRow[] =>
@@ -864,20 +772,20 @@ export function CompatibilityMatrix() {
 
       {/* Matrix — crew gets card layout, all others get table-in-box */}
       {isCrew ? (
-        <CrewCards rows={crewSlice} maxScore={maxScore} colorMap={colorMap} />
+        <CrewCards rows={crewSlice} maxScore={maxScore} />
       ) : (
         <div className="overflow-x-auto scrollbar-hide rounded-[var(--radius-card)] border border-border bg-bg-card">
           {isActRows && (
-            <ActivitiesRowsTable activities={actSlice} scores={scoreSlice} members={memSlice} maxScore={maxScore} colorMap={colorMap} />
+            <ActivitiesRowsTable activities={actSlice} scores={scoreSlice} members={memSlice} maxScore={maxScore} />
           )}
           {isMemRows && (
-            <MembersRowsTable members={memSlice} activities={actSlice} scores={scoreSlice} maxScore={maxScore} colorMap={colorMap} />
+            <MembersRowsTable members={memSlice} activities={actSlice} scores={scoreSlice} maxScore={maxScore} />
           )}
           {isRoster && (
-            <RosterTable activities={actSlice} scores={scoreSlice} members={members} maxScore={maxScore} colorMap={colorMap} />
+            <RosterTable activities={actSlice} scores={scoreSlice} members={members} maxScore={maxScore} />
           )}
           {isTwin && (
-            <TwinGrid members={members} jaccardMatrix={jaccardMatrix} colorMap={colorMap} />
+            <TwinGrid members={members} jaccardMatrix={jaccardMatrix} />
           )}
         </div>
       )}
@@ -904,20 +812,6 @@ export function CompatibilityMatrix() {
               <div className="w-3 h-3 rounded-sm bg-cell-empty" />
               <span className="text-[10px] text-text-muted">No rating</span>
             </div>
-          </div>
-        )}
-
-        {(isRoster || isCrew) && members.length <= 10 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            {members.map((m, idx) => {
-              const c = paletteFor(idx)
-              return (
-                <div key={m.id} className="flex items-center gap-1">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: c.bg }} />
-                  <span className="text-[10px] text-text-muted">{m.name.split(' ')[0]}</span>
-                </div>
-              )
-            })}
           </div>
         )}
 

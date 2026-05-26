@@ -1,7 +1,7 @@
 "use client"
 
 import type { Member, Activity } from '@pulse/types'
-import { memberPalette } from '@/lib/memberColors'
+import { MemberAvatar } from '@/components/MemberAvatar'
 
 export interface TwinPreview {
   member: Member
@@ -81,40 +81,11 @@ const CATEGORY_CONFIG: Record<string, { bg: string; color: string; label: string
   },
 }
 
-// ── Enthusiasm ring ───────────────────────────────────────────────────────────
-
-function EnthusiasmRing({ musts, wants, total }: { musts: number; wants: number; total: number }) {
-  const size = 44, r = 18, sw = 3, cx = size / 2
-  const C = 2 * Math.PI * r
-  const mArc = total > 0 ? (musts / total) * C : 0
-  const wArc = total > 0 ? (wants / total) * C : 0
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ position: 'absolute', top: 0, left: 0 }}>
-      <circle cx={cx} cy={cx} r={r} fill="none" stroke="#E8E6E2" strokeWidth={sw} />
-      {wArc > 0.4 && (
-        <circle cx={cx} cy={cx} r={r} fill="none" stroke="#00C9A7" strokeWidth={sw}
-          strokeDasharray={`${wArc} ${C}`} strokeDashoffset={C / 4 - mArc}
-          transform={`rotate(-90 ${cx} ${cx})`} />
-      )}
-      {mArc > 0.4 && (
-        <circle cx={cx} cy={cx} r={r} fill="none" stroke="#FF5C35" strokeWidth={sw}
-          strokeDasharray={`${mArc} ${C}`} strokeDashoffset={C / 4}
-          transform={`rotate(-90 ${cx} ${cx})`} />
-      )}
-    </svg>
-  )
-}
-
-function getInitials(name: string) {
-  return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-}
-
 // ── Card ──────────────────────────────────────────────────────────────────────
 
 export function GroupiesMemberCard({
-  member, colorIndex, musts, wants, activityCount, memberCategoryChips, topTwins, onClick
+  member, colorIndex: _colorIndex, musts: _musts, wants: _wants, activityCount: _activityCount, memberCategoryChips, topTwins, onClick
 }: GroupiesMemberCardProps) {
-  const palette = memberPalette(colorIndex)
   const [firstName, ...rest] = member.name.trim().split(' ')
   const lastName = rest.join(' ')
   const topTwin = topTwins[0] ?? null
@@ -129,15 +100,7 @@ export function GroupiesMemberCard({
       className="bg-bg-card rounded-[14px] border border-border overflow-hidden cursor-pointer active:bg-[#FAFAF8] transition-colors"
     >
       <div className="flex items-center gap-[11px] px-[14px] pt-[13px] pb-[11px]">
-        <div className="relative flex-shrink-0 w-11 h-11">
-          <EnthusiasmRing musts={musts} wants={wants} total={activityCount} />
-          <div
-            className="absolute top-[3px] left-[3px] w-[38px] h-[38px] rounded-full flex items-center justify-center text-[13px] font-extrabold"
-            style={{ backgroundColor: palette.bg, color: palette.fg }}
-          >
-            {getInitials(member.name)}
-          </div>
-        </div>
+        <MemberAvatar name={member.name} avatarUrl={member.avatar_url} size="2xl" className="flex-shrink-0" />
 
         <div className="flex-1 min-w-0">
           <div className="text-sm font-bold leading-tight">
@@ -189,19 +152,9 @@ export function GroupiesMemberCard({
       <div className="flex items-center gap-2 px-[14px] pb-[11px] pt-2 border-t border-border bg-[#FAFAF8] overflow-hidden">
         <span className="text-[10px] text-text-subtle font-medium whitespace-nowrap flex-shrink-0">Vibes with</span>
         <div className="flex items-center flex-shrink-0">
-          {topTwins.slice(0, 3).map((t, i) => {
-            const tp = memberPalette(t.colorIndex)
-            return (
-              <div
-                key={t.member.id}
-                className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[8px] font-extrabold border-2 border-bg-card flex-shrink-0"
-                style={{ backgroundColor: tp.bg, color: tp.fg, marginLeft: i === 0 ? 0 : '-6px' }}
-                title={t.member.name}
-              >
-                {getInitials(t.member.name)}
-              </div>
-            )
-          })}
+          {topTwins.slice(0, 3).map((t, i) => (
+            <MemberAvatar key={t.member.id} name={t.member.name} avatarUrl={t.member.avatar_url} size="sm" overlap={i > 0} />
+          ))}
         </div>
         {topTwin?.sharedMust ? (
           <div className="flex items-center gap-1 flex-shrink-0 max-w-[160px] bg-[rgba(255,92,53,0.08)] border border-[rgba(255,92,53,0.14)] rounded-[10px] px-2 py-px overflow-hidden">
