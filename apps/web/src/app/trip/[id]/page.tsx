@@ -14,7 +14,6 @@ import {
 } from "@pulse/hooks";
 import { useTripStore } from "@pulse/store";
 import { ActivityFormModal } from "@/components/ActivityFormModal";
-import { CompatibilityMatrix } from "@/components/CompatibilityMatrix";
 import { FindYourCrew } from "@/components/FindYourCrew";
 import { FindYourCrewOverview } from "@/components/FindYourCrewOverview";
 import { MemberDatesModal } from "@/components/MemberDatesModal";
@@ -31,13 +30,12 @@ import { MemberAvatar } from "@/components/MemberAvatar";
 import { KebabMenu } from "@/components/KebabMenu";
 import type { Activity, Stop } from "@pulse/types";
 
-type Tab = "activities" | "timeline" | "crew" | "matrix";
+type Tab = "activities" | "timeline" | "crew";
 
 const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
   activities: { short: "Activities", full: "Activities" },
   timeline:   { short: "Timeline",   full: "Timeline" },
   crew:       { short: "Find your crew", full: "Find your crew" },
-  matrix:     { short: "Matrix",     full: "Matrix" },
 };
 
 function formatDateRange(start: string, end: string) {
@@ -490,7 +488,7 @@ export default function TripPage({
           <div className="flex-1 min-w-0 flex flex-col gap-5">
             {/* Tab bar */}
             <div className="flex border-b border-border">
-              {(["activities", "timeline", "crew", "matrix"] as Tab[]).map((t) => (
+              {(["activities", "timeline", "crew"] as Tab[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -523,8 +521,6 @@ export default function TripPage({
             {/* Find your crew tab */}
             {tab === "crew" && <FindYourCrewOverview />}
 
-            {/* Matrix tab — other compatibility views */}
-            {tab === "matrix" && <CompatibilityMatrix />}
           </div>
         </div>
       </div>
