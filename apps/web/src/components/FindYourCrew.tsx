@@ -1,19 +1,21 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useModalEscape } from "@/hooks/useModalEscape";
 import { useTripStore } from "@pulse/store";
 import { useSession } from "@pulse/hooks";
 import { useRateActivity } from "@pulse/hooks";
-import type { Activity, Member, Rating } from "@pulse/types";
-import { memberPalette, buildColorMap } from "@/lib/memberColors";
+import type { Activity, Member, Rating, Stop } from "@pulse/types";
+import { MemberAvatar } from "@/components/MemberAvatar";
 
-type SortKey = "popular" | "my-recs" | "cant-miss" | "newest";
+type SortKey = "popular" | "my-recs" | "cant-miss" | "newest" | "by-stop";
 
 const SORT_LABELS: Record<SortKey, string> = {
   popular: "Popular",
   "cant-miss": "Can't Miss",
   "my-recs": "My Recs",
   newest: "Newest",
+  "by-stop": "By Stop",
 };
 
 // ── Shared types ──────────────────────────────────────────────────────────────
@@ -56,32 +58,26 @@ function PinIcon() {
 
 function AvatarChip({
   member,
-  colorIdx,
   isYou = false,
   soft = false,
 }: {
   member: Member;
-  colorIdx: number;
   isYou?: boolean;
   soft?: boolean;
 }) {
-  const c = memberPalette(colorIdx);
   return (
     <div
       className={`flex items-center gap-1.5 bg-bg-card border border-border rounded-full pl-1 pr-2.5 py-1 text-xs font-medium text-text-primary ${soft ? "opacity-65" : ""}`}
     >
-      <div
-        className="w-[22px] h-[22px] rounded-full flex items-center justify-center text-[8px] font-bold shrink-0 text-white"
-        style={{
-          backgroundColor: c.bg,
-          color: c.fg,
-          boxShadow: isYou
-            ? `0 0 0 2px var(--accent), 0 0 0 3.5px var(--bg-card)`
-            : undefined,
-        }}
+      <span
+        style={
+          isYou
+            ? { boxShadow: `0 0 0 2px var(--accent), 0 0 0 3.5px var(--bg-card)`, borderRadius: "9999px", display: "inline-flex" }
+            : undefined
+        }
       >
-        {member.name.charAt(0).toUpperCase()}
-      </div>
+        <MemberAvatar name={member.name} avatarUrl={member.avatar_url} size="sm" />
+      </span>
       <span>{isYou ? "You" : member.name.split(" ")[0]}</span>
     </div>
   );
@@ -123,12 +119,10 @@ function StatusPill({ rating }: { rating: Rating | null }) {
 function AvatarRow({
   mustMembers,
   wantMembers,
-  colorMap,
   userId,
 }: {
   mustMembers: Member[];
   wantMembers: Member[];
-  colorMap: Map<string, number>;
   userId?: string;
 }) {
   const allShown = [...mustMembers, ...wantMembers].slice(0, 5);
@@ -138,25 +132,22 @@ function AvatarRow({
     <div className="flex items-center">
       <div className="flex">
         {allShown.map((m, i) => {
-          const c = memberPalette(colorMap.get(m.id) ?? 0);
           const isWant = !mustSet.has(m.id);
           const isYou = m.id === userId;
           return (
-            <div
+            <span
               key={m.id}
-              className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
+              title={m.name}
               style={{
-                backgroundColor: c.bg,
-                color: c.fg,
                 marginLeft: i > 0 ? "-6px" : 0,
-                border: "1.5px solid var(--bg-card)",
                 opacity: isWant ? 0.6 : 1,
                 boxShadow: isYou ? "0 0 0 2px var(--accent)" : undefined,
+                borderRadius: "9999px",
+                display: "inline-flex",
               }}
-              title={m.name}
             >
-              {m.name.charAt(0).toUpperCase()}
-            </div>
+              <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="md" overlap={i > 0} />
+            </span>
           );
         })}
       </div>
@@ -175,14 +166,12 @@ function TierBlock({
   mustMembers,
   wantMembers,
   maybeMembers,
-  colorMap,
   userId,
   myRating,
 }: {
   mustMembers: Member[];
   wantMembers: Member[];
   maybeMembers: Member[];
-  colorMap: Map<string, number>;
   userId?: string;
   myRating: Rating | null;
 }) {
@@ -191,23 +180,9 @@ function TierBlock({
       {mustMembers.length > 0 && (
         <div className="flex items-center gap-2 py-0.5">
           <div className="flex">
-            {mustMembers.map((m, i) => {
-              const c = memberPalette(colorMap.get(m.id) ?? 0);
-              return (
-                <div
-                  key={m.id}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
-                  style={{
-                    backgroundColor: c.bg,
-                    color: c.fg,
-                    marginLeft: i > 0 ? "-6px" : 0,
-                    border: "1.5px solid var(--bg-card)",
-                  }}
-                >
-                  {m.name.charAt(0).toUpperCase()}
-                </div>
-              );
-            })}
+            {mustMembers.map((m, i) => (
+              <MemberAvatar key={m.id} name={m.name} avatarUrl={m.avatar_url} size="md" overlap={i > 0} />
+            ))}
           </div>
           <span className="text-xs text-text-muted truncate">
             {mustMembers.map((m) => m.name.split(" ")[0]).join(", ")}
@@ -222,23 +197,9 @@ function TierBlock({
       {wantMembers.length > 0 && (
         <div className="flex items-center gap-2 py-0.5 opacity-60">
           <div className="flex">
-            {wantMembers.map((m, i) => {
-              const c = memberPalette(colorMap.get(m.id) ?? 0);
-              return (
-                <div
-                  key={m.id}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
-                  style={{
-                    backgroundColor: c.bg,
-                    color: c.fg,
-                    marginLeft: i > 0 ? "-6px" : 0,
-                    border: "1.5px solid var(--bg-card)",
-                  }}
-                >
-                  {m.name.charAt(0).toUpperCase()}
-                </div>
-              );
-            })}
+            {wantMembers.map((m, i) => (
+              <MemberAvatar key={m.id} name={m.name} avatarUrl={m.avatar_url} size="md" overlap={i > 0} />
+            ))}
           </div>
           <span className="text-xs text-text-muted truncate">
             {wantMembers.map((m) => m.name.split(" ")[0]).join(", ")}
@@ -252,23 +213,9 @@ function TierBlock({
           <div className="flex items-center gap-2 py-0.5 mt-0.5 opacity-35">
             <div className="w-1.5 h-1.5 rounded-full bg-maybe-text shrink-0" />
             <div className="flex">
-              {maybeMembers.slice(0, 3).map((m, i) => {
-                const c = memberPalette(colorMap.get(m.id) ?? 0);
-                return (
-                  <div
-                    key={m.id}
-                    className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold shrink-0"
-                    style={{
-                      backgroundColor: c.bg,
-                      color: c.fg,
-                      marginLeft: i > 0 ? "-5px" : 0,
-                      border: "1.5px solid var(--bg-card)",
-                    }}
-                  >
-                    {m.name.charAt(0).toUpperCase()}
-                  </div>
-                );
-              })}
+              {maybeMembers.slice(0, 3).map((m, i) => (
+                <MemberAvatar key={m.id} name={m.name} avatarUrl={m.avatar_url} size="sm" overlap={i > 0} />
+              ))}
             </div>
             <span className="text-[10px] text-text-subtle truncate">
               {maybeMembers
@@ -325,18 +272,22 @@ function CrewFooter({
 
 function CrewModalD2({
   row,
-  colorMap,
   userId,
   onClose,
   onRate,
   ratingLoading,
+  canEdit,
+  onEdit,
+  onDelete,
 }: {
   row: CrewRowData;
-  colorMap: Map<string, number>;
   userId?: string;
   onClose: () => void;
   onRate: (r: Rating) => void;
   ratingLoading: boolean;
+  canEdit?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
   const {
     activity,
@@ -349,6 +300,8 @@ function CrewModalD2({
   } = row;
 
   const [pendingRating, setPendingRating] = useState<Rating | null>(myRating);
+
+  useModalEscape(onClose)
 
   function handleRate(r: Rating) {
     const next = pendingRating === r ? null : r;
@@ -391,14 +344,10 @@ function CrewModalD2({
   const showOthers = maybeMembers.length > 0 || skipMembers.length > 0;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center sm:justify-center sm:p-5"
-      style={{ background: "rgba(0,0,0,.42)", backdropFilter: "blur(3px)" }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
-        className="bg-bg-card w-full max-w-[520px] max-h-[92vh] sm:max-h-[86vh] overflow-y-auto flex flex-col"
-        style={{ borderRadius: "var(--radius-card) var(--radius-card) 0 0" }}
+        className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-[520px] max-h-[92vh] sm:max-h-[86vh] overflow-y-auto flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -455,7 +404,6 @@ function CrewModalD2({
                   <AvatarChip
                     key={m.id}
                     member={m}
-                    colorIdx={colorMap.get(m.id) ?? 0}
                     isYou={m.id === userId}
                   />
                 ))}
@@ -487,7 +435,6 @@ function CrewModalD2({
                   <AvatarChip
                     key={m.id}
                     member={m}
-                    colorIdx={colorMap.get(m.id) ?? 0}
                     isYou={m.id === userId}
                     soft={m.id !== userId}
                   />
@@ -511,7 +458,6 @@ function CrewModalD2({
                     Maybe
                   </span>
                   {maybeMembers.map((m) => {
-                    const c = memberPalette(colorMap.get(m.id) ?? 0);
                     const isYou = m.id === userId;
                     return (
                       <div
@@ -524,12 +470,7 @@ function CrewModalD2({
                             : undefined,
                         }}
                       >
-                        <div
-                          className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[7px] font-bold"
-                          style={{ backgroundColor: c.bg, color: c.fg }}
-                        >
-                          {m.name.charAt(0).toUpperCase()}
-                        </div>
+                        <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="sm" />
                         <span>{isYou ? "You" : m.name.split(" ")[0]}</span>
                       </div>
                     );
@@ -541,24 +482,16 @@ function CrewModalD2({
                   <span className="text-[10px] font-bold uppercase tracking-[.06em] w-12 shrink-0 text-text-subtle">
                     Skipping
                   </span>
-                  {skipMembers.map((m) => {
-                    const c = memberPalette(colorMap.get(m.id) ?? 0);
-                    return (
-                      <div
-                        key={m.id}
-                        className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-text-muted opacity-55"
-                        style={{ background: "rgba(0,0,0,.03)" }}
-                      >
-                        <div
-                          className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[7px] font-bold"
-                          style={{ backgroundColor: c.bg, color: c.fg }}
-                        >
-                          {m.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span>{m.name.split(" ")[0]}</span>
-                      </div>
-                    );
-                  })}
+                  {skipMembers.map((m) => (
+                    <div
+                      key={m.id}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium text-text-muted opacity-55"
+                      style={{ background: "rgba(0,0,0,.03)" }}
+                    >
+                      <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="sm" />
+                      <span>{m.name.split(" ")[0]}</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -652,6 +585,27 @@ function CrewModalD2({
             </>
           )}
         </div>
+
+        {canEdit && (onEdit || onDelete) && (
+          <div className="px-5 py-3.5 border-t border-border flex items-center gap-2">
+            {onEdit && (
+              <button
+                onClick={onEdit}
+                className="flex-1 py-2 text-[12px] font-semibold rounded-[var(--radius-btn)] border border-border text-text-muted hover:border-accent/40 hover:text-accent transition-colors"
+              >
+                Edit
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={onDelete}
+                className="flex-1 py-2 text-[12px] font-semibold rounded-[var(--radius-btn)] border border-border text-text-muted hover:border-red-300 hover:text-red-500 transition-colors"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -661,12 +615,10 @@ function CrewModalD2({
 
 function CrewCard({
   row,
-  colorMap,
   userId,
   onOpen,
 }: {
   row: CrewRowData;
-  colorMap: Map<string, number>;
   userId?: string;
   onOpen: () => void;
 }) {
@@ -731,7 +683,6 @@ function CrewCard({
           <AvatarRow
             mustMembers={mustMembers}
             wantMembers={wantMembers}
-            colorMap={colorMap}
             userId={userId}
           />
         ) : (
@@ -739,7 +690,6 @@ function CrewCard({
             mustMembers={mustMembers}
             wantMembers={wantMembers}
             maybeMembers={maybeMembers}
-            colorMap={colorMap}
             userId={userId}
             myRating={myRating}
           />
@@ -760,18 +710,37 @@ function CrewCard({
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export function FindYourCrew() {
-  const activities = useTripStore((s) => s.activities);
+export function FindYourCrew({
+  onAdd,
+  onEdit,
+  onDelete,
+  tripOwnerId,
+  hiddenIds,
+}: {
+  onAdd?: () => void;
+  onEdit?: (a: Activity) => void;
+  onDelete?: (a: Activity) => void;
+  tripOwnerId?: string;
+  hiddenIds?: Set<string>;
+} = {}) {
+  const allActivities = useTripStore((s) => s.activities);
   const members = useTripStore((s) => s.members);
   const ratings = useTripStore((s) => s.ratings);
+  const stops = useTripStore((s) => s.stops);
   const { session } = useSession();
   const { rateActivity, loading: ratingLoading } = useRateActivity();
 
-  const userId = session?.user.id;
-  const colorMap = useMemo(() => buildColorMap(members), [members]);
+  const activities = hiddenIds?.size
+    ? allActivities.filter((a) => !hiddenIds.has(a.id))
+    : allActivities;
 
+  const userId = session?.user.id;
   const [openId, setOpenId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("popular");
+
+  function canEditActivity(a: Activity) {
+    return userId === tripOwnerId || userId === a.added_by;
+  }
 
   const rows = useMemo((): CrewRowData[] => {
     return activities
@@ -807,99 +776,154 @@ export function FindYourCrew() {
         };
       })
       .sort((a, b) => {
+        if (sortKey === "by-stop") {
+          return b.mustCount * 3 + b.wantCount - (a.mustCount * 3 + a.wantCount);
+        }
         if (sortKey === "my-recs") {
           const aMe = a.activity.added_by === userId ? 0 : 1;
           const bMe = b.activity.added_by === userId ? 0 : 1;
           if (aMe !== bMe) return aMe - bMe;
         }
         if (sortKey === "cant-miss") {
-          const TIER: Record<string, number> = {
-            MUST: 0,
-            WANT: 1,
-            MAYBE: 2,
-            SKIP: 3,
-          };
+          const TIER: Record<string, number> = { MUST: 0, WANT: 1, MAYBE: 2, SKIP: 3 };
           const av = a.myRating ? (TIER[a.myRating] ?? 4) : 4;
           const bv = b.myRating ? (TIER[b.myRating] ?? 4) : 4;
           if (av !== bv) return av - bv;
         }
         if (sortKey === "newest") {
-          return (
-            new Date(b.activity.created_at).getTime() -
-            new Date(a.activity.created_at).getTime()
-          );
+          return new Date(b.activity.created_at).getTime() - new Date(a.activity.created_at).getTime();
         }
         return b.mustCount * 3 + b.wantCount - (a.mustCount * 3 + a.wantCount);
       });
   }, [activities, members, ratings, userId, sortKey]);
 
+  const sortedStops = useMemo(
+    () => [...stops].sort((a, b) => a.position - b.position),
+    [stops]
+  );
+
   const openRow = rows.find((r) => r.activity.id === openId) ?? null;
 
   if (activities.length === 0) {
     return (
-      <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-14 flex flex-col items-center gap-2 text-center">
-        <p className="text-sm font-medium text-text-primary">
-          No activities yet
-        </p>
-        <p className="text-xs text-text-muted max-w-xs">
-          Add activities to the trip — then come back to see who's excited about
-          what.
-        </p>
-      </div>
-    );
-  }
-
-  if (ratings.length === 0) {
-    return (
-      <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-14 flex flex-col items-center gap-2 text-center">
-        <p className="text-sm font-medium text-text-primary">No ratings yet</p>
-        <p className="text-xs text-text-muted max-w-xs">
-          Rate activities to see who's excited about what.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="flex items-center justify-end gap-2">
-        <span className="text-[11px] text-text-subtle">Sort:</span>
-        <div className="flex items-center gap-0.5 bg-bg-card border border-border rounded-lg p-0.5">
-          {(Object.keys(SORT_LABELS) as SortKey[]).map((k) => (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-text-muted">0 activities</p>
+          {onAdd && (
             <button
-              key={k}
-              onClick={() => setSortKey(k)}
-              className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                sortKey === k
-                  ? "bg-accent text-white shadow-sm"
-                  : "text-text-muted hover:text-text-primary"
-              }`}
+              onClick={onAdd}
+              className="text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-btn)] bg-accent text-white hover:opacity-90 transition-opacity"
             >
-              {SORT_LABELS[k]}
+              + Add activity
             </button>
-          ))}
+          )}
+        </div>
+        <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
+          <p className="text-sm font-medium text-text-primary">No activities yet</p>
+          <p className="text-xs text-text-muted">Add the first one for the group to rate.</p>
         </div>
       </div>
+    );
+  }
+
+  function renderCards(cardRows: typeof rows) {
+    return (
       <div className="flex flex-col gap-2.5">
-        {rows.map((row) => (
+        {cardRows.map((row) => (
           <CrewCard
             key={row.activity.id}
             row={row}
-            colorMap={colorMap}
             userId={userId}
             onOpen={() => setOpenId(row.activity.id)}
           />
         ))}
       </div>
+    );
+  }
+
+  const fmtDate = (d: string) =>
+    new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  function stopDateLabel(stop: Stop) {
+    if (stop.date_from && stop.date_to) return `${fmtDate(stop.date_from)} – ${fmtDate(stop.date_to)}`;
+    if (stop.date_from) return `From ${fmtDate(stop.date_from)}`;
+    if (stop.date_to) return `Until ${fmtDate(stop.date_to)}`;
+    return null;
+  }
+
+  return (
+    <>
+      <div className="flex items-center justify-between gap-2">
+        {onAdd ? (
+          <button
+            onClick={onAdd}
+            className="text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-btn)] bg-accent text-white hover:opacity-90 transition-opacity shrink-0"
+          >
+            + Add activity
+          </button>
+        ) : <div />}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] text-text-subtle">Sort:</span>
+          <div className="flex items-center gap-0.5 bg-bg-card border border-border rounded-lg p-0.5">
+            {(Object.keys(SORT_LABELS) as SortKey[]).filter(k => k !== "by-stop" || stops.length > 0).map((k) => (
+              <button
+                key={k}
+                onClick={() => setSortKey(k)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
+                  sortKey === k
+                    ? "bg-accent text-white shadow-sm"
+                    : "text-text-muted hover:text-text-primary"
+                }`}
+              >
+                {SORT_LABELS[k]}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {sortKey === "by-stop" ? (
+        <div className="flex flex-col gap-4">
+          {sortedStops.map((stop) => {
+            const stopRows = rows.filter((r) => r.activity.stop_id === stop.id);
+            if (stopRows.length === 0) return null;
+            const dateLabel = stopDateLabel(stop);
+            return (
+              <div key={stop.id} className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-text-primary">{stop.name}</span>
+                  {dateLabel && <span className="text-[11px] text-text-muted">{dateLabel}</span>}
+                </div>
+                {renderCards(stopRows)}
+              </div>
+            );
+          })}
+          {(() => {
+            const stopIds = new Set(stops.map((s) => s.id));
+            const unassigned = rows.filter((r) => !r.activity.stop_id || !stopIds.has(r.activity.stop_id));
+            if (unassigned.length === 0) return null;
+            return (
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-bold text-text-muted">Unassigned</span>
+                {renderCards(unassigned)}
+              </div>
+            );
+          })()}
+        </div>
+      ) : (
+        renderCards(rows)
+      )}
 
       {openRow && (
         <CrewModalD2
           row={openRow}
-          colorMap={colorMap}
           userId={userId}
           onClose={() => setOpenId(null)}
           onRate={(r) => rateActivity(openRow.activity.id, r)}
           ratingLoading={ratingLoading}
+          canEdit={canEditActivity(openRow.activity)}
+          onEdit={onEdit ? () => { setOpenId(null); onEdit(openRow.activity); } : undefined}
+          onDelete={onDelete ? () => { setOpenId(null); onDelete(openRow.activity); } : undefined}
         />
       )}
     </>
