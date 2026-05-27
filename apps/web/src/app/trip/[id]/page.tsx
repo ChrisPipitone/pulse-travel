@@ -443,7 +443,7 @@ export default function TripPage({
             <StopsPanel
               tripId={id}
               userId={userId}
-              tripOwnerId={trip.created_by}
+              tripOwnerId={trip.created_by ?? undefined}
               onOpenAdd={() => setStopModal({ mode: "add" })}
               onOpenEdit={(stop) => setStopModal({ mode: "edit", stop })}
             />
@@ -512,7 +512,7 @@ export default function TripPage({
                 onAdd={() => setModal({ mode: "add" })}
                 onEdit={(a) => setModal({ mode: "edit", activity: a })}
                 onDelete={handleDelete}
-                tripOwnerId={trip.created_by}
+                tripOwnerId={trip.created_by ?? undefined}
                 hiddenIds={hiddenActivityIds}
               />
             )}
@@ -559,7 +559,7 @@ export default function TripPage({
         onClose={() => setShowEditTrip(false)}
         onSubmit={handleEditTrip}
         members={members}
-        ownerId={trip.created_by}
+        ownerId={trip.created_by ?? undefined}
         onRemoveMember={removeMember}
         removingMemberId={removingId}
         removeError={removeError}

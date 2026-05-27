@@ -23,7 +23,7 @@ export interface Trip {
   destination: string
   start_date: string
   end_date: string
-  created_by: string
+  created_by: string | null
   invite_code: string
 }
 
@@ -41,7 +41,7 @@ export interface Stop {
   date_from?: string | null
   date_to?: string | null
   position: number
-  created_by: string
+  created_by: string | null
   created_at: string
 }
 
@@ -56,7 +56,7 @@ export interface Activity {
   duration_hours?: number | null
   category_id?: string | null
   stop_id?: string | null
-  added_by: string
+  added_by: string | null
   created_at: string
 }
 

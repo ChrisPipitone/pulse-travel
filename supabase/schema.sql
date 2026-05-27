@@ -26,7 +26,7 @@ create table trips (
   destination text not null,
   start_date  date,
   end_date    date,
-  created_by  uuid not null references auth.users,
+  created_by  uuid references auth.users on delete set null,
   invite_code text not null unique default substr(md5(random()::text), 1, 8),
   created_at  timestamptz default now()
 );
@@ -51,7 +51,7 @@ create table activities (
   region        text,
   duration_hours numeric,
   category_id   uuid references activity_categories,
-  added_by      uuid not null references auth.users,
+  added_by      uuid references auth.users on delete set null,
   created_at    timestamptz default now()
 );
 
