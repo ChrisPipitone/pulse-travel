@@ -143,7 +143,9 @@ export function ActivityDetailModal({
                         : 'bg-bg border border-border text-text-muted hover:border-accent/40 hover:text-text-primary'
                     }`}
                   >
-                    {showCheck ? '✓' : ratingLabel[r]}
+                    <span key={showCheck ? 'check' : r} className={showCheck ? 'pop-in' : ''}>
+                      {showCheck ? '✓' : ratingLabel[r]}
+                    </span>
                   </button>
                 )
               })}

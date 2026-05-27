@@ -157,13 +157,15 @@ function ActivityRow({
         </svg>
       </button>
 
-      {isOpen && (
-        <ActivityRatingsGrid
-          activityId={activity.id}
-          members={members}
-          ratings={ratings}
-        />
-      )}
+      <div className={`grid transition-all duration-200 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+        <div className="overflow-hidden">
+          <ActivityRatingsGrid
+            activityId={activity.id}
+            members={members}
+            ratings={ratings}
+          />
+        </div>
+      </div>
     </div>
   );
 }

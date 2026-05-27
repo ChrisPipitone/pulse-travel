@@ -336,10 +336,11 @@ function CrewModalD2({
           {/* Definite crew */}
           {mustMembers.length > 0 && (
             <div
-              className="rounded-xl p-3 flex flex-col gap-2.5"
+              className="section-in rounded-xl p-3 flex flex-col gap-2.5"
               style={{
                 background: "rgba(255,92,53,.05)",
                 border: "1px solid rgba(255,92,53,.15)",
+                animationDelay: "0ms",
               }}
             >
               <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[.08em] text-text-subtle">
@@ -360,10 +361,11 @@ function CrewModalD2({
           {/* Open to it crew */}
           {maybeMembers.length > 0 && (
             <div
-              className="rounded-xl p-3 flex flex-col gap-2.5"
+              className="section-in rounded-xl p-3 flex flex-col gap-2.5"
               style={{
                 background: "rgba(0,0,0,.025)",
                 border: "1px solid var(--border)",
+                animationDelay: "40ms",
               }}
             >
               <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[.08em] text-text-subtle">
@@ -387,8 +389,8 @@ function CrewModalD2({
           {/* Skip */}
           {showOthers && (
             <div
-              className="rounded-[10px] flex flex-col divide-y divide-black/5"
-              style={{ background: "var(--bg)" }}
+              className="section-in rounded-[10px] flex flex-col divide-y divide-black/5"
+              style={{ background: "var(--bg)", animationDelay: "80ms" }}
             >
               {skipMembers.length > 0 && (
                 <div className="flex items-center gap-2 flex-wrap px-3.5 py-1.5">
@@ -420,47 +422,49 @@ function CrewModalD2({
         {/* Rating footer */}
         <div className="border-t border-border px-6 py-4 flex flex-col gap-4 shrink-0 sticky bottom-0 bg-bg-card">
           {/* Contextual callout */}
-          {pendingRating === null ? (
-            <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
-              <span className="text-[22px] shrink-0">👋</span>
-              <div>
-                <p className="text-[13px] font-semibold text-text-primary leading-snug">
-                  {mustMembers.length + maybeMembers.length}{' '}people have opinions — what&apos;s yours?
-                </p>
-                <p className="text-[11px] text-text-muted mt-0.5">Rate it and see where you land in the crew.</p>
+          <div key={pendingRating ?? 'null'} className="callout-in">
+            {pendingRating === null ? (
+              <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
+                <span className="text-[22px] shrink-0">👋</span>
+                <div>
+                  <p className="text-[13px] font-semibold text-text-primary leading-snug">
+                    {mustMembers.length + maybeMembers.length}{' '}people have opinions — what&apos;s yours?
+                  </p>
+                  <p className="text-[11px] text-text-muted mt-0.5">Rate it and see where you land in the crew.</p>
+                </div>
               </div>
-            </div>
-          ) : pendingRating === "MUST" ? (
-            <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
-              <span className="text-[22px] shrink-0">🤝</span>
-              <div>
-                <p className="text-[13px] font-semibold text-text-primary leading-snug">
-                  You&apos;re in — {mustMembers.length} confirmed.
-                </p>
-                <p className="text-[11px] text-text-muted mt-0.5">Plan it to lock in dates and finalize your crew.</p>
+            ) : pendingRating === "MUST" ? (
+              <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
+                <span className="text-[22px] shrink-0">🤝</span>
+                <div>
+                  <p className="text-[13px] font-semibold text-text-primary leading-snug">
+                    You&apos;re in — {mustMembers.length} confirmed.
+                  </p>
+                  <p className="text-[11px] text-text-muted mt-0.5">Plan it to lock in dates and finalize your crew.</p>
+                </div>
               </div>
-            </div>
-          ) : pendingRating === "MAYBE" ? (
-            <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
-              <span className="text-[22px] shrink-0">🤔</span>
-              <div>
-                <p className="text-[13px] font-semibold text-text-primary leading-snug">
-                  You&apos;re flexible — in if the timing or vibe is right.
-                </p>
-                <p className="text-[11px] text-text-muted mt-0.5">Upgrade to Can&apos;t miss if you don&apos;t want to miss it.</p>
+            ) : pendingRating === "MAYBE" ? (
+              <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
+                <span className="text-[22px] shrink-0">🤔</span>
+                <div>
+                  <p className="text-[13px] font-semibold text-text-primary leading-snug">
+                    You&apos;re flexible — in if the timing or vibe is right.
+                  </p>
+                  <p className="text-[11px] text-text-muted mt-0.5">Upgrade to Can&apos;t miss if you don&apos;t want to miss it.</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
-              <span className="text-[22px] shrink-0">👋</span>
-              <div>
-                <p className="text-[13px] font-semibold text-text-primary leading-snug">
-                  You&apos;re out — not your thing.
-                </p>
-                <p className="text-[11px] text-text-muted mt-0.5">Change your rating if you want in.</p>
+            ) : (
+              <div className="flex items-center gap-3 bg-bg rounded-xl px-4 py-3">
+                <span className="text-[22px] shrink-0">👋</span>
+                <div>
+                  <p className="text-[13px] font-semibold text-text-primary leading-snug">
+                    You&apos;re out — not your thing.
+                  </p>
+                  <p className="text-[11px] text-text-muted mt-0.5">Change your rating if you want in.</p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Your rating chips */}
           <div className="flex flex-col gap-2">
