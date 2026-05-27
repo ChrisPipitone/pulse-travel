@@ -2,9 +2,9 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Trip, Activity, ActivityRating, Member, Stop } from '@pulse/types'
 
 export type TripMemberAvatar = { id: string; name: string; avatar_url?: string | null }
-export type TripSummary = Trip & { member_count: number; member_avatars: TripMemberAvatar[] }
+export type TripSummary = Trip & { member_count: number; member_avatars: TripMemberAvatar[]; activity_count: number; my_rated_count: number }
 
-export async function getUserTrips(client: SupabaseClient): Promise<TripSummary[]> {
+export async function getUserTrips(client: SupabaseClient, userId?: string): Promise<TripSummary[]> {
   const { data: trips, error } = await client
     .from('trips')
     .select('*')
@@ -40,6 +40,35 @@ export async function getUserTrips(client: SupabaseClient): Promise<TripSummary[
     }
   }
 
+  // Activity counts per trip
+  const activityCountByTrip = new Map<string, number>()
+  const myRatedByTrip = new Map<string, number>()
+
+  const { data: activities } = await client
+    .from('activities')
+    .select('id, trip_id')
+    .in('trip_id', tripIds)
+
+  if (activities?.length) {
+    for (const a of activities) {
+      activityCountByTrip.set(a.trip_id, (activityCountByTrip.get(a.trip_id) ?? 0) + 1)
+    }
+
+    if (userId) {
+      const activityIds = activities.map((a: any) => a.id)
+      const { data: myRatings } = await client
+        .from('activity_ratings')
+        .select('activity_id')
+        .eq('user_id', userId)
+        .in('activity_id', activityIds)
+
+      for (const r of myRatings ?? []) {
+        const tripId = activities.find((a: any) => a.id === r.activity_id)?.trip_id
+        if (tripId) myRatedByTrip.set(tripId, (myRatedByTrip.get(tripId) ?? 0) + 1)
+      }
+    }
+  }
+
   return trips.map((t: any) => {
     const memberIds = membersByTrip.get(t.id) ?? []
     return {
@@ -50,6 +79,8 @@ export async function getUserTrips(client: SupabaseClient): Promise<TripSummary[
         name: profileMap.get(id)?.name ?? 'Unknown',
         avatar_url: profileMap.get(id)?.avatar_url,
       })),
+      activity_count: activityCountByTrip.get(t.id) ?? 0,
+      my_rated_count: myRatedByTrip.get(t.id) ?? 0,
     }
   })
 }

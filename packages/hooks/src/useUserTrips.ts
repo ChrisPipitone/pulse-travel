@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSupabase } from './SupabaseContext'
+import { useSession } from './useSession'
 import { getUserTrips } from '@pulse/services'
 import type { TripSummary } from '@pulse/services'
 
@@ -12,6 +13,7 @@ type UserTripsState = {
 
 export function useUserTrips(): UserTripsState {
   const client = useSupabase()
+  const { session } = useSession()
   const [trips, setTrips] = useState<TripSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -21,11 +23,11 @@ export function useUserTrips(): UserTripsState {
     let cancelled = false
     setLoading(true)
     setError(null)
-    getUserTrips(client)
+    getUserTrips(client, session?.user.id)
       .then((data) => { if (!cancelled) { setTrips(data); setLoading(false) } })
       .catch((e) => { if (!cancelled) { setError(e instanceof Error ? e.message : 'Failed to load trips'); setLoading(false) } })
     return () => { cancelled = true }
-  }, [client, tick])
+  }, [client, session?.user.id, tick])
 
   return { trips, loading, error, refresh: () => setTick((t) => t + 1) }
 }

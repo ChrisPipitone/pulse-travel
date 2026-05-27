@@ -184,7 +184,7 @@ export default function Home() {
               <div>
                 <h1 className="text-2xl font-semibold text-text-primary">Your trips</h1>
                 <p className="hidden sm:block text-sm text-text-muted mt-0.5">
-                  Plan, rate, and explore with your group.
+                  Find out who&apos;s doing what — before the group chat melts down.
                 </p>
               </div>
               <Button size="sm" onClick={() => setShowCreate(true)}>
@@ -223,9 +223,20 @@ export default function Home() {
 
                     <div className="flex items-center justify-between mt-auto pt-1">
                       <MemberDots count={trip.member_count} avatars={trip.member_avatars} />
-                      {dates && (
-                        <span className="text-xs text-text-muted tabular-nums shrink-0">{dates}</span>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {dates && (
+                          <span className="text-xs text-text-muted tabular-nums">{dates}</span>
+                        )}
+                        {trip.activity_count > 0 && (
+                          <span className={`text-[10px] font-semibold tabular-nums px-1.5 py-0.5 rounded-full ${
+                            trip.my_rated_count === trip.activity_count
+                              ? 'bg-accent/10 text-accent'
+                              : 'bg-border text-text-subtle'
+                          }`}>
+                            {trip.my_rated_count}/{trip.activity_count}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </button>
                 );
