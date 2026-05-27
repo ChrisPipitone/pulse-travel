@@ -9,23 +9,61 @@
 ## Repo / Technical Name
 `pulse-travel` — disambiguates for development, not public-facing
 
-## Tagline Candidates
-- *Find your group's rhythm.*
-- *Avanti insieme.* (forward together — Italian, nods to origin)
-- *Know what everyone wants.*
-- *Plan together. Stay together.*
-- *Your group, in sync.*
+---
 
-Lean toward **"Find your group's rhythm."** — ties to Pulse, implies harmony without being cheesy.
+## Origin Story — The Brand Cornerstone
 
-## Brand Story
-Born from a real problem: a group Italy trip with a wedding, overlapping schedules, and everyone wanting different things. No tool existed to show what the group actually wanted — only spreadsheets and endless group chats. Pulse is the answer: see the group's heartbeat on every activity, find where you overlap, stay together.
+**Use this everywhere. It is the product's proof of concept and its best marketing asset.**
+
+> *A group Italy trip. A wedding in the middle. Family and friends with different arrival dates, different wishlists, and a group chat that had already given up. No tool existed to answer the only question that mattered: who should do what, and with whom? Spreadsheets failed. Wanderlog didn't touch it. Pulse was built to answer it.*
+
+This story is not background — it is the positioning. Every copy decision should pass this test:
+**"Would this resonate with someone planning a group trip around a fixed shared event?"**
+
+### The Anchor Event Use Case
+Trips built around a fixed, shared occasion — a wedding, a reunion, a milestone birthday, a family Christmas — have a structure no general-purpose itinerary tool handles:
+
+- One or more days are locked (the wedding dates)
+- Sub-groups arrive and depart at different times around it
+- Everyone has their own wishlist for the free days
+- The question isn't "where should we go" — it's "who can do what, when, together"
+
+This is Pulse's native habitat. It's the use case TripRelay, Wanderlog, and Frienzy all miss. It should appear in marketing copy, onboarding, and empty states wherever it fits naturally.
+
+---
+
+## Locked Tagline
+
+> **"Built for the trip with a wedding in the middle."**
+
+Used on: login page (desktop panel + mobile wordmark).
+
+This line works because:
+- Hyper-specific — signals a real tool, not a generic planner
+- Implies per-member dates, anchor events, sub-group scheduling — without naming any feature
+- Un-copyable by competitors who have no anchor event or crew layer
+- Immediately relatable — anyone planning around a fixed occasion nods
+
+Alternate (for A/B or secondary surfaces): *"A wedding, twelve people, and everyone's wishlist. There had to be a better way."*
+
+---
+
+## Positioning
+
+One-sentence: **Pulse answers "who should do what together" before you plan anything — no other tool does that.**
+
+Competitive wedge:
+- **TripRelay** tells you *where* to go (curated spots → AI route). No crew layer.
+- **Frienzy / Wanderlog** coordinate *after* decisions are made. No compatibility model.
+- **Pulse** answers *who goes together* — before logistics start.
+
+---
 
 ## Brand Values
 - **Togetherness** — the whole point. Not solo planning, group harmony.
 - **Clarity** — non-technical users (grandma, the cousin who doesn't travel much) can use it in 60 seconds.
 - **Joy** — planning a trip should feel exciting, not like a spreadsheet exercise.
-- **Honesty** — MEH is a valid answer. No pressure to fake enthusiasm.
+- **Honesty** — MAYBE is a valid answer. No pressure to fake enthusiasm.
 
 ## Personality / Voice
 - Warm, not corporate
@@ -35,16 +73,23 @@ Born from a real problem: a group Italy trip with a wedding, overlapping schedul
 - Talks like a well-traveled friend, not a SaaS product
 
 ### Examples
-- ✅ "Who else is in for the Vatican?" 
+- ✅ "Who else is in for the Vatican?"
 - ✅ "3 MUSTs. You're going."
 - ✅ "Lena and Marco both love this. Go together."
+- ✅ "Built for the trip with a wedding in the middle."
 - ❌ "Activity consensus metrics dashboard"
 - ❌ "Optimizing group itinerary alignment"
+- ❌ "Plan trips everyone will love." (generic — could be any travel app)
+
+---
 
 ## Target Audience
-- Primary: trip organizer (the person who cares most, sets up the trip)
-- Secondary: trip members (non-technical, just need to tap MUST/WANT/MEH)
+- **Primary:** trip organizer — the person who cares most, sets up the trip, sends the invite
+- **Secondary:** trip members — non-technical, just need to tap MUST/WANT/MAYBE in 30 seconds
 - The secondary user defines the UX ceiling — if grandma can't rate an activity in 30 seconds, the app failed.
+- **Sweet spot group size:** 6–20 people. Small enough to care about individual preferences, large enough that coordination fails without a tool.
+
+---
 
 ## Visual Identity
 See `UI_DESIGN.md` for full design system.
@@ -57,8 +102,11 @@ See `UI_DESIGN.md` for full design system.
 - Domain options: `pulse.travel`, `getpulse.app`, `usepulse.co`, `pulsewith.us`
 - `pulse.travel` is the dream — worth checking availability
 
+---
+
 ## What to Avoid
 - Purple gradients, generic travel stock photos, globe icons
 - Corporate SaaS tone ("leverage group synergy")
 - Overcomplicating the Italian angle — it's soul, not costume
 - Making it feel like a work tool — this is joy, not productivity
+- Generic taglines that could belong to any travel app ("Plan trips everyone will love", "Travel smarter together")

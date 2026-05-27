@@ -207,7 +207,7 @@ function Layout({ children }: { children: React.ReactNode }) {
       {/* Left panel — brand (desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 bg-accent flex-col items-center justify-center p-12 gap-3">
         <h1 className="text-5xl font-semibold text-white tracking-tight">Pulse</h1>
-        <p className="text-white/70 text-lg text-center max-w-xs">Plan trips everyone will love.</p>
+        <p className="text-white/70 text-lg text-center max-w-xs">Built for the trip with a wedding in the middle.</p>
       </div>
 
       {/* Right panel — form */}
@@ -215,7 +215,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         {/* Mobile wordmark */}
         <div className="lg:hidden mb-10 text-center">
           <h1 className="text-3xl font-semibold text-text-primary">Pulse</h1>
-          <p className="text-sm text-text-muted mt-1">Plan trips everyone will love.</p>
+          <p className="text-sm text-text-muted mt-1">Built for the trip with a wedding in the middle.</p>
         </div>
         <div className="w-full max-w-sm">
           {children}

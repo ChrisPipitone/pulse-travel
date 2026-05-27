@@ -35,7 +35,7 @@ type Tab = "activities" | "timeline" | "crew";
 const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
   activities: { short: "Activities", full: "Activities" },
   timeline:   { short: "Timeline",   full: "Timeline" },
-  crew:       { short: "Find your crew", full: "Find your crew" },
+  crew:       { short: "Crew",       full: "Find your crew" },
 };
 
 function formatDateRange(start: string, end: string) {
@@ -488,7 +488,7 @@ export default function TripPage({
           <div className="flex-1 min-w-0 flex flex-col gap-5">
             {/* Tab bar */}
             <div role="tablist" className="flex border-b border-border">
-              {(["activities", "timeline", "crew"] as Tab[]).map((t) => (
+              {(["activities", "crew", "timeline"] as Tab[]).map((t) => (
                 <button
                   key={t}
                   role="tab"

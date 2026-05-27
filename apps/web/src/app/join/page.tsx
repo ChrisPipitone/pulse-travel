@@ -112,7 +112,7 @@ function JoinPage() {
       <div className="w-full max-w-sm flex flex-col gap-6">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-text-primary">You're invited</h1>
-          <p className="text-sm text-text-muted mt-1">Join the trip below to start rating activities.</p>
+          <p className="text-sm text-text-muted mt-1">Join to rate activities and see who you&apos;re going with.</p>
         </div>
 
         <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-5 flex flex-col gap-1">

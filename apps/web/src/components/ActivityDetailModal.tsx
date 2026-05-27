@@ -152,6 +152,10 @@ export function ActivityDetailModal({
             </div>
           </div>
 
+          <p className="text-[11px] text-text-subtle text-center -mt-2">
+            MUST = you&apos;re in the crew · MAYBE = flexible · SKIP = you&apos;re out
+          </p>
+
           {/* Group ratings */}
           {memberRatings.length > 0 && (() => {
             const ratedMembers = members.filter((m) => memberRatings.some((ar) => ar.user_id === m.id))

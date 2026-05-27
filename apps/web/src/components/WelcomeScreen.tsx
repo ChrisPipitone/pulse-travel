@@ -51,7 +51,7 @@ export function WelcomeScreen({ onPlanTrip, onJoinTrip }: Props) {
               <div>
                 <p className="text-base font-semibold text-text-primary">Plan a trip</p>
                 <p className="text-sm text-text-muted mt-1 max-w-[200px]">
-                  Create a trip and invite your group to rate activities together.
+                  Add what you want to do, set your dates — then see who&apos;s coming with you for each one.
                 </p>
               </div>
               <span className="text-xs font-medium text-accent group-hover:underline mt-auto">

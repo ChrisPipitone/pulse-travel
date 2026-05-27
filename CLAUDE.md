@@ -99,7 +99,8 @@ Non-crew members can always be added to any scheduled instance at any time — t
 - **Google Trips** — dead
 - **Notion/Sheets DIY** — what people actually use; our real competition
 - **Frienzy** — all-in-one travel OS (chat, expense split, AI itinerary, booking, location share); iOS only, 4.8★/190 reviews, $9/mo Pro. No compatibility model — assumes everyone does everything together. Not a direct competitor; complementary.
-- **Differentiator**: MUST/WANT/MAYBE/SKIP matrix + potential-crew-to-actual-crew resolution via itinerary is genuinely novel; Frienzy confirms the gap by not touching it
+- **TripRelay** — closest conceptual overlap. Also uses 4-way voting (`super yes / yes / no / opt-out` = our MUST/WANT/SKIP/MAYBE). Key difference: their activities come from a curated database (swipe cards); output is a spatially-optimized day-by-day map route. They answer "where should we go and in what order." **They have no crew layer** — no Find Your Crew, no Travel Twin, no per-member date availability, no potential-crew-to-actual-crew model. Their voting is input to an AI scheduler; our voting is input to a crew compatibility engine. Positioning risk: the 4-way vocabulary overlap will confuse users who've seen both. Must say explicitly everywhere: *TripRelay tells you where to go. Pulse tells you who to go with.*
+- **Differentiator**: MUST/WANT/MAYBE/SKIP matrix + potential-crew-to-actual-crew resolution via itinerary is genuinely novel; TripRelay and Frienzy both confirm the gap by not touching the crew compatibility layer
 
 ## Viability
 - Pain point: real, universal, underserved in group niche
