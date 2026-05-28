@@ -115,32 +115,6 @@ export function FindYourCrew({
     return fmtDateRange(stop.date_from, stop.date_to);
   }
 
-  if (activities.length === 0) {
-    return (
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-text-muted">0 activities</p>
-          {onAdd && (
-            <button
-              onClick={onAdd}
-              className="text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-btn)] bg-accent text-white hover:opacity-90 transition-opacity"
-            >
-              + Add activity
-            </button>
-          )}
-        </div>
-        <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
-          <p className="text-sm font-medium text-text-primary">No activities yet</p>
-          <p className="text-xs text-text-muted">Add the first one for the group to rate.</p>
-        </div>
-      </div>
-    );
-  }
-
-  function toggleOpen(activityId: string) {
-    setOpenId((prev) => (prev === activityId ? null : activityId));
-  }
-
   useEffect(() => {
     if (!autoOpenFirstUnrated || didAutoOpen || rows.length === 0) return;
     const first = rows.find((r) => r.myRating === null);
@@ -175,6 +149,32 @@ export function FindYourCrew({
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [openId, rows]);
+
+  if (activities.length === 0) {
+    return (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-text-muted">0 activities</p>
+          {onAdd && (
+            <button
+              onClick={onAdd}
+              className="text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-btn)] bg-accent text-white hover:opacity-90 transition-opacity"
+            >
+              + Add activity
+            </button>
+          )}
+        </div>
+        <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
+          <p className="text-sm font-medium text-text-primary">No activities yet</p>
+          <p className="text-xs text-text-muted">Add the first one for the group to rate.</p>
+        </div>
+      </div>
+    );
+  }
+
+  function toggleOpen(activityId: string) {
+    setOpenId((prev) => (prev === activityId ? null : activityId));
+  }
 
   function renderCards(cardRows: typeof rows) {
     return (
