@@ -112,6 +112,7 @@ TripRelay tells you *where* to go. Pulse tells you *who to go with*. These are n
 2. **Gap detector** — surface conflicts early: "Sara's Rome MUSTs need 3 days but her crew only overlaps for 2."
 3. **Crew card (shareable)** — per-activity card with MUST/MAYBE avatars + overlap dates, one-tap share to WhatsApp. Every share is an ad.
 4. **Sub-trip clustering** — given ratings + dates, suggest "these 4 activities cluster in Rome on days 3–5 with 80% crew overlap." MVP = manual; v2 = smart.
+5. **Organizer role (paid) — JAB-86** — trip owner who is not a member. Doesn't rate, doesn't appear in crew/compatibility views, invisible to the Jaccard model. Curates activities and facilitates the trip for members. Targets both professional travel agents and the "friend who organizes everything." Trip-level role (not account-level). Unlock path: read-only client share link → organizer notes → template trips → agency branding. See JAB-86 for full data model and open questions.
 
 ---
 
