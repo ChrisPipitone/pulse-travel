@@ -181,7 +181,7 @@ Option B (restructure): Crew tab becomes Travel Twin view (distinct value, not a
 
 | # | Item | Status | Commit |
 |---|---|---|---|
-| 1 | Tab rename + sub-labels | — | — |
+| 1 | Tab rename + sub-labels | ✅ done | — |
 | 2 | Activity Status Labels | — | — |
 | 3 | Post-join: auto-open first unrated | — | — |
 | 4 | Flip invite CTA | — | — |

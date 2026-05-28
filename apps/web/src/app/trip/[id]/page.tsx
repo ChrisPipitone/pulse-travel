@@ -32,10 +32,10 @@ import { UNDO_DURATION_MS, TRIP_DELETE_DELAY_MS } from "@/lib/constants";
 
 type Tab = "activities" | "timeline" | "crew";
 
-const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
-  activities: { short: "Activities", full: "Activities" },
-  timeline:   { short: "Timeline",   full: "Timeline" },
-  crew:       { short: "Crew",       full: "Find your crew" },
+const TAB_LABELS: Record<Tab, { short: string; full: string; sub: string }> = {
+  activities: { short: "Rate",     full: "Rate",           sub: "What do you want to do?" },
+  crew:       { short: "Crew",     full: "Find Your Crew", sub: "Who are you going with?" },
+  timeline:   { short: "Timeline", full: "Timeline",       sub: "When and where?"          },
 };
 
 type OpenModal =
@@ -244,7 +244,7 @@ export default function TripPage({
                   role="tab"
                   aria-selected={tab === t}
                   onClick={() => setTab(t)}
-                  className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                  className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px flex flex-col items-start gap-0.5 ${
                     tab === t
                       ? "text-text-primary border-accent"
                       : "text-text-muted border-transparent hover:text-text-primary"
@@ -252,6 +252,9 @@ export default function TripPage({
                 >
                   <span className="sm:hidden">{TAB_LABELS[t].short}</span>
                   <span className="hidden sm:inline">{TAB_LABELS[t].full}</span>
+                  <span className="hidden sm:block text-[10px] font-normal text-text-subtle leading-none">
+                    {TAB_LABELS[t].sub}
+                  </span>
                 </button>
               ))}
             </div>
