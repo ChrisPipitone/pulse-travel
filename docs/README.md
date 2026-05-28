@@ -15,12 +15,22 @@ All diagrams use [Mermaid](https://mermaid.js.org/) and render natively on GitHu
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Local dev setup, migrations workflow, Vercel config, hosted Supabase, free tier limits, pre-prod checklist |
 | [MONOREPO.md](./MONOREPO.md) | Turborepo + pnpm workspaces decision, package dependency graph, portability rules |
 
+### Product
+
+| Doc | What it covers |
+|---|---|
+| [PRODUCT.md](./PRODUCT.md) | **Single source of truth** — rating vocabulary, crew model, Jaccard model, positioning, launch checklist, what NOT to build |
+| [COMPETITIVE.md](./COMPETITIVE.md) | Competitive landscape detail — Partiful, TripRelay, Frienzy, Wanderlog, go-to-market wedge |
+| [BRANDING.md](./BRANDING.md) | Name, origin story, tagline, voice, visual identity |
+
 ### Features
 
 | Doc | What it covers |
 |---|---|
 | [TRIP_FLOW.md](./TRIP_FLOW.md) | Create trip, invite code lifecycle, join flow, duplicate join handling, tier-aware member cap, trip page state machine, permission model |
-| [RATING_MATRIX.md](./RATING_MATRIX.md) | MUST/WANT/MEH scoring formula, data flow, optimistic updates + rollback, CompatibilityScore type, real-time sync |
+| [RATING_MATRIX.md](./RATING_MATRIX.md) | MUST/MAYBE/SKIP scoring formula, data flow, optimistic updates + rollback, CompatibilityScore type, real-time sync |
+| [CREW_VIEW_DESIGN.md](./CREW_VIEW_DESIGN.md) | Find Your Crew UI — card/modal design, adaptive scaling, sub-group model, build order |
+| [ITINERARY_DESIGN.md](./ITINERARY_DESIGN.md) | Four-layer itinerary model — who/where/when/conflict resolution, data model implications |
 | [TIERS.md](./TIERS.md) | User tier system (free/planner/enterprise), what's built, pre-deploy gaps, billing roadmap |
 
 ### Design
@@ -28,7 +38,6 @@ All diagrams use [Mermaid](https://mermaid.js.org/) and render natively on GitHu
 | Doc | What it covers |
 |---|---|
 | [UI_DESIGN.md](./UI_DESIGN.md) | Theme architecture, CSS custom properties, Tailwind v4 setup, component design decisions |
-| [BRANDING.md](./BRANDING.md) | Name, positioning, voice, visual identity |
 
 ### Roadmap
 

@@ -25,13 +25,13 @@
 
 /* Rating badges */
 --must-bg:      #FF5C35  --must-text: #FFFFFF
---want-bg:      #00C9A7  --want-text: #FFFFFF
---meh-bg:       #E8E6E0  --meh-text:  #8B8779
+--maybe-bg:     #FFF8D6  --maybe-text: #8a6e00
+--skip-bg:      #E8E6E0  --skip-text:  #888888
 
 /* Matrix cells */
 --cell-must:    #FF5C35
---cell-want:    #00C9A7
---cell-meh:     #D9D6CE
+--cell-maybe:   #FFF8D6
+--cell-skip:    #D9D6CE
 --cell-empty:   #ECEAE4
 
 /* Radius */
@@ -59,13 +59,13 @@ Typography: `DM Sans` (all weights). Body size 15px. Generous line-height.
 
 /* Rating badges */
 --must-bg:      #C4603A  --must-text: #FFFFFF
---want-bg:      #D4A96A  --want-text: #FFFFFF
---meh-bg:       #E8E2D9  --meh-text:  #8B7355
+--maybe-bg:     #FFF3C4  --maybe-text: #7A5C00
+--skip-bg:      #E8E2D9  --skip-text:  #8B7355
 
 /* Matrix cells */
 --cell-must:    #C4603A
---cell-want:    #EFC98A
---cell-meh:     #F0EBE3
+--cell-maybe:   #EFC98A
+--cell-skip:    #F0EBE3
 --cell-empty:   #F7F4F0
 
 /* Radius */
@@ -83,7 +83,7 @@ Typography: `Playfair Display` (headings) + `Inter` (body). Body size 14px.
 
 - Non-technical users first: clear labels, big tap targets, no jargon
 - Matrix/visualizer is the hero — give it space and contrast
-- MUST/WANT/MEH always color-coded consistently within theme
+- MUST/MAYBE/SKIP always color-coded consistently within theme
 - Mobile-first layout, responsive breakpoints
 - Animations: subtle only — no distracting motion
 - Avoid: purple gradients, generic card grids, AI-sloppy defaults

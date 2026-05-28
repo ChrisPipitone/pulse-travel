@@ -16,7 +16,7 @@ Session date: 2026-05-23. Updated to sharpen sub-group formation as the core mod
 
 **Sub-group formation is the primary purpose of Pulse.** Not a dashboard. Not a conflict resolver. Not a rating summary.
 
-The entire rating system exists to answer one question per activity: **who is my crew for this?** MUST + WANT ratings define the natural sub-group. MEH says "I'm flexible — I'll join if it works out, skip if it doesn't." Unrated = no signal.
+The entire rating system exists to answer one question per activity: **who is my crew for this?** MUST ratings define the natural sub-group. MAYBE says "I'm flexible — I'll join if it works out, skip if it doesn't." Unrated = no signal.
 
 A group vacation is not one group doing everything together. It's overlapping sub-groups, each optimized around shared enthusiasm. Pulse's job is to surface those sub-groups so the trip can be planned around them instead of guessed at.
 
@@ -29,35 +29,28 @@ The "Find your crew" view is where that happens. Every card is an activity + its
 | Rating | What it means | Sub-group membership |
 |---|---|---|
 | MUST | I need to do this | Core sub-group — always in |
-| WANT | I really want to do this | Core sub-group — always in |
-| MEH | Indifferent — I'll go or skip | Flexible — join if timing works, no loss if not |
+| MAYBE | Indifferent — I'll go or skip | Flexible — join if timing works, no loss if not |
+| SKIP | Not interested | Out — excluded from crew |
 | Unrated | No signal yet | Not counted |
 
-**The crew for an activity = everyone who rated it MUST or WANT.**
+**The crew for an activity = everyone who rated it MUST.**
 
 This is not a "conflict" when different people have different crews for different activities — that's the feature. The trip is a collection of sub-group experiences. Someone's crew for the museum is different from their crew for the beach hike, and that's exactly what the trip should reflect.
 
-MEH members are not obstacles. They are available capacity. If the timing works for a MEH member to join a sub-group, great. If not, no friction — they weren't defining the activity anyway.
+MAYBE members are not obstacles. They are available capacity. If the timing works for a MAYBE member to join a sub-group, great. If not, no friction — they weren't defining the activity anyway.
 
 ---
 
-## Current Implementation (before this sprint)
+## Current Implementation
 
-File: `apps/web/src/components/CompatibilityMatrix.tsx`, function `CrewCards`.
+Files: `apps/web/src/components/FindYourCrew.tsx`, `CrewCard.tsx`, `CrewModal.tsx`.
 
-- Activity cards sorted by `excitedCount` (MUST + WANT members), score as tiebreak
-- Each card: activity name/location, excited count badge, MUST/WANT/MEH avatar rows, score bar
-- MEH rows faded at 50% opacity
+- Activity cards sorted by score (MUST×3 + MAYBE×1), excited count as tiebreak
+- Each card: activity name/location, MUST/MAYBE/SKIP avatar rows, left stripe = viewer's own rating
+- SKIP rows faded; MAYBE members shown as available capacity
 - Empty state: opacity-40 card, "Nobody's excited yet"
-- Pagination via `crewSlice`
-
-**Gaps identified:**
-- No personalization — viewer can't locate themselves without hunting
-- Unrated members invisible (different from MEH — zero signal, not a non-vote)
-- Sort is one-dimensional (excited count only)
-- Doesn't scale — avatar rows become unreadable at 15+ members
-- No action path from the view
-- Sub-group formation framed as "conflict resolution" — completely backwards
+- Desktop: split-pane (card list + detail panel). Mobile: card list + bottom-sheet modal.
+- CrewModal handles both panel (desktop) and full-screen modal (mobile) via `variant` prop
 
 ---
 
@@ -79,33 +72,33 @@ Never remove avatars regardless of group size. People need to see *who* is in th
 
 ### Adaptive card by group size
 
-- **≤8 members**: Full MUST/WANT rating rows on the card. Every excited member visible without opening anything.
-- **>8 members**: Top 5 excited avatars + "+N more" overflow + count pills (e.g. "11 MUST · 8 WANT"). Deep dive for full picture.
+- **≤8 members**: Full MUST/MAYBE rating rows on the card. Every member visible without opening anything.
+- **>8 members**: Top 5 excited avatars + "+N more" overflow + count pills (e.g. "11 MUST · 8 MAYBE"). Deep dive for full picture.
 
-MEH row on cards: show at ≤8, omit at >8 (they're flexible capacity, not the crew — deprioritize at scale).
+MAYBE row on cards: show at ≤8, omit at >8 (they're flexible capacity, not the crew — deprioritize at scale).
 
 Threshold (8) is a tunable constant — adjust after seeing real data.
 
 ### Left stripe = viewer's own rating
 
-4px left border on each card colored by the viewer's rating: coral (MUST), mint (WANT), yellow (MEH), gray (unrated). Instant personal orientation — viewer knows at a glance whether they're in this crew, flexible, or uncommitted.
+4px left border on each card colored by the viewer's rating: coral (MUST), yellow (MAYBE), gray (unrated/SKIP). Instant personal orientation — viewer knows at a glance whether they're in this crew, flexible, or uncommitted.
 
-### "You: MUST/WANT/MEH/—" chip
+### "You: MUST/MAYBE/SKIP/—" chip
 
 Top-right of card. Always visible. Viewer's own avatar gets an accent outline ring in all avatar groups.
 
 ### Count pills on cards (large group mode)
 
-Small colored pills: `11 MUST`, `8 WANT`. Gives crew size at a glance without a bar.
+Small colored pills: `11 MUST`, `8 MAYBE`. Gives crew size at a glance without a bar.
 
 ### Deep dive modal — sub-group view
 
 Contains:
 - Activity name + location header
 - Visual distribution bar (stacked — color proportions carry the story, no % number)
-- Legend with counts: MUST N · WANT N · MEH N · unvoted N
-- **"Your crew"** section: avatar + name chips for MUST members, then WANT members — these are the people to plan with
-- MEH members noted below ("also available")
+- Legend with counts: MUST N · MAYBE N · SKIP N · unvoted N
+- **"Your crew"** section: avatar + name chips for MUST members — these are the people to plan with
+- MAYBE members noted below ("also available")
 - Unvoted members noted ("haven't weighed in")
 - **Actions section** — the planning hub (see below)
 
@@ -117,9 +110,9 @@ There is no "conflict" state. Different crews for different activities is expect
 
 | Viewer state | Primary action | Secondary actions |
 |---|---|---|
-| In the crew (MUST or WANT) | Plan with your crew | Nudge unvoted members (Soon) |
-| MEH — flexible | Join this crew? → Rate MUST/WANT inline | — |
-| Unrated | What's your take? → Rate MUST/WANT/MEH inline | — |
+| In the crew (MUST) | Plan with your crew | Nudge unvoted members (Soon) |
+| MAYBE — flexible | Join this crew? → Rate MUST inline | — |
+| Unrated | What's your take? → Rate MUST/MAYBE/SKIP inline | — |
 | Small crew (1–2 excited) | Recruit more → Nudge unvoted (Soon) | Rate if unrated |
 
 "Plan with your crew" is the primary CTA for anyone already in the crew. For MVP it opens the itinerary/scheduling surface (Soon tag). The button exists now, the feature ships later.
@@ -130,9 +123,32 @@ There is no "conflict" state. Different crews for different activities is expect
 
 Shelved — may be useful in another view (e.g. a future "Debate" or tension analysis view). Not appropriate here where the goal is crew formation, not framing opposition.
 
-### Distribution bar lives in modal only
+### Activity Status Labels (Social Energy)
 
-Not on the card. Cards are visual (avatars, stripe, chip). Bars are data — belong in the deep dive.
+Every card and modal header should feature a high-signal "Social Energy" label. This summarizes the distribution of enthusiasm instantly, solving the cognitive load of interpreting raw numbers.
+
+| Status | Distribution | Meaning |
+|---|---|---|
+| **Universal Favorite** | High MUST, Low/No MAYBE | Everyone is in. This is a core trip anchor. |
+| **Strong Match** | High MUST, Some MAYBE | A clear sub-group exists with flexible capacity. |
+| **Split Crowd** | High MUST + High MAYBE/Unrated | Divisive or half the group is indifferent. |
+| **Polarizing** | High MUST + High SKIP | People either love it or hate it. Plan as a niche sub-group. |
+| **Niche Favorite** | Small but intense MUST cluster | Perfect for a small sub-group breakout. |
+| **Safe Consensus** | Mostly MAYBE, few MUST | Nobody is dying to do it, but everyone is okay with it. |
+
+### Distribution bar (Social Energy Bar)
+
+Stacked horizontal bar that lives in the modal only.
+- Colors: Coral (MUST), Yellow (MAYBE), Gray (SKIP/unvoted).
+- Purpose: Show the *proportions* of enthusiasm. A "Split Crowd" bar looks 50% Coral and 50% Gray/Yellow.
+- No percentages needed on the bar itself; the legend handles counts.
+
+### "You Align With..." (Social Stickiness)
+
+Post-MVP, the deep dive modal should surface "Social Similarity":
+- "You align 92% with Sam on this activity."
+- "You and Nina both have this as a MUST."
+This turns a planning tool into a social discovery tool.
 
 ### Poll visualization insight
 
@@ -151,36 +167,27 @@ All in `apps/web/public/prototypes/`. Open directly in browser or via dev server
 | `crew-v3.html` | Card + modal split introduced. Bar moved to modal. Working click-to-open. |
 | `crew-v4.html` | **Current best.** Full rating rows on small-group cards. Four modal states. Options section. Avatar+name chips in modal. ← Start here. |
 
-v4 is the approved direction. Next step is implementing it in `CompatibilityMatrix.tsx`. Note: v4's "options" section uses old conflict framing — override with the sub-group model above during implementation.
+v4 was the approved direction and is now implemented across `FindYourCrew.tsx`, `CrewCard.tsx`, `CrewModal.tsx`.
 
 ---
 
 ## Implementation Notes
 
-### Files to touch
+### Files (current)
 
-- `apps/web/src/components/CompatibilityMatrix.tsx` — `CrewCards` function (lines ~503–572), `CrewRow` interface, `crewRows` useMemo (lines ~731–742)
-- New component: `ActivityCrewModal.tsx` (alongside or inside CompatibilityMatrix)
-- No changes needed to hooks, store, or services — data model already has everything required
+- `apps/web/src/components/FindYourCrew.tsx` — card list + desktop split-pane, row computation
+- `apps/web/src/components/CrewCard.tsx` — individual activity card (adaptive small/large)
+- `apps/web/src/components/CrewModal.tsx` — modal/panel with crew composition + actions; `variant: 'modal' | 'panel'`
+- `apps/web/src/components/FindYourCrewOverview.tsx` — overview for the Crew tab
+- No changes needed to hooks, store, or services — data model has everything required
 
-### Data already available
+### Data available per row
 
-- `mustMembers`, `wantMembers`, `mehMembers` arrays per activity (already computed in `crewRows`)
-- `excitedCount` per activity
-- `score?.ratings[currentUserId]` gives viewer's own rating (need to pass `currentUserId` into `CrewCards`)
+- `mustMembers`, `maybeMembers`, `skipMembers` arrays per activity
+- `excitedCount` = mustMembers.length (core crew count)
+- `score` = must×3 + maybe×1
+- Viewer's own rating via `score?.ratings[currentUserId]`
 - Member `arrival_date` / `departure_date` on `Member` type (for future date-aware crew filtering)
-
-### New props needed for CrewCards
-
-```ts
-interface CrewCardsProps {
-  rows: CrewRow[]
-  maxScore: number
-  colorMap: Map<string, number>
-  currentUserId: string   // for you-chip + avatar ring
-  members: Member[]       // for unvoted count (totalMembers - rated)
-}
-```
 
 ### Group size threshold
 
@@ -189,28 +196,22 @@ const SMALL_GROUP_THRESHOLD = 8  // show full rows; above this, truncate
 const MAX_CARD_AVATARS = 5       // max avatars shown on large-group card
 ```
 
-### Modal
-
-Implement as `ActivityCrewModal.tsx`. State: `const [selectedActivity, setSelectedActivity] = useState<string | null>(null)`.
-
-Use existing modal pattern (fixed overlay, ESC closes, backdrop click closes) from `ActivityDetailModal.tsx`.
-
 ### Unvoted count
 
 ```ts
-const unvotedCount = members.length - (mustMembers.length + wantMembers.length + mehMembers.length)
+const unvotedCount = members.length - (mustMembers.length + maybeMembers.length + skipMembers.length)
 ```
 
 ---
 
 ## Sub-Group Features — Build Order
 
-MVP (this sprint):
-- [ ] Adaptive cards (small/large group modes)
-- [ ] Left stripe + you-chip
-- [ ] Modal with crew composition (MUST/WANT/MEH/unvoted)
-- [ ] Inline rating from modal when viewer unrated
-- [ ] "Plan with your crew" button — Soon tag for now, permanent slot in modal
+MVP (shipped):
+- [x] Adaptive cards (small/large group modes)
+- [x] Left stripe + you-chip
+- [x] Modal with crew composition (MUST/MAYBE/SKIP/unvoted)
+- [x] Inline rating from modal when viewer unrated
+- [x] "Plan with your crew" button — Soon tag, permanent slot in modal
 
 Post-MVP, in rough order:
 - [ ] Schedule for this sub-group — "which days work for everyone in this crew?" (needs date availability data)

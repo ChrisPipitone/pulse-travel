@@ -32,7 +32,7 @@ Pulse = group trip decision engine. No fixed date yet, no venue yet — the *pla
 
 ### The "Harmony Engine" Strategy
 Partiful wins on *speed*; Pulse wins on *effectiveness*.
-- **The Politeness Barrier:** Traditional polls force a "Yes/No" that people feel guilty about. The MUST/WANT/MEH matrix acts as a "Meh-diator," allowing users to signal preferences without killing the vibe.
+- **The Politeness Barrier:** Traditional polls force a "Yes/No" that people feel guilty about. The MUST/MAYBE/SKIP matrix allows users to signal preferences without killing the vibe — MAYBE is a socially safe non-commitment.
 - **Sub-Groups as a Feature:** In Partiful, if you don't attend the event, you've "failed" the social contract. In Pulse, splitting into sub-groups (e.g., 4 to the museum, 2 to the beach) is a success of the planning algorithm.
 - **Algorithmic Logistics:** Beyond simple voting, Pulse identifies the "Maximum Overlap" for group activities and handles the transition between stops (multi-day logistics).
 
@@ -80,7 +80,7 @@ Pulse users *expect* to spend 20 minutes. Depth is the product. Partiful cannot 
 **Wedding-adjacent trips** are the strongest first-user wedge:
 - **High-Yield Acquisition:** One organizer (MOH/Best Man) onboard 10–50 users in a single session.
 - **The "Flying In" Problem:** Solves the 3-day logistical gap around the wedding day that wedding websites (The Knot) don't touch.
-- **The Politeness Barrier:** Solves the awkwardness of mixed groups (college friends vs. cousins) by using anonymous MUST/WANT ratings.
+- **The Politeness Barrier:** Solves the awkwardness of mixed groups (college friends vs. cousins) by using anonymous MUST/MAYBE/SKIP ratings.
 - **Viral "Aha!" Moment:** Users realize they can split off into sub-groups (The Crew) based on shared interests without offending the larger group.
 - **Network Effect:** A wedding guest is a high-probability future organizer for their own smaller friend trips.
 

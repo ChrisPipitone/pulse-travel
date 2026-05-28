@@ -9,10 +9,12 @@ Three values, each with a deliberate meaning:
 | Rating | Weight | Meaning |
 |---|---|---|
 | `MUST` | 3 | Non-negotiable — I will be disappointed if we skip this |
-| `WANT` | 1 | Would love to do it — happy if it fits |
-| `MEH` | 0 | Indifferent — won't affect my enjoyment either way |
+| `MAYBE` | 1 | Flexible — I'll join if timing works, no loss if not |
+| `SKIP` | 0 | Not interested — excluded from crew calculations |
 
-MEH contributes zero to the score intentionally — it's a deliberate non-vote, not weak support. Three people MUSTing beats ten people WANTing (3×3=9 vs 10×1=10, barely — but one more MUST tips it decisively).
+SKIP contributes zero to the score intentionally. Three people MUSTing beats ten people in MAYBE (3×3=9 vs 10×1=10, barely — but one more MUST tips it decisively).
+
+MAYBE is not weak enthusiasm — it's a deliberate "available but not driving" signal. Excluded from Jaccard compatibility calculations (Travel Twin), but still contributes to group score.
 
 ---
 
@@ -22,13 +24,13 @@ MEH contributes zero to the score intentionally — it's a deliberate non-vote, 
 flowchart LR
     R["activity_ratings rows\nfor one activity"]
     R --> M["must_count × 3"]
-    R --> W["want_count × 1"]
-    R --> E["meh_count × 0"]
-    M & W & E --> S["score\n= must_count×3 + want_count"]
+    R --> W["maybe_count × 1"]
+    R --> E["skip_count × 0"]
+    M & W & E --> S["score\n= must_count×3 + maybe_count"]
     S --> Sort["activities sorted by score DESC\nin useCompatibilityMatrix"]
 ```
 
-**Formula:** `score = (MUST count × 3) + (WANT count × 1)`
+**Formula:** `score = (MUST count × 3) + (MAYBE count × 1)`
 
 Example — 8-member trip, activity "Colosseum Tour":
 
@@ -36,11 +38,11 @@ Example — 8-member trip, activity "Colosseum Tour":
 |---|---|
 | Marco | MUST |
 | Sara | MUST |
-| Lena | WANT |
-| Chris | WANT |
-| Alex | MEH |
+| Lena | MAYBE |
+| Chris | MAYBE |
+| Alex | MAYBE |
 | Priya | MUST |
-| Kai | WANT |
+| Kai | SKIP |
 | Yuki | — |
 
 `score = 3×3 + 3×1 = 12`. Sorted above any activity with score < 12.
@@ -69,8 +71,8 @@ flowchart TD
         RA["useRateActivity()\noptimistic update + rollback"]
     end
 
-    subgraph ui["Trip page / matrix component"]
-        UI["render cells by score"]
+    subgraph ui["Trip page / Find Your Crew"]
+        UI["render cards by score"]
     end
 
     AR -->|initial fetch| GR
@@ -87,7 +89,7 @@ flowchart TD
 
 ## Optimistic Rating Update
 
-User taps MUST/WANT/MEH → UI responds immediately, network follows:
+User taps MUST/MAYBE/SKIP → UI responds immediately, network follows:
 
 ```mermaid
 sequenceDiagram
@@ -120,28 +122,33 @@ The placeholder `id` (`crypto.randomUUID()`) is overwritten when the real-time c
 ```ts
 interface CompatibilityScore {
   activity_id: string
-  score: number          // must×3 + want×1
+  score: number          // must×3 + maybe×1
   must_count: number
-  want_count: number
-  meh_count: number
+  maybe_count: number
+  skip_count: number
   ratings: Record<string, Rating>  // keyed by user_id — O(1) lookup in matrix UI
 }
 ```
 
-`useCompatibilityMatrix` returns `CompatibilityScore[]` sorted by `score` descending. The `ratings` map lets the matrix UI look up any member's rating for any activity in O(1) — no `.find()` per cell.
+`useCompatibilityMatrix` returns `CompatibilityScore[]` sorted by `score` descending. The `ratings` map lets the Find Your Crew UI look up any member's rating for any activity in O(1) — no `.find()` per cell.
 
 ---
 
-## Compatibility Matrix UI (planned)
+## Find Your Crew View
 
-The matrix is a grid of `activities × members`, each cell coloured by that member's rating for that activity.
+The primary view for sub-group formation. Each activity card shows:
+- MUST members — the core crew (always in)
+- MAYBE members — flexible capacity (joins if timing works)
+- Unrated members — no signal yet
+
+Cards sorted by `score` descending. At large group sizes (>8), cards truncate to top avatars + count pills.
 
 ```
                 Marco   Sara    Lena    Chris   Alex
-Colosseum       MUST    MUST    WANT    WANT    MEH      score: 12
-Wine Tasting    MUST    WANT    MUST    MEH     WANT     score: 10
-Vatican         WANT    MUST    MEH     WANT    MUST     score: 10
-Amalfi Day      MEH     WANT    WANT    —       WANT     score:  3
+Colosseum       MUST    MUST    MAYBE   MAYBE   MAYBE    score: 12
+Wine Tasting    MUST    MAYBE   MUST    SKIP    MAYBE    score: 10
+Vatican         MAYBE   MUST    SKIP    MAYBE   MUST     score: 10
+Amalfi Day      SKIP    MAYBE   MAYBE   —       MAYBE    score:  3
 ```
 
 Cell colours:
@@ -149,14 +156,9 @@ Cell colours:
 | Rating | Background | Text |
 |---|---|---|
 | MUST | `--must-bg` (coral) | `--must-text` |
-| WANT | `--want-bg` (mint) | `--want-text` |
-| MEH | `--meh-bg` (yellow) | `--meh-text` |
+| MAYBE | `--maybe-bg` (yellow) | `--maybe-text` |
+| SKIP | `--skip-bg` (gray) | `--skip-text` |
 | — (unrated) | `--cell-empty` | — |
-
-Planned views:
-- **Matrix** — full grid, all members × all activities
-- **Cluster** — group activities by "who should do this together" (members with MUST/WANT in common)
-- **Conflict** — highlight activities where members strongly diverge (some MUST, some MEH)
 
 ---
 

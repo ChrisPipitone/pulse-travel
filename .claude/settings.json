@@ -1,3 +1,16 @@
 {
-  "enabledPlugins": {}
+  "enabledPlugins": {},
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "last_ts=$(git log -1 --format='%ct' 2>/dev/null || echo 0); now=$(date +%s); msg=$(git log -1 --format='%s' 2>/dev/null || echo ''); age=$((now - last_ts)); [ \"$age\" -lt 15 ] && echo \"$msg\" | grep -qE '^(feat|refactor):' && printf '\\nDOC-CHECK: feat/refactor commit detected.\\nDoes this change product vocabulary, user-facing behaviour, or architecture?\\nIf so, update the relevant doc before the session ends:\\n  docs/PRODUCT.md          -- rating model, crew model, positioning, launch checklist\\n  CLAUDE.md                -- Current State snapshot, stack, architecture rules\\n  docs/RATING_MATRIX.md    -- scoring formula, CompatibilityScore type\\n  docs/CREW_VIEW_DESIGN.md -- crew UI design decisions\\n  docs/ITINERARY_DESIGN.md -- itinerary layer model\\n' || true"
+          }
+        ]
+      }
+    ]
+  }
 }

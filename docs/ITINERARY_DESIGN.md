@@ -16,16 +16,15 @@ These are two separate problems. The crew view answers "who would go." The itine
 
 ### Layer 1 — Who (Find Your Crew, MVP now)
 
-MUST + WANT ratings define the potential crew per activity.
+MUST ratings define the potential crew per activity.
 
 | Rating | Crew membership |
 |---|---|
 | MUST | Definite crew — going regardless of timing |
-| WANT | Conditional crew — in unless timing/logistics conflict |
 | MAYBE | Flexible capacity — joins if it works out, no loss if not |
 | SKIP | Out — not part of any crew calculation |
 
-The Find Your Crew card presents MUST and WANT as two tiers within one group. MUST = solid commitment. WANT = likely, subject to schedule. No labels on the card — visual weight carries the distinction.
+The Find Your Crew card presents MUST members as the core crew. MAYBE members shown as available capacity below. MUST = solid commitment. MAYBE = available but not driving.
 
 ### Layer 2 — Where (activity region clustering)
 
@@ -52,7 +51,7 @@ When two crew members share a MUST for activity A but their other MUSTs create a
 
 Example:
 - Activity A: Colosseum. Crew: Marco, Sara, Chris, Lena (all MUST)
-- Activity B: Pompeii. Crew: Marco, Sara (MUST), Chris, Lena (WANT, but also MUST for activity C that day)
+- Activity B: Pompeii. Crew: Marco, Sara (MUST), Chris, Lena (MAYBE, but also MUST for activity C that day)
 - Result: Marco + Sara do Colosseum Day 3. Chris + Lena do Colosseum Day 7.
 
 The potential crew (4 people, all MUST) is correct. The actual instances (2+2) are resolved at scheduling time.

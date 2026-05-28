@@ -1,165 +1,15 @@
 # Pulse — Group Vacation Planner
 
-> App name: **Pulse** | Repo: `pulse-travel` | Dir: `activity-matrix` (rename pending)
-> See `docs/BRANDING.md` for full brand strategy, `docs/UI_DESIGN.md` for design system.
+> App name: **Pulse** | Repo: `pulse-travel`
+> **Product model + strategy:** `docs/PRODUCT.md` | **Brand/voice:** `docs/BRANDING.md` | **Design system:** `docs/UI_DESIGN.md`
 
-## The Problem
+## What It Is
 
-Group vacations are hard to coordinate. Different arrival/departure dates, overlapping and conflicting interests, shared fixed events (e.g. a wedding). No tool exists to visualize group compatibility and optimize logistics.
+Group vacation planner built around one question: *who should do what together?* Members rate activities MUST/MAYBE/SKIP; the app surfaces sub-groups (Find Your Crew), pairwise compatibility (Travel Twin), and a potential-to-actual crew pipeline via the itinerary. See `docs/PRODUCT.md` for the full rating model, crew model, positioning, and launch checklist.
 
-## Use Case (Origin)
+## Current State
 
-Italy trip — family + friends. Some attend a wedding for a subset of days. Everyone has activities they want to do. Need to see who wants what, find overlap, figure out where/how long to stay where.
-
-## Core Features (MVP)
-
-### Activity List
-- Anyone in group can add activities
-- Visible to all members
-- Fields: name, location/region, estimated duration, category
-
-### Rating System
-- **MUST** — non-negotiable, definite crew member for this activity
-- **WANT** — conditional crew; in unless timing/logistics conflict
-- **MAYBE** — flexible / indifferent; joins if it works out, no loss if not
-- **SKIP** — not interested; excluded from crew entirely
-
-### Compatibility Matrix
-The core differentiator. **Not** just a rating grid — the goal is to answer "who should do what together?"
-
-#### Compatibility Model
-- **Excited set** per member = activities they rated MUST or WANT
-- **MAYBE = flexible**, not a conflict. Means "I'll go or skip — doesn't define my trip." Excluded from compatibility calculations entirely.
-- **Jaccard similarity** between two members = `|shared excited activities| / |union of excited activities|`
-  - Example: Sara excited about 5, Marco about 5, share 3 → `3/7 = 43%`
-- Multi-person Jaccard: `|intersection of all excited sets| / |union of all excited sets|`
-- Unrated activities are excluded (not enough signal)
-
-#### Key Product Insight — Potential Crew vs Actual Crew
-> **The crew shown in Find Your Crew is the *potential* crew — everyone who'd go under ideal conditions. The itinerary is where the *actual* crew per scheduled instance gets resolved.**
-
-Find Your Crew does not need to solve timing. It shows who *would* go. Timing conflicts are an itinerary problem, not a crew problem. A group of 4 who all MUST an activity may split into 2+2 at scheduling time if other MUSTs conflict — that is expected and correct behaviour.
-
-MUST = definite crew. WANT = conditional crew (in unless timing knocks them out). This distinction must be visually preserved in the Find Your Crew card — two tiers, not one flat group.
-
-#### Five Matrix Views
-All five views are always available. Multiple views exist because different people parse data differently — more views = more likely someone finds their ideal read.
-
-| View | Key question answered | Description shown in UI |
-|---|---|---|
-| **By activity** | What did everyone rate each activity? | "See each activity's ratings across the whole group. Sorted by group enthusiasm score." |
-| **By member** | What did this person rate across all activities? | "See each member's ratings side by side. Spot who has the most opinions and where they align." |
-| **Who's in** | For each activity, which rating bucket did each member land in? | "See exactly who's excited, neutral, or unresponsive for every activity at a glance." |
-| **Find your crew** | For each activity, who's excited enough to do it together? | "Activities sorted by excitement breadth. See your natural sub-group for each experience — who to invite." |
-| **Travel twin** | Which members have the most overlapping excitement across all activities? | "Pairwise compatibility scores based on shared excitement (MUST + WANT overlap). Higher = more similar vacation style." |
-
-#### Group Score (existing, unchanged)
-- Per-activity group score: MUST×3 + WANT×1, MEH=0
-- Used for sort order in "By activity" and "Find your crew" views
-
-### Date / Availability Layer
-- Each member sets arrival + departure dates
-- Fixed shared events (e.g. wedding June 10–12) block those days for tagged members
-- Activities filtered/sorted by who is present
-
-### Itinerary Builder
-See `docs/ITINERARY_DESIGN.md` for full design. Summary:
-
-- **Layer 1 — Who:** MUST+WANT crew per activity (resolved in Find Your Crew)
-- **Layer 2 — Where:** Activity `region` field clusters activities to the same days by proximity (Rome activities on Rome days, etc.)
-- **Layer 3 — When:** Manual day assignment for MVP; member drags/assigns activities to calendar days constrained by arrival/departure dates and logical region grouping
-- **Layer 4 — Conflict resolution:** If Person A has two MUSTs that can't share a day, they do both at different times than other crew members — the crew splits per scheduled instance. This is expected and correct.
-
-Non-crew members can always be added to any scheduled instance at any time — the crew is a default invite list, not a locked roster.
-
-**Future consideration:** Same activity, different date windows (e.g. "Rome Mar 21–23 vs Rome Mar 23–25") — allows sub-groups to schedule the same activity independently. Post-MVP scope.
-
-## Out of Scope (MVP)
-- No booking integration, no payments, no maps, no real-time chat
-
-## Future Expansion
-- ***REMOVED*** links (***REMOVED***, ***REMOVED***, Booking.com) — primary passive revenue path
-- Budget tracking per person
-- Map view with region clustering
-- AI itinerary suggestions
-- Calendar export (Google, Apple, Proton)
-- Travel agency white-label
-- React Native / Expo port
-
-## Monetization (Ranked by effort/return)
-1. *****REMOVED*** links** — zero friction, natural fit, commission on clicks/bookings
-2. **Freemium** — free: 1 trip, 5 members. Paid: unlimited, export, advanced views
-3. **One-time trip purchase** — ~$5–15 per trip, no subscription fatigue
-4. **Subscription** — better for travel agencies than consumers
-5. **Ads** — avoid unless massive traffic
-
-## Competitive Landscape
-- **Wanderlog** — itinerary focused, no group compatibility
-- **TripIt** — individual only, no group voting
-- **Google Trips** — dead
-- **Notion/Sheets DIY** — what people actually use; our real competition
-- **Frienzy** — all-in-one travel OS (chat, expense split, AI itinerary, booking, location share); iOS only, 4.8★/190 reviews, $9/mo Pro. No compatibility model — assumes everyone does everything together. Not a direct competitor; complementary.
-- **TripRelay** — closest conceptual overlap. Also uses 4-way voting (`super yes / yes / no / opt-out` = our MUST/WANT/SKIP/MAYBE). Key difference: their activities come from a curated database (swipe cards); output is a spatially-optimized day-by-day map route. They answer "where should we go and in what order." **They have no crew layer** — no Find Your Crew, no Travel Twin, no per-member date availability, no potential-crew-to-actual-crew model. Their voting is input to an AI scheduler; our voting is input to a crew compatibility engine. Positioning risk: the 4-way vocabulary overlap will confuse users who've seen both. Must say explicitly everywhere: *TripRelay tells you where to go. Pulse tells you who to go with.*
-- **Differentiator**: MUST/WANT/MAYBE/SKIP matrix + potential-crew-to-actual-crew resolution via itinerary is genuinely novel; TripRelay and Frienzy both confirm the gap by not touching the crew compatibility layer
-
-## Viability
-- Pain point: real, universal, underserved in group niche
-- Technical complexity: medium-low MVP, medium with real-time collab
-- Revenue ceiling: modest standalone; strong with ***REMOVED*** + freemium
-- Verdict: solid side project / passive income vehicle
-
-## Product Strategy & Differentiation
-
-> **Always keep this in mind when building, designing, or suggesting features.**
-
-### The defensible lane
-- **Frienzy / Wanderlog = logistics coordination** — after decisions are made
-- **Pulse = decision intelligence** — before logistics start
-- The gap nobody owns: "who should do what together?" Stay in it.
-- One-sentence positioning: *Pulse answers "who should do what together" before you plan anything — no other tool does that.*
-
-### What makes us distinct
-- MUST/WANT/MAYBE/SKIP vocabulary — not stars, not thumbs, captures commitment level
-- Find Your Crew — potential crew per activity, two-tier (MUST vs WANT), nobody else has it
-- Travel Twin — pairwise Jaccard compatibility, immediately legible
-- Per-member date ranges — crew is real (overlapping presence), not theoretical
-- Potential crew → actual crew pipeline — Find Your Crew surfaces who would go; itinerary resolves who actually goes given timing conflicts
-
-### Planned features that deepen the core (prioritised)
-1. **Overlap calendar** — days × members grid, activity crew dots overlaid on days everyone is present. Turns potential crew into real crew without manual scheduling. Highest leverage, nothing like it exists.
-2. **Gap detector** — surface conflicts early: "Sara's Rome MUSTs need 3 days but her crew only overlaps for 2."
-3. **Crew card (shareable)** — per-activity card with MUST/WANT avatars + overlap dates, one-tap share to WhatsApp. Every share is an ad.
-4. **Sub-trip clustering** — given ratings + dates, suggest "these 4 activities cluster in Rome on days 3–5 with 80% crew overlap." MVP = manual; v2 = smart.
-
-### What NOT to build (stay out of these lanes)
-- Expense tracking → Splitwise owns it
-- Real-time chat → WhatsApp group already open
-- Booking engine → premature; ***REMOVED*** play is post-traction
-- AI itinerary generation from docs/photos → Frienzy's lane, feature not differentiator
-
-### Launch identity checklist
-Every v1 release must ship: MUST/WANT/MAYBE/SKIP rating, Find Your Crew view, Travel Twin view, per-member arrival/departure dates, share-link onboarding under 60 seconds, and the overlap calendar. If any of these are missing, the identity is not established.
-
----
-
-## UI/UX Design Philosophy
-
-> **Eyes-only information density** — every key fact should be readable at a glance. No clicking around, no deduction, no hovering to reveal hidden state.
-
-Principles:
-- Names are always visible, not just on hover. If a face/avatar appears, its name label appears with it.
-- Color encodes meaning consistently — the same member has the same color across all views; the same rating has the same color in every context.
-- Empty/unrated state is visible and explicit, not just the absence of something. Show "unrated" as a column or cell so gaps are obvious.
-- Pagination is a last resort — prefer showing more with scrolling. When pagination is unavoidable, label both axes clearly.
-- Multiple views of the same data are additive — each view should surface something the others don't. No view should exist purely as a layout variant.
-- Progressive disclosure only for actions (edit, delete), not for information.
-
-Applied examples:
-- **By activity / By member**: colored cells + score bars give rank and distribution simultaneously — no hover needed to see who's excited vs indifferent.
-- **Who's in**: member avatars with name labels always visible in rating-column cells. Consistent avatar colors let you track a person across activity rows without searching.
-- **Find your crew**: activities sorted by excited-member count. The sub-group is immediately visible — no inference needed. MUST avatars distinguished from WANT avatars so commitment level is clear.
-- **Travel twin**: N×N member grid with compatibility % in each cell, color-coded from low to high. You can read "Marco and Sara are 85% compatible" in one glance without clicking into anything.
-- **Activity list**: per-member rating chips visible on the list row itself — no click required to see who rated what.
+Not yet deployed. Core loop ships: create trip → invite → rate MUST/MAYBE/SKIP → Find Your Crew shows sub-groups → Timeline for itinerary. Auth works (email+password, OTP, Google OAuth). Trip page has 3 tabs: Activities, Find Your Crew, Timeline. 18 hooks, 63 tests across 16 files, 9 modal components, UI audit rounds 1–7 done. All open work in Linear ([Pulse MVP](***REMOVED***)).
 
 ---
 
@@ -172,8 +22,8 @@ Applied examples:
 | Styling | Tailwind CSS v4 | Different from v3 — uses `@theme inline`, not tailwind.config.js |
 | Themes | next-themes | `data-theme` attribute, CSS custom properties |
 | State | Zustand 5 | Works identically in RN |
-| Backend/DB | Supabase (Postgres) | Free tier, not set up yet |
-| Auth | Supabase Auth | Magic link + Google OAuth, not set up yet |
+| Backend/DB | Supabase (Postgres) | Free tier, local + hosted both live |
+| Auth | Supabase Auth | email+password, OTP, Google OAuth |
 | Deployment | Vercel | Free hobby tier, zero-config |
 | Package mgr | **pnpm** | v11 via brew |
 
@@ -194,7 +44,7 @@ Applied examples:
 MVP = Next.js web (mobile-responsive) + PWA. Future = Expo/React Native.
 Port must require **zero business logic rewrite** — only UI layer rewrite.
 
-**Why not Gluestack UI v2:** requires react-native-web patch for React 19 — fragile on our stack. Decided against it.
+**Why not Gluestack UI v2:** requires react-native-web patch for React 19 — fragile on our stack.
 
 ### Architecture Rules (enforce from day one)
 - All logic in custom hooks — zero business logic inside components
@@ -208,7 +58,7 @@ Port must require **zero business logic rewrite** — only UI layer rewrite.
 | Logic type | Lives in | Why |
 |---|---|---|
 | Raw activity list, member profiles | Hook fetches raw | Safe, fast local sort/filter |
-| MUST/WANT/MEH scoring, matrix | API route computes | One source of truth, consistent |
+| MUST/MAYBE/SKIP scoring, matrix | API route computes | One source of truth, consistent |
 | Itinerary suggestions | API route | Complex, expensive |
 | UI filtering, sorting, search | Hook (client) | Snappy, no round-trip |
 | Auth, permissions, billing | API route always | Never trust client |
@@ -244,58 +94,13 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 
 ---
 
-## Current State (session handoff)
-- [x] Monorepo: Turborepo + pnpm workspaces (`apps/web`, `packages/*`)
-- [x] Next.js 16 + React 19 + TypeScript + Tailwind v4 + ESLint in `apps/web/`
-- [x] pnpm v11 (brew), `.npmrc` `ignore-scripts=true`, `pnpm-workspace.yaml` `allowBuilds` set
-- [x] ThemeProvider wired in `apps/web/src/app/layout.tsx` (`data-theme` attribute)
-- [x] Both themes (modern + editorial) in `apps/web/src/app/globals.css` as CSS vars
-- [x] Core TypeScript types in `packages/types/src/index.ts`
-- [x] Supabase client in `apps/web/src/lib/supabase.ts` (placeholder fallback for build safety)
-- [x] `.env.local` → local Supabase, `.env.prod` → hosted Supabase (gitignored)
-- [x] UI primitives (web only): Badge, Button, Card, Input in `packages/ui/src/`
-- [x] `.native.tsx` files created (Badge, Button, Card, Input)
-- [x] Zustand store: `packages/store/src/tripStore.ts`
-- [x] Service functions: `packages/services/src/trips.ts`
-- [x] Local Supabase: `supabase/config.toml` (pg17) + `supabase/seed.sql`
-- [x] DB schema: `supabase/schema.sql` — 8 tables, enum type, indexes, seeded categories
-- [x] RLS policies: `supabase/rls.sql` — 27 policies, no security definer, inline subqueries only
-- [x] Migrations: `supabase/migrations/` — init_schema + init_rls + revoke_anon_select, applied local + hosted
-- [x] Hosted Supabase: project `qphuglkhzdwqamslekyc` (West US Oregon), linked, migrations pushed
-- [x] SupabaseProvider wired into `apps/web/src/app/layout.tsx` via `Providers.tsx`
-- [x] Auth flow: email+password, OTP, Google OAuth (`/login`), protected routes, sign out
-- [x] Seed: 10 users, 3 trips (Italy/Barcelona/Tokyo), activities, ratings — password login works
-- [x] RLS: is_trip_member() SECURITY DEFINER fixes trips↔trip_members recursion (migration 0000)
-- [x] RLS: trips SELECT policy allows created_by = auth.uid() so INSERT→SELECT works before membership (migration 0005)
-- [x] Trip page `/trip/[id]` — activity list, per-member rating chips (capped at 5+N), real-time
-- [x] Activity CRUD — add/edit/delete with modal, RLS enforced (adder or trip owner)
-- [x] Activity detail modal — MUST/WANT/MEH chip rating, group ratings, optimistic update + rollback
-- [x] Toggle-to-unrate — tapping active rating removes it; optimistic remove + rollback; deleteRating service + removeRating store action
-- [x] 11 hooks, 52 tests passing
-- [x] Trip member limit — tier-aware BEFORE INSERT trigger (free=5, planner=25, enterprise=unlimited) replacing old 50-member hard cap
-- [x] Invite code lookup — SECURITY DEFINER RPC (non-member safe)
-- [x] Home page — trip list with member count, create trip modal, join via invite code
-- [x] Trip create flow — insert trip + add creator as first member
-- [x] Join flow — `/join?code=<code>` page, trip preview, redirect on success
-- [x] Technical docs — AUTH.md, DATA_MODEL.md, TRIP_FLOW.md, RATING_MATRIX.md, DEPLOYMENT.md (all Mermaid)
-- [x] Profile creation trigger — on_auth_user_created fires AFTER INSERT on auth.users, display_name from meta or email prefix
-- [x] Auth config — enable_confirmations = true, max_frequency = "60s" (config.toml + supabase restart)
-- [x] Input validation — all forms: trim, maxLength, URL format, date order, email regex; DB CHECK constraints on all tables (migration 0006)
-- [x] Hosted Supabase — all migrations (0000–0006) applied and in sync with local
-- [x] Compatibility matrix UI — 5 views: Rundown (card layout), Travel twin (Jaccard heatmap), By activity, By member, Who's in. Jaccard model (MUST+WANT excited set, MEH excluded). Per-view descriptions. Pagination.
-- [x] Global AppNav — sticky header, route-aware (Pulse wordmark on home, ← Trips on trip pages), sign out button; wired in Providers.tsx above {children}
-- [x] Home page layout — trip card grid (sm:2col, lg:3col), MemberDots overlap avatars, empty state, skeleton loading, join section card
-- [x] Trip page layout — two-column (sidebar + main) at lg:, sticky sidebar with trip info / schedule / invite cards; tab bar for Activities / Find your crew
-- [x] Mobile: all 5 matrix views have mobile card layouts at sm: breakpoint; no horizontal overflow
-- [x] Cross-browser overflow fix — removed `flex flex-col` from body (caused Firefox width calc divergence); `overflow-x-clip` on each page's `<main>` instead
-- [x] ESC key closes all 4 modals (CreateTripModal, ActivityFormModal, ActivityDetailModal, MemberDatesModal)
-- [x] UI audit rounds 1 + 2 complete — see `docs/ui-reviews/`; RN3 open (needs simulator)
-- [x] User tiers — `user_tier` enum (free/planner/enterprise) on profiles; tier-aware member limit; see `docs/TIERS.md`
-- [x] Stress-test seed — 200 bulk users, 9 trips at 10/15/20/50/75/100/125/150/200 members with random ratings
+## Key Constraint
+Non-technical users (family) must onboard in under 60 seconds. Share link → in app → rating → done. If it takes longer, it failed.
 
-**Backlog and task tracking moved to Linear.** All open work (pre-deploy blockers, security fixes, billing, post-MVP features, UX polish) lives in the [Pulse MVP project](***REMOVED***). Do not track tasks in `.md` files. Use Linear (JAB-* issues) as the source of truth.
+## Biggest Risk
+Infrequent use cycle — 1–2 big trips/year. Retention is low by nature. ***REMOVED*** revenue mitigates this — revenue per session can be high even with low return visits.
 
-Deprecated task files (migrated to Linear, kept for reference): `deprecated/TODO.md`, `deprecated/FUTURE.md`, `deprecated/AUTH_FLOW_GAPS.md`, `deprecated/UI_REVIEW_ROUND_1.5.md`
+---
 
 ## Linear Workflow
 
@@ -317,12 +122,6 @@ cp apps/web/.env.local.example apps/web/.env.local
 # fill in Supabase URL + anon key
 make dev                   # or: pnpm dev (turbo --filter=web)
 ```
-
-## Key Constraint
-Non-technical users (family) must onboard in under 60 seconds. Share link → in app → rating → done. If it takes longer, it failed.
-
-## Biggest Risk
-Infrequent use cycle — 1–2 big trips/year. Retention is low by nature. ***REMOVED*** revenue mitigates this — revenue per session can be high even with low return visits.
 
 ---
 

@@ -85,7 +85,7 @@ Competitive wedge:
 
 ## Target Audience
 - **Primary:** trip organizer — the person who cares most, sets up the trip, sends the invite
-- **Secondary:** trip members — non-technical, just need to tap MUST/WANT/MAYBE in 30 seconds
+- **Secondary:** trip members — non-technical, just need to tap MUST/MAYBE/SKIP in 30 seconds
 - The secondary user defines the UX ceiling — if grandma can't rate an activity in 30 seconds, the app failed.
 - **Sweet spot group size:** 6–20 people. Small enough to care about individual preferences, large enough that coordination fails without a tool.
 
