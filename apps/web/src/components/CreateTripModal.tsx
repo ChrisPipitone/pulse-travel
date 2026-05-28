@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
 import { useToast } from '@/components/ToastProvider'
+import { UNDO_DURATION_MS } from '@/lib/constants'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useModalEscape } from '@/hooks/useModalEscape'
 import { MemberAvatar } from '@/components/MemberAvatar'
@@ -57,7 +58,7 @@ export function CreateTripModal({
         undoMemberTimersRef.current.delete(memberId)
         setHiddenMemberIds(prev => { const s = new Set(prev); s.delete(memberId); return s })
         onRemoveMember?.(memberId)
-      }, 4000)
+      }, UNDO_DURATION_MS)
       undoMemberTimersRef.current.set(memberId, timer)
       showToast(
         'Member removed',
@@ -66,7 +67,7 @@ export function CreateTripModal({
           undoMemberTimersRef.current.delete(memberId)
           setHiddenMemberIds(prev => { const s = new Set(prev); s.delete(memberId); return s })
         },
-        4000,
+        UNDO_DURATION_MS,
       )
       return
     }

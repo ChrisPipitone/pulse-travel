@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useTripStore } from '@pulse/store'
 import { useStopActions } from '@pulse/hooks'
+import { UNDO_DURATION_MS } from '@/lib/constants'
 import { useToast } from '@/components/ToastProvider'
 import { KebabMenu } from '@/components/KebabMenu'
 import type { Stop } from '@pulse/types'
@@ -38,7 +39,7 @@ export function StopsPanel({ userId, tripOwnerId, onOpenAdd, onOpenEdit }: Props
       timerRef.current.delete(stop.id)
       setHiddenIds((prev) => { const s = new Set(prev); s.delete(stop.id); return s })
       await deleteStop(stop.id)
-    }, 4000)
+    }, UNDO_DURATION_MS)
     timerRef.current.set(stop.id, timer)
     showToast(
       `"${stop.name}" deleted`,
@@ -47,7 +48,7 @@ export function StopsPanel({ userId, tripOwnerId, onOpenAdd, onOpenEdit }: Props
         timerRef.current.delete(stop.id)
         setHiddenIds((prev) => { const s = new Set(prev); s.delete(stop.id); return s })
       },
-      4000,
+      UNDO_DURATION_MS,
     )
   }
 

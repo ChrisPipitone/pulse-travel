@@ -7,6 +7,7 @@ import { useSession } from "@pulse/hooks";
 import { useRateActivity } from "@pulse/hooks";
 import type { Activity, Member, Rating, Stop } from "@pulse/types";
 import { RATING_BUTTON, RATING_LABELS } from "@pulse/types";
+import { AVATAR_PREVIEW_CAP } from "@/lib/constants";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { KebabMenu } from "@/components/KebabMenu";
 
@@ -130,7 +131,7 @@ function AvatarRow({
   maybeMembers: Member[];
   userId?: string;
 }) {
-  const allShown = [...mustMembers, ...maybeMembers].slice(0, 5);
+  const allShown = [...mustMembers, ...maybeMembers].slice(0, AVATAR_PREVIEW_CAP);
   const overflow = mustMembers.length + maybeMembers.length - allShown.length;
   const mustSet = new Set(mustMembers.map((m) => m.id));
   return (

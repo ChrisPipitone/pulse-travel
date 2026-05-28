@@ -1,6 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Trip, TripPreview, Activity, ActivityRating, Member, Stop } from '@pulse/types'
 
+const PG_NOT_FOUND        = 'PGRST116'
+const PG_UNIQUE_VIOLATION = '23505'
+const AVATAR_PREVIEW_CAP  = 5
+
 export type TripMemberAvatar = { id: string; name: string; avatar_url?: string | null }
 export type TripSummary = Trip & { member_count: number; member_avatars: TripMemberAvatar[]; activity_count: number; my_rated_count: number }
 
@@ -26,7 +30,7 @@ export async function getUserTrips(client: SupabaseClient, userId?: string): Pro
     membersByTrip.get(m.trip_id)!.push(m.user_id)
   }
 
-  const previewIds = [...new Set([...membersByTrip.values()].flatMap((ids) => ids.slice(0, 5)))]
+  const previewIds = [...new Set([...membersByTrip.values()].flatMap((ids) => ids.slice(0, AVATAR_PREVIEW_CAP)))]
 
   const profileMap = new Map<string, { name: string; avatar_url?: string | null }>()
   if (previewIds.length > 0) {
@@ -76,7 +80,7 @@ export async function getUserTrips(client: SupabaseClient, userId?: string): Pro
     return {
       ...t,
       member_count: memberIds.length,
-      member_avatars: memberIds.slice(0, 5).map((id) => ({
+      member_avatars: memberIds.slice(0, AVATAR_PREVIEW_CAP).map((id) => ({
         id,
         name: profileMap.get(id)?.name ?? 'Unknown',
         avatar_url: profileMap.get(id)?.avatar_url,
@@ -101,7 +105,7 @@ export async function createTrip(
       .single()
     if (error) {
       // 23505 = unique_violation — invite_code collision, retry with new DB-generated code
-      if (error.code === '23505' && error.message.includes('invite_code')) continue
+      if (error.code === PG_UNIQUE_VIOLATION && error.message.includes('invite_code')) continue
       throw new Error(error.message)
     }
     trip = data as Trip
@@ -137,7 +141,7 @@ export async function deleteTrip(client: SupabaseClient, tripId: string): Promis
 
 export async function getTrip(client: SupabaseClient, id: string): Promise<Trip | null> {
   const { data, error } = await client.from('trips').select('*').eq('id', id).single()
-  if (error && error.code !== 'PGRST116') throw new Error(error.message)
+  if (error && error.code !== PG_NOT_FOUND) throw new Error(error.message)
   return data
 }
 

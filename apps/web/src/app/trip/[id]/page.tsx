@@ -31,6 +31,7 @@ import { MemberAvatar } from "@/components/MemberAvatar";
 import { KebabMenu } from "@/components/KebabMenu";
 import type { Activity, Stop } from "@pulse/types";
 import { fmtDateRange } from "@/lib/date";
+import { UNDO_DURATION_MS, TRIP_DELETE_DELAY_MS } from "@/lib/constants";
 
 type Tab = "activities" | "timeline" | "crew";
 
@@ -156,7 +157,7 @@ export default function TripPage({
       const ok = await deleteActivity(activity.id);
       if (!ok) showToast("Failed to delete — activity restored");
     });
-    showToast(`"${activity.name}" deleted`, () => { cancel(); unhide(activity.id); }, 4000);
+    showToast(`"${activity.name}" deleted`, () => { cancel(); unhide(activity.id); }, UNDO_DURATION_MS);
   }
 
   async function handleEditTrip(fields: {
@@ -184,8 +185,8 @@ export default function TripPage({
     const cancel = scheduleUndo("trip", async () => {
       await deleteTrip(tripId, () => {});
       window.dispatchEvent(new Event("pulse:trips:changed"));
-    }, 5000);
-    showToast(`Trip "${tripName}" deleted`, () => { cancel(); router.push(`/trip/${tripId}`); }, 5000);
+    }, TRIP_DELETE_DELAY_MS);
+    showToast(`Trip "${tripName}" deleted`, () => { cancel(); router.push(`/trip/${tripId}`); }, TRIP_DELETE_DELAY_MS);
   }
 
   async function handleAddStop(fields: { name: string; date_from: string | null; date_to: string | null }) {

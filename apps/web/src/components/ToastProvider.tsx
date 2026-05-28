@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useCallback, useRef } from 'react'
+import { UNDO_DURATION_MS } from '@/lib/constants'
 
 type Toast = {
   id: string
@@ -82,7 +83,7 @@ function ToastItem({ t, onDismiss }: { t: Toast; onDismiss: (undo?: () => void) 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  const showToast = useCallback((message: string, onUndo?: () => void, duration = 4000) => {
+  const showToast = useCallback((message: string, onUndo?: () => void, duration = UNDO_DURATION_MS) => {
     const id = crypto.randomUUID()
     setToasts(prev => [...prev.slice(-2), { id, message, onUndo }])
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration)
