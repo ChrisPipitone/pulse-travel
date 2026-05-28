@@ -8,14 +8,14 @@ export const RATING_LABELS: Record<Rating, string> = {
 
 export const RATING_PILL: Record<Rating, string> = {
   MUST:  'bg-must/12 text-must',
-  MAYBE: 'bg-maybe text-maybe-text',
-  SKIP:  'bg-skip text-skip-text',
+  MAYBE: 'bg-[#FFF8D6] text-[#8a6e00]',
+  SKIP:  'bg-skip text-[#888]',
 }
 
 export const RATING_BUTTON: Record<Rating, { active: string; idle: string }> = {
-  MUST:  { active: 'bg-must text-must-text border-transparent',   idle: 'border-must/40 text-must/60' },
-  MAYBE: { active: 'bg-maybe text-maybe-text border-transparent', idle: 'border-maybe/40 text-maybe-text/60' },
-  SKIP:  { active: 'bg-skip text-skip-text border-transparent',   idle: 'border-border text-text-subtle' },
+  MUST:  { active: 'bg-must text-must-text border-transparent',              idle: 'border-must/40 text-must/60' },
+  MAYBE: { active: 'bg-maybe text-maybe-text border-transparent',            idle: 'border-[#FFE566]/40 text-[#7A6200]/60' },
+  SKIP:  { active: 'bg-text-subtle/30 text-text-primary border-text-subtle/40', idle: 'border-border text-text-subtle' },
 }
 
 export type Theme = 'modern' | 'editorial'
