@@ -272,6 +272,7 @@ export default function TripPage({
                 tripOwnerId={trip.created_by ?? undefined}
                 hiddenIds={hiddenActivityIds}
                 autoOpenFirstUnrated={newMember === "1"}
+                onSwitchToCrewTab={() => setTab("crew")}
               />
             )}
 

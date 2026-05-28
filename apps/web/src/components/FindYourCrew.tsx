@@ -27,6 +27,7 @@ export function FindYourCrew({
   tripOwnerId,
   hiddenIds,
   autoOpenFirstUnrated = false,
+  onSwitchToCrewTab,
 }: {
   onAdd?: () => void;
   onEdit?: (a: Activity) => void;
@@ -34,6 +35,7 @@ export function FindYourCrew({
   tripOwnerId?: string;
   hiddenIds?: Set<string>;
   autoOpenFirstUnrated?: boolean;
+  onSwitchToCrewTab?: () => void;
 } = {}) {
   const allActivities = useTripStore((s) => s.activities);
   const members = useTripStore((s) => s.members);
@@ -250,8 +252,8 @@ export function FindYourCrew({
 
   return (
     <>
-      {/* Rating progress banner — stays until all rated */}
-      {unratedCount > 0 && (
+      {/* Rating progress / completion banner */}
+      {unratedCount > 0 ? (
         <div className="flex items-center justify-between gap-3 bg-accent/8 border border-accent/20 rounded-[var(--radius-card)] px-4 py-3">
           <div className="min-w-0">
             <p className="text-sm font-medium text-text-primary">Rate activities to find your crew</p>
@@ -263,6 +265,25 @@ export function FindYourCrew({
           >
             Next unrated →
           </button>
+        </div>
+      ) : rows.length > 0 && (
+        <div
+          className="flex items-center justify-between gap-3 rounded-[var(--radius-card)] px-4 py-3"
+          style={{ background: "rgba(22,163,74,.08)", border: "1px solid rgba(22,163,74,.2)" }}
+        >
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-text-primary">All rated — you&apos;re done</p>
+            <p className="text-xs text-text-muted mt-0.5">See how the group lines up</p>
+          </div>
+          {onSwitchToCrewTab && (
+            <button
+              onClick={onSwitchToCrewTab}
+              className="shrink-0 text-xs font-bold hover:opacity-80 transition-opacity whitespace-nowrap"
+              style={{ color: "#16A34A" }}
+            >
+              See your crew →
+            </button>
+          )}
         </div>
       )}
 
