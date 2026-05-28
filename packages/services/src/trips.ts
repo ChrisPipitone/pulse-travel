@@ -50,6 +50,8 @@ export async function getUserTrips(client: SupabaseClient, userId?: string): Pro
     .in('trip_id', tripIds)
 
   if (activities?.length) {
+    const activityTripMap = new Map<string, string>(activities.map((a: any) => [a.id, a.trip_id]))
+
     for (const a of activities) {
       activityCountByTrip.set(a.trip_id, (activityCountByTrip.get(a.trip_id) ?? 0) + 1)
     }
@@ -63,7 +65,7 @@ export async function getUserTrips(client: SupabaseClient, userId?: string): Pro
         .in('activity_id', activityIds)
 
       for (const r of myRatings ?? []) {
-        const tripId = activities.find((a: any) => a.id === r.activity_id)?.trip_id
+        const tripId = activityTripMap.get(r.activity_id)
         if (tripId) myRatedByTrip.set(tripId, (myRatedByTrip.get(tripId) ?? 0) + 1)
       }
     }
@@ -250,12 +252,7 @@ export async function joinTrip(client: SupabaseClient, tripId: string, userId: s
   const { error } = await client
     .from('trip_members')
     .upsert({ trip_id: tripId, user_id: userId }, { onConflict: 'trip_id,user_id', ignoreDuplicates: true })
-  if (error) {
-    if (error.message.startsWith('Trip is full')) {
-      throw new Error(error.message)
-    }
-    throw new Error(error.message)
-  }
+  if (error) throw new Error(error.message)
 }
 
 export async function sendInviteEmail(
