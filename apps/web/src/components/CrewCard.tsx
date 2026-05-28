@@ -184,22 +184,49 @@ function TierBlock({
   );
 }
 
-function CrewFooter({ mustCount, maybeCount }: { mustCount: number; maybeCount: number }) {
+function activityStatusLabel(must: number, maybe: number, skip: number, total: number): string | null {
+  if (total < 2) return null;
+  if (total >= 3 && must === total) return "Universal favorite";
+  if (total >= 4 && must >= Math.ceil(total * 0.6) && skip === 0) return "Strong match";
+  if (must >= 2 && skip >= 2) return "Split crowd";
+  if (must >= 1 && must + maybe <= Math.max(2, Math.floor(total * 0.35)) && total >= 4) return "Niche pick";
+  return null;
+}
+
+function CrewFooter({
+  mustCount,
+  maybeCount,
+  skipCount,
+  totalMembers,
+}: {
+  mustCount: number;
+  maybeCount: number;
+  skipCount: number;
+  totalMembers: number;
+}) {
+  const label = activityStatusLabel(mustCount, maybeCount, skipCount, totalMembers);
   return (
-    <div className="flex items-center gap-1.5 pt-2.5 border-t border-border flex-wrap">
-      {mustCount > 0 && (
-        <span
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-          style={{ background: "rgba(255,92,53,.1)", color: "var(--must-bg)" }}
-        >
-          {mustCount} going
+    <div className="flex flex-col gap-1 pt-2.5 border-t border-border">
+      {label && (
+        <span className="text-[10px] font-bold text-text-subtle uppercase tracking-[.08em]">
+          {label}
         </span>
       )}
-      {maybeCount > 0 && (
-        <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-border text-text-subtle">
-          {maybeCount} maybe
-        </span>
-      )}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {mustCount > 0 && (
+          <span
+            className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+            style={{ background: "rgba(255,92,53,.1)", color: "var(--must-bg)" }}
+          >
+            {mustCount} going
+          </span>
+        )}
+        {maybeCount > 0 && (
+          <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-border text-text-subtle">
+            {maybeCount} maybe
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -219,7 +246,8 @@ export function CrewCard({
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
-  const { activity, mustMembers, maybeMembers, myRating, mustCount, maybeCount } = row;
+  const { activity, mustMembers, maybeMembers, skipMembers, unratedMembers, myRating, mustCount, maybeCount } = row;
+  const totalMembers = mustCount + maybeCount + skipMembers.length + unratedMembers.length;
 
   const stripeColor =
     myRating === "MUST" ? "var(--must-bg)" : myRating === "MAYBE" ? "#FFE566" : "#E8E6E0";
@@ -269,7 +297,14 @@ export function CrewCard({
           <TierBlock mustMembers={mustMembers} maybeMembers={maybeMembers} />
         )}
 
-        {!isEmpty && <CrewFooter mustCount={mustCount} maybeCount={maybeCount} />}
+        {!isEmpty && (
+          <CrewFooter
+            mustCount={mustCount}
+            maybeCount={maybeCount}
+            skipCount={skipMembers.length}
+            totalMembers={totalMembers}
+          />
+        )}
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ export function KebabMenu({ items }: { items: Item[] }) {
     <div ref={ref} className="relative">
       <button
         onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
-        className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
+        className="p-2 rounded text-text-muted hover:text-text-primary hover:bg-bg transition-colors"
         aria-label="More options"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
