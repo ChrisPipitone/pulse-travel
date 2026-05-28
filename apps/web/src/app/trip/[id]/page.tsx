@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useRef, useState } from "react";
+import { use, useState } from "react";
 import {
   useTripData,
   useSession,
@@ -11,6 +11,7 @@ import {
   useDeleteTrip,
   useRemoveMember,
   useStopActions,
+  useUndoAction,
 } from "@pulse/hooks";
 import { useTripStore } from "@pulse/store";
 import { ActivityFormModal } from "@/components/ActivityFormModal";
@@ -80,6 +81,7 @@ export default function TripPage({
   const router = useRouter();
 
   const { showToast } = useToast();
+  const { schedule: scheduleUndo } = useUndoAction();
 
   const [modal, setModal] = useState<ModalState>({ mode: "closed" });
   const [stopModal, setStopModal] = useState<StopModalState>({ mode: "closed" });
@@ -89,12 +91,7 @@ export default function TripPage({
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("activities");
-  const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(
-    new Set(),
-  );
-  const undoTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map(),
-  );
+  const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(new Set());
 
   const userId = session?.user.id;
   const isOwner = !!userId && trip?.created_by === userId;
@@ -148,32 +145,18 @@ export default function TripPage({
     }
   }
 
+  function unhide(id: string) {
+    setHiddenActivityIds((prev) => { const s = new Set(prev); s.delete(id); return s });
+  }
+
   async function handleDelete(activity: Activity) {
     setHiddenActivityIds((prev) => new Set(prev).add(activity.id));
-    const timer = setTimeout(async () => {
-      undoTimersRef.current.delete(activity.id);
-      setHiddenActivityIds((prev) => {
-        const s = new Set(prev);
-        s.delete(activity.id);
-        return s;
-      });
+    const cancel = scheduleUndo(activity.id, async () => {
+      unhide(activity.id);
       const ok = await deleteActivity(activity.id);
       if (!ok) showToast("Failed to delete — activity restored");
-    }, 4000);
-    undoTimersRef.current.set(activity.id, timer);
-    showToast(
-      `"${activity.name}" deleted`,
-      () => {
-        clearTimeout(undoTimersRef.current.get(activity.id));
-        undoTimersRef.current.delete(activity.id);
-        setHiddenActivityIds((prev) => {
-          const s = new Set(prev);
-          s.delete(activity.id);
-          return s;
-        });
-      },
-      4000,
-    );
+    });
+    showToast(`"${activity.name}" deleted`, () => { cancel(); unhide(activity.id); }, 4000);
   }
 
   async function handleEditTrip(fields: {
@@ -198,21 +181,11 @@ export default function TripPage({
     const tripId = trip!.id;
     const tripName = trip!.name;
     router.replace("/");
-    const timer = setTimeout(async () => {
-      undoTimersRef.current.delete("trip");
+    const cancel = scheduleUndo("trip", async () => {
       await deleteTrip(tripId, () => {});
       window.dispatchEvent(new Event("pulse:trips:changed"));
     }, 5000);
-    undoTimersRef.current.set("trip", timer);
-    showToast(
-      `Trip "${tripName}" deleted`,
-      () => {
-        clearTimeout(undoTimersRef.current.get("trip"));
-        undoTimersRef.current.delete("trip");
-        router.push(`/trip/${tripId}`);
-      },
-      5000,
-    );
+    showToast(`Trip "${tripName}" deleted`, () => { cancel(); router.push(`/trip/${tripId}`); }, 5000);
   }
 
   async function handleAddStop(fields: { name: string; date_from: string | null; date_to: string | null }) {
