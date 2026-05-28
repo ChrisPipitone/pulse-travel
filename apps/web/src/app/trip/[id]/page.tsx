@@ -26,6 +26,7 @@ import { TripTimeline } from "@/components/TripTimeline";
 import { TripSidebar } from "@/components/TripSidebar";
 import { TripLoadingSkeleton } from "@/components/TripLoadingSkeleton";
 import { SetDisplayNameModal } from "@/components/SetDisplayNameModal";
+import { TripSetupStrip } from "@/components/TripSetupStrip";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 import type { Activity, Stop } from "@pulse/types";
@@ -41,7 +42,7 @@ const TAB_LABELS: Record<Tab, { short: string; full: string; sub: string }> = {
 
 type OpenModal =
   | { kind: "none" }
-  | { kind: "addActivity" }
+  | { kind: "addActivity"; prefill?: { name: string } }
   | { kind: "editActivity"; activity: Activity }
   | { kind: "addStop" }
   | { kind: "editStop"; stop: Stop }
@@ -63,6 +64,7 @@ export default function TripPage({
   const { session } = useSession();
   const trip = useTripStore((s) => s.trip);
   const members = useTripStore((s) => s.members);
+  const activities = useTripStore((s) => s.activities);
   const stops = useTripStore((s) => s.stops);
 
   const { addActivity, loading: adding, error: addError } = useAddActivity();
@@ -240,6 +242,17 @@ export default function TripPage({
 
           {/* ── Main content ─────────────────────────────────────── */}
           <div className="flex-1 min-w-0 flex flex-col gap-5">
+            {/* Creator setup strip */}
+            {isOwner && (
+              <TripSetupStrip
+                hasActivities={activities.length > 0}
+                hasCrew={members.length > 1}
+                onAddActivity={() => setOpenModal({ kind: "addActivity" })}
+                onInvite={() => setOpenModal({ kind: "invite" })}
+                onAddSuggestion={(name) => setOpenModal({ kind: "addActivity", prefill: { name } })}
+              />
+            )}
+
             {/* Tab bar */}
             <div role="tablist" className="flex border-b border-border">
               {(["activities", "crew", "timeline"] as Tab[]).map((t) => (
@@ -355,6 +368,9 @@ export default function TripPage({
         error={addError}
         onClose={closeModal}
         onSubmit={handleAdd}
+        initial={openModal.kind === "addActivity" && openModal.prefill
+          ? { name: openModal.prefill.name }
+          : undefined}
       />
 
       {(() => {

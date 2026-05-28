@@ -188,7 +188,7 @@ Option B (restructure): Crew tab becomes Travel Twin view (distinct value, not a
 | 5 | SetDisplayNameModal defer | ✅ done | — |
 | 6 | Post-join celebration toast | ✅ done | — |
 | 7 | Completion moment | ✅ done | — |
-| 8 | Creator setup sequence | — | — |
+| 8 | Creator setup sequence | ✅ done | — |
 | 9 | Split-pane default populated | — | — |
 | 10 | Set dates inline | — | — |
 | 11 | Unrated sort filter | — | — |
