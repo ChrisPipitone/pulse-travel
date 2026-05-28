@@ -235,6 +235,7 @@ export function CrewCard({
   row,
   userId,
   canEdit,
+  selected,
   onOpen,
   onEdit,
   onDelete,
@@ -242,6 +243,7 @@ export function CrewCard({
   row: CrewRowData;
   userId?: string;
   canEdit?: boolean;
+  selected?: boolean;
   onOpen: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -261,7 +263,7 @@ export function CrewCard({
   return (
     <div
       onClick={onOpen}
-      className={`rounded-[var(--radius-card)] border border-border overflow-hidden cursor-pointer flex transition-all hover:shadow-md hover:-translate-y-px active:scale-[.998] ${isEmpty ? "opacity-40" : ""}`}
+      className={`rounded-[var(--radius-card)] border overflow-hidden cursor-pointer flex transition-all hover:shadow-md hover:-translate-y-px active:scale-[.998] ${isEmpty ? "opacity-40" : ""} ${selected ? "border-accent/50 shadow-sm" : "border-border"}`}
       style={{ background: cardBg }}
     >
       <div className="w-1 shrink-0" style={{ background: stripeColor }} />

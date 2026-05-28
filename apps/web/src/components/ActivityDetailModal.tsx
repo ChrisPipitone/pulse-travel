@@ -126,7 +126,7 @@ export function ActivityDetailModal({
                     key={r}
                     disabled={ratingLoading}
                     onClick={() => { setJustRated(true); onRate(r) }}
-                    className={`flex-1 py-2 rounded-[var(--radius-card)] text-sm font-semibold transition-all disabled:opacity-50 ${
+                    className={`flex-1 min-h-[44px] py-2 rounded-[var(--radius-card)] text-sm font-semibold transition-all disabled:opacity-50 ${
                       active
                         ? `${RATING_BUTTON[r].active} ring-2 ring-offset-2 ${ratingRing[r]}`
                         : 'bg-bg border border-border text-text-muted hover:border-accent/40 hover:text-text-primary'
