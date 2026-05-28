@@ -38,15 +38,16 @@ const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
   crew:       { short: "Crew",       full: "Find your crew" },
 };
 
-type ModalState =
-  | { mode: "closed" }
-  | { mode: "add" }
-  | { mode: "edit"; activity: Activity };
-
-type StopModalState =
-  | { mode: "closed" }
-  | { mode: "add" }
-  | { mode: "edit"; stop: Stop };
+type OpenModal =
+  | { kind: "none" }
+  | { kind: "addActivity" }
+  | { kind: "editActivity"; activity: Activity }
+  | { kind: "addStop" }
+  | { kind: "editStop"; stop: Stop }
+  | { kind: "editTrip" }
+  | { kind: "memberDates" }
+  | { kind: "schedules" }
+  | { kind: "invite" };
 
 export default function TripPage({
   params,
@@ -81,12 +82,8 @@ export default function TripPage({
   const { showToast } = useToast();
   const { schedule: scheduleUndo } = useUndoAction();
 
-  const [modal, setModal] = useState<ModalState>({ mode: "closed" });
-  const [stopModal, setStopModal] = useState<StopModalState>({ mode: "closed" });
-  const [showDatesModal, setShowDatesModal] = useState(false);
-  const [showEditTrip, setShowEditTrip] = useState(false);
-  const [showSchedulesModal, setShowSchedulesModal] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [openModal, setOpenModal] = useState<OpenModal>({ kind: "none" });
+  const closeModal = () => setOpenModal({ kind: "none" });
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("activities");
   const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(new Set());
@@ -117,7 +114,7 @@ export default function TripPage({
       category_id: null,
     });
     if (ok) {
-      setModal({ mode: "closed" });
+      closeModal();
       showToast("Activity added");
     }
   }
@@ -129,8 +126,8 @@ export default function TripPage({
     url: string;
     stop_id: string | null;
   }) {
-    if (modal.mode !== "edit") return;
-    const ok = await updateActivity(modal.activity.id, {
+    if (openModal.kind !== "editActivity") return;
+    const ok = await updateActivity(openModal.activity.id, {
       name: fields.name,
       location: fields.location || null,
       description: fields.description || null,
@@ -138,7 +135,7 @@ export default function TripPage({
       stop_id: fields.stop_id ?? undefined,
     });
     if (ok) {
-      setModal({ mode: "closed" });
+      closeModal();
       showToast("Activity saved");
     }
   }
@@ -170,7 +167,7 @@ export default function TripPage({
       end_date: fields.end_date || null,
     });
     if (ok) {
-      setShowEditTrip(false);
+      closeModal();
       showToast("Trip updated");
     }
   }
@@ -188,13 +185,13 @@ export default function TripPage({
 
   async function handleAddStop(fields: { name: string; date_from: string | null; date_to: string | null }) {
     const ok = await createStop(id, fields.name, fields.date_from, fields.date_to);
-    if (ok) setStopModal({ mode: "closed" });
+    if (ok) closeModal();
   }
 
   async function handleEditStop(fields: { name: string; date_from: string | null; date_to: string | null }) {
-    if (stopModal.mode !== "edit") return;
-    const ok = await updateStop(stopModal.stop.id, { name: fields.name, date_from: fields.date_from, date_to: fields.date_to });
-    if (ok) setStopModal({ mode: "closed" });
+    if (openModal.kind !== "editStop") return;
+    const ok = await updateStop(openModal.stop.id, { name: fields.name, date_from: fields.date_from, date_to: fields.date_to });
+    if (ok) closeModal();
   }
 
   function handleCopyInvite() {
@@ -227,14 +224,14 @@ export default function TripPage({
             userId={userId}
             isOwner={isOwner}
             copied={copied}
-            onEditTrip={() => setShowEditTrip(true)}
+            onEditTrip={() => setOpenModal({ kind: "editTrip" })}
             onDeleteTrip={handleDeleteTrip}
-            onShowDatesModal={() => setShowDatesModal(true)}
-            onShowSchedulesModal={() => setShowSchedulesModal(true)}
-            onShowInviteModal={() => setShowInviteModal(true)}
+            onShowDatesModal={() => setOpenModal({ kind: "memberDates" })}
+            onShowSchedulesModal={() => setOpenModal({ kind: "schedules" })}
+            onShowInviteModal={() => setOpenModal({ kind: "invite" })}
             onCopyInvite={handleCopyInvite}
-            onOpenAddStop={() => setStopModal({ mode: "add" })}
-            onOpenEditStop={(stop) => setStopModal({ mode: "edit", stop })}
+            onOpenAddStop={() => setOpenModal({ kind: "addStop" })}
+            onOpenEditStop={(stop) => setOpenModal({ kind: "editStop", stop })}
           />
 
           {/* ── Main content ─────────────────────────────────────── */}
@@ -262,8 +259,8 @@ export default function TripPage({
             {/* Activities tab */}
             {tab === "activities" && (
               <FindYourCrew
-                onAdd={() => setModal({ mode: "add" })}
-                onEdit={(a) => setModal({ mode: "edit", activity: a })}
+                onAdd={() => setOpenModal({ kind: "addActivity" })}
+                onEdit={(a) => setOpenModal({ kind: "editActivity", activity: a })}
                 onDelete={handleDelete}
                 tripOwnerId={trip.created_by ?? undefined}
                 hiddenIds={hiddenActivityIds}
@@ -281,24 +278,24 @@ export default function TripPage({
       </div>
 
       <MemberSchedulesModal
-        open={showSchedulesModal}
+        open={openModal.kind === "schedules"}
         members={members}
         userId={userId}
-        onEditDates={() => setShowDatesModal(true)}
-        onClose={() => setShowSchedulesModal(false)}
+        onEditDates={() => setOpenModal({ kind: "memberDates" })}
+        onClose={closeModal}
       />
 
-      {showInviteModal && trip && (
+      {openModal.kind === "invite" && trip && (
         <InviteMemberModal
           tripName={trip.name}
           tripId={trip.id}
           inviteCode={trip.invite_code}
-          onClose={() => setShowInviteModal(false)}
+          onClose={closeModal}
         />
       )}
 
       <CreateTripModal
-        open={showEditTrip}
+        open={openModal.kind === "editTrip"}
         title="Edit trip"
         initial={{
           name: trip.name,
@@ -309,7 +306,7 @@ export default function TripPage({
         submitLabel="Save"
         loading={updating}
         error={updateError}
-        onClose={() => setShowEditTrip(false)}
+        onClose={closeModal}
         onSubmit={handleEditTrip}
         members={members}
         ownerId={trip.created_by ?? undefined}
@@ -319,34 +316,34 @@ export default function TripPage({
       />
 
       <StopFormModal
-        open={stopModal.mode === "add"}
+        open={openModal.kind === "addStop"}
         title="Add stop"
         submitLabel="Add stop"
         loading={stopLoading}
         error={stopError}
-        onClose={() => setStopModal({ mode: "closed" })}
+        onClose={closeModal}
         onSubmit={handleAddStop}
       />
 
       <StopFormModal
-        open={stopModal.mode === "edit"}
+        open={openModal.kind === "editStop"}
         title="Edit stop"
         submitLabel="Save"
         loading={stopLoading}
         error={stopError}
-        initial={stopModal.mode === "edit" ? { name: stopModal.stop.name, date_from: stopModal.stop.date_from, date_to: stopModal.stop.date_to } : undefined}
-        onClose={() => setStopModal({ mode: "closed" })}
+        initial={openModal.kind === "editStop" ? { name: openModal.stop.name, date_from: openModal.stop.date_from, date_to: openModal.stop.date_to } : undefined}
+        onClose={closeModal}
         onSubmit={handleEditStop}
       />
 
       <ActivityFormModal
-        open={modal.mode === "add"}
+        open={openModal.kind === "addActivity"}
         title="Add Activity"
         submitLabel="Add"
         stops={stops}
         loading={adding}
         error={addError}
-        onClose={() => setModal({ mode: "closed" })}
+        onClose={closeModal}
         onSubmit={handleAdd}
       />
 
@@ -354,40 +351,40 @@ export default function TripPage({
         const me = members.find((m) => m.id === userId);
         return (
           <MemberDatesModal
-            open={showDatesModal}
+            open={openModal.kind === "memberDates"}
             tripStart={trip.start_date ?? null}
             tripEnd={trip.end_date ?? null}
             initialArrival={me?.arrival_date ?? null}
             initialDeparture={me?.departure_date ?? null}
             loading={datesLoading}
             error={datesError}
-            onClose={() => setShowDatesModal(false)}
+            onClose={closeModal}
             onSubmit={async (arrival, departure) => {
               await updateDates(arrival, departure);
-              setShowDatesModal(false);
+              closeModal();
             }}
           />
         );
       })()}
 
       <ActivityFormModal
-        open={modal.mode === "edit"}
+        open={openModal.kind === "editActivity"}
         title="Edit Activity"
         stops={stops}
         initial={
-          modal.mode === "edit"
+          openModal.kind === "editActivity"
             ? {
-                name: modal.activity.name,
-                location: modal.activity.location ?? "",
-                description: modal.activity.description ?? "",
-                url: modal.activity.url ?? "",
-                stop_id: modal.activity.stop_id ?? null,
+                name: openModal.activity.name,
+                location: openModal.activity.location ?? "",
+                description: openModal.activity.description ?? "",
+                url: openModal.activity.url ?? "",
+                stop_id: openModal.activity.stop_id ?? null,
               }
             : undefined
         }
         loading={acting}
         error={actError}
-        onClose={() => setModal({ mode: "closed" })}
+        onClose={closeModal}
         onSubmit={handleEdit}
       />
     </main>
