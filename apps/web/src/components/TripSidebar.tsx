@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { KebabMenu } from "@/components/KebabMenu";
 import { StopsPanel } from "@/components/StopsPanel";
@@ -42,6 +43,40 @@ export function TripSidebar({
   const tripStart = trip.start_date ? new Date(trip.start_date + "T00:00:00").getTime() : null;
   const tripEnd = trip.end_date ? new Date(trip.end_date + "T00:00:00").getTime() : null;
   const tripDuration = (tripStart && tripEnd) ? tripEnd - tripStart : 0;
+
+  const peakOverlap = useMemo(() => {
+    if (!tripStart || !tripEnd || tripDuration <= 0) return null;
+    const MS = 86400000;
+    const numDays = Math.round(tripDuration / MS) + 1;
+    const dayCounts = Array.from({ length: numDays }, (_, i) => {
+      const day = tripStart + i * MS;
+      return members.filter((m) => {
+        const mStart = m.arrival_date ? new Date(m.arrival_date + "T00:00:00").getTime() : tripStart;
+        const mEnd = m.departure_date ? new Date(m.departure_date + "T00:00:00").getTime() : tripEnd;
+        return day >= mStart && day <= mEnd;
+      }).length;
+    });
+    const maxCount = Math.max(...dayCounts);
+    if (maxCount <= 0) return null;
+    let bestStart = 0, bestEnd = 0, curStart = -1;
+    for (let i = 0; i <= numDays; i++) {
+      if (i < numDays && dayCounts[i] === maxCount) {
+        if (curStart === -1) curStart = i;
+      } else if (curStart !== -1) {
+        if (i - 1 - curStart > bestEnd - bestStart) { bestStart = curStart; bestEnd = i - 1; }
+        curStart = -1;
+      }
+    }
+    function toStr(ms: number) {
+      const d = new Date(ms);
+      return [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-");
+    }
+    return {
+      dateRange: fmtDateRange(toStr(tripStart + bestStart * MS), toStr(tripStart + bestEnd * MS)),
+      count: maxCount,
+      total: members.length,
+    };
+  }, [tripStart, tripEnd, tripDuration, members]);
 
   return (
     <aside className="w-full lg:w-72 lg:shrink-0 flex flex-col gap-6 lg:sticky lg:top-[5rem]">
@@ -97,49 +132,40 @@ export function TripSidebar({
           </span>
         </div>
 
+        {peakOverlap && peakOverlap.dateRange && (
+          <div className="flex items-center gap-1.5 text-[10px] text-text-muted -mt-2 bg-bg rounded-lg px-2.5 py-1.5">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 1v2M6 9v2M1 6h2M9 6h2M2.93 2.93l1.41 1.41M7.66 7.66l1.41 1.41M2.93 9.07l1.41-1.41M7.66 4.34l1.41-1.41" />
+            </svg>
+            <span>
+              Best window:{" "}
+              <span className="font-medium text-text-primary">{peakOverlap.dateRange}</span>
+              {" · "}{peakOverlap.count}/{peakOverlap.total}
+            </span>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4">
           {inlineList.map((m) => {
             const isMe = m.id === userId;
             const dateStr = fmtDateRange(m.arrival_date, m.departure_date);
             const hasDates = !!(m.arrival_date || m.departure_date);
 
-            // Timeline calculations
-            let left = 0;
-            let width = 100;
-            if (hasDates && tripDuration > 0 && tripStart && tripEnd) {
-              const mStart = m.arrival_date ? new Date(m.arrival_date + "T00:00:00").getTime() : tripStart;
-              const mEnd = m.departure_date ? new Date(m.departure_date + "T00:00:00").getTime() : tripEnd;
-              left = Math.max(0, ((mStart - tripStart) / tripDuration) * 100);
-              width = Math.min(100 - left, ((mEnd - mStart) / tripDuration) * 100);
-            }
-
             return (
-              <div key={m.id} className="flex flex-col gap-2">
-                <div className="flex items-center gap-2.5">
-                  <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="lg" />
-                  <div className="flex flex-col leading-tight min-w-0 flex-1">
-                    <span className="text-xs font-semibold text-text-primary">
-                      {m.name.split(" ")[0]} {isMe && <span className="text-text-muted font-normal">(you)</span>}
-                    </span>
-                    <span className={`text-[10px] ${hasDates ? "text-text-muted" : "text-accent font-medium italic"}`}>
-                      {dateStr ?? (isMe ? "+ Add your dates" : "Dates not set")}
-                    </span>
-                  </div>
-                  {isMe && (
-                    <KebabMenu
-                      items={[{ label: "Edit dates", onClick: onShowDatesModal }]}
-                    />
-                  )}
+              <div key={m.id} className="flex items-center gap-2.5">
+                <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="lg" />
+                <div className="flex flex-col leading-tight min-w-0 flex-1">
+                  <span className="text-xs font-semibold text-text-primary">
+                    {m.name.split(" ")[0]} {isMe && <span className="text-text-muted font-normal">(you)</span>}
+                  </span>
+                  <span className={`text-[10px] ${hasDates ? "text-text-muted" : "text-accent font-medium italic"}`}>
+                    {dateStr ?? (isMe ? "+ Add your dates" : "Dates not set")}
+                  </span>
                 </div>
-                
-                {/* Visual timeline bar */}
-                {tripDuration > 0 && (
-                  <div className="h-1 w-full bg-bg rounded-full overflow-hidden relative">
-                    <div 
-                      className={`absolute h-full rounded-full transition-all duration-500 ${hasDates ? "bg-accent" : "bg-border opacity-50"}`}
-                      style={{ left: `${left}%`, width: `${width}%` }}
-                    />
-                  </div>
+                {isMe && (
+                  <KebabMenu
+                    items={[{ label: "Edit dates", onClick: onShowDatesModal }]}
+                  />
                 )}
               </div>
             );
