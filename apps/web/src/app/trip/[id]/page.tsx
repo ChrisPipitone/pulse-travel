@@ -25,6 +25,7 @@ import { StopFormModal } from "@/components/StopFormModal";
 import { TripTimeline } from "@/components/TripTimeline";
 import { TripSidebar } from "@/components/TripSidebar";
 import { TripLoadingSkeleton } from "@/components/TripLoadingSkeleton";
+import { SetDisplayNameModal } from "@/components/SetDisplayNameModal";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ToastProvider";
 import type { Activity, Stop } from "@pulse/types";
@@ -395,6 +396,8 @@ export default function TripPage({
         onClose={closeModal}
         onSubmit={handleEdit}
       />
+
+      <SetDisplayNameModal />
     </main>
   );
 }

@@ -2,8 +2,9 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useSession, useJoinTrip } from '@pulse/hooks'
+import { useSession, useJoinTrip, useOnboarding } from '@pulse/hooks'
 import { Button } from '@pulse/ui'
+import { Input } from '@pulse/ui'
 import { getTripByInviteCode, getMembers } from '@pulse/services'
 import { supabase } from '@/lib/supabase'
 import { fmtDateRange } from '@/lib/date'
@@ -16,11 +17,14 @@ function JoinPage() {
 
   const { session, loading: sessionLoading } = useSession()
   const { joinTrip, loading: joining, error: joinError } = useJoinTrip()
+  const { needsOnboarding, submit: submitName, loading: nameLoading, error: nameError } = useOnboarding()
 
   const [trip, setTrip] = useState<TripPreview | null>(null)
   const [alreadyMember, setAlreadyMember] = useState(false)
   const [lookupError, setLookupError] = useState<string | null>(null)
   const [lookupDone, setLookupDone] = useState(false)
+  const [joinedTripId, setJoinedTripId] = useState<string | null>(null)
+  const [nameValue, setNameValue] = useState('')
 
   useEffect(() => {
     if (!sessionLoading && !session) {
@@ -44,7 +48,21 @@ function JoinPage() {
 
   async function handleJoin() {
     const joined = await joinTrip(code)
-    if (joined) router.replace(`/trip/${joined.id}?newMember=1`)
+    if (!joined) return
+    if (needsOnboarding(session)) {
+      const meta = session?.user.user_metadata ?? {}
+      setNameValue((meta.name as string | undefined) ?? session?.user.email?.split('@')[0] ?? '')
+      setJoinedTripId(joined.id)
+    } else {
+      router.replace(`/trip/${joined.id}?newMember=1`)
+    }
+  }
+
+  async function handleNameSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!nameValue.trim() || !session) return
+    try { await submitName(session.user.id, nameValue) } catch { /* error shown */ }
+    router.replace(`/trip/${joinedTripId}?newMember=1`)
   }
 
   if (sessionLoading || !session) {
@@ -74,6 +92,43 @@ function JoinPage() {
   }
 
   const dates = fmtDateRange(trip.start_date, trip.end_date)
+
+  if (joinedTripId && needsOnboarding(session)) {
+    return (
+      <Screen>
+        <div className="w-full max-w-sm flex flex-col gap-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold text-text-primary">What should we call you?</h1>
+            <p className="text-sm text-text-muted mt-1">
+              This is how you&apos;ll appear to the group in{' '}
+              <span className="text-text-primary font-medium">{trip?.name}</span>.
+            </p>
+          </div>
+          <form onSubmit={handleNameSubmit} className="flex flex-col gap-3">
+            <Input
+              type="text"
+              placeholder="Your name"
+              value={nameValue}
+              onChange={(e) => setNameValue(e.target.value)}
+              maxLength={50}
+              autoFocus
+              required
+            />
+            {nameError && <p className="text-xs text-red-500">{nameError}</p>}
+            <Button type="submit" disabled={nameLoading || !nameValue.trim()} className="w-full">
+              {nameLoading ? 'Saving…' : "Let's go"}
+            </Button>
+          </form>
+          <button
+            onClick={() => router.replace(`/trip/${joinedTripId}?newMember=1`)}
+            className="text-sm text-text-muted hover:text-text-primary transition-colors text-center"
+          >
+            Skip for now
+          </button>
+        </div>
+      </Screen>
+    )
+  }
 
   if (alreadyMember) {
     return (
