@@ -184,12 +184,35 @@ function TierBlock({
   );
 }
 
-function activityStatusLabel(must: number, maybe: number, skip: number, total: number): string | null {
-  if (total < 2) return null;
-  if (total >= 3 && must === total) return "Universal favorite";
-  if (total >= 4 && must >= Math.ceil(total * 0.6) && skip === 0) return "Strong match";
-  if (must >= 2 && skip >= 2) return "Split crowd";
-  if (must >= 1 && must + maybe <= Math.max(2, Math.floor(total * 0.35)) && total >= 4) return "Niche pick";
+export type ActivityStatus = {
+  label: string;
+  bg: string;
+  color: string;
+};
+
+export function activityStatusLabel(
+  must: number,
+  maybe: number,
+  skip: number,
+  total: number,
+): ActivityStatus | null {
+  if (must + maybe + skip < 2) return null;
+
+  if (must >= Math.ceil(total * 0.75) && skip === 0)
+    return { label: "Universal Favorite", bg: "rgba(255,92,53,.12)", color: "var(--must-bg)" };
+
+  if (must >= 2 && skip >= 2)
+    return { label: "Split Crowd", bg: "rgba(217,119,6,.12)", color: "#B45309" };
+
+  if (must >= Math.ceil(total * 0.5) && skip === 0)
+    return { label: "Strong Match", bg: "rgba(22,163,74,.1)", color: "#16A34A" };
+
+  if (maybe >= 2 && maybe > must && skip === 0)
+    return { label: "Safe Consensus", bg: "rgba(59,130,246,.1)", color: "#2563EB" };
+
+  if (must >= 1 && skip === 0 && must < Math.ceil(total * 0.5))
+    return { label: "Niche Favorite", bg: "rgba(124,58,237,.1)", color: "#7C3AED" };
+
   return null;
 }
 
@@ -204,12 +227,15 @@ function CrewFooter({
   skipCount: number;
   totalMembers: number;
 }) {
-  const label = activityStatusLabel(mustCount, maybeCount, skipCount, totalMembers);
+  const status = activityStatusLabel(mustCount, maybeCount, skipCount, totalMembers);
   return (
     <div className="flex flex-col gap-1 pt-2.5 border-t border-border">
-      {label && (
-        <span className="text-[10px] font-bold text-text-subtle uppercase tracking-[.08em]">
-          {label}
+      {status && (
+        <span
+          className="self-start text-[11px] font-semibold px-2.5 py-0.5 rounded-full mb-0.5"
+          style={{ background: status.bg, color: status.color }}
+        >
+          {status.label}
         </span>
       )}
       <div className="flex items-center gap-1.5 flex-wrap">

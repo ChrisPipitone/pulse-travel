@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useModalEscape } from "@/hooks/useModalEscape";
 import type { Rating, Stop } from "@pulse/types";
 import { RATING_BUTTON, RATING_LABELS } from "@pulse/types";
-import { AvatarChip, PinIcon, StatusPill, type CrewRowData } from "@/components/CrewCard";
+import { AvatarChip, PinIcon, StatusPill, activityStatusLabel, type CrewRowData } from "@/components/CrewCard";
 
 type Props = {
   row: CrewRowData;
@@ -27,8 +27,10 @@ function fmtDuration(hours: number): string {
 }
 
 export function CrewModal({ row, userId, onClose, onRate, ratingLoading, variant = "modal", stops, canEdit, onEdit }: Props) {
-  const { activity, mustMembers, maybeMembers, skipMembers, unratedMembers, myRating } = row;
+  const { activity, mustMembers, maybeMembers, skipMembers, unratedMembers, myRating, mustCount, maybeCount } = row;
   const allMembers = [...mustMembers, ...maybeMembers, ...skipMembers, ...unratedMembers];
+  const totalCount = mustCount + maybeCount + skipMembers.length + unratedMembers.length;
+  const status = activityStatusLabel(mustCount, maybeCount, skipMembers.length, totalCount);
   const addedByMember = activity.added_by ? allMembers.find((m) => m.id === activity.added_by) ?? null : null;
   const stop = stops?.find((s) => s.id === activity.stop_id) ?? null;
   const [pendingRating, setPendingRating] = useState<Rating | null>(myRating);
@@ -46,6 +48,14 @@ export function CrewModal({ row, userId, onClose, onRate, ratingLoading, variant
       <div className="flex items-start justify-between gap-3 px-6 pt-5 pb-4 border-b border-border sticky top-0 bg-bg-card z-10">
         <div className="min-w-0 flex-1">
           <p className="text-[17px] font-bold text-text-primary leading-snug">{activity.name}</p>
+          {status && (
+            <span
+              className="inline-flex mt-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+              style={{ background: status.bg, color: status.color }}
+            >
+              {status.label}
+            </span>
+          )}
           {activity.location && (
             <div className="flex items-center gap-1 mt-1 text-xs text-text-muted">
               <PinIcon />
