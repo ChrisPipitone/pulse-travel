@@ -6,6 +6,7 @@ import { useTripStore } from "@pulse/store";
 import { useCompatibilityMatrix } from "@pulse/hooks";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { Activity, Member, Rating } from "@pulse/types";
+import { RATING_PILL } from "@pulse/types";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { GroupiesMemberCard, type MemberCategoryChip } from "./GroupiesMemberCard";
 import { TravelTwinCard } from "./TravelTwinCard";
@@ -88,11 +89,6 @@ const RATING_SECTION_LABEL: Record<Rating, string> = {
   MAYBE: 'Maybe',
   SKIP:  'Skipping',
 }
-const ratingPillStyle: Record<Rating, string> = {
-  MUST:  'bg-[rgba(255,92,53,0.12)] text-must',
-  MAYBE: 'bg-[#FFF8D6] text-[#8a6e00]',
-  SKIP:  'bg-[#EDECEA] text-[#888]',
-}
 
 function MemberDetailModal({
   member, musts, wants, activities, memberRatings, open, onClose,
@@ -161,7 +157,7 @@ function MemberDetailModal({
               {acts.map(a => (
                 <div key={a.id} className="flex items-center gap-[10px] px-[18px] py-[10px] border-b border-border last:border-b-0">
                   <span className="flex-1 text-[13px] text-text-primary">{a.name}</span>
-                  <span className={`flex-shrink-0 px-2 py-[3px] rounded-[8px] text-[10px] font-bold ${ratingPillStyle[r]}`}>
+                  <span className={`flex-shrink-0 px-2 py-[3px] rounded-[8px] text-[10px] font-bold ${RATING_PILL[r]}`}>
                     {r}
                   </span>
                 </div>

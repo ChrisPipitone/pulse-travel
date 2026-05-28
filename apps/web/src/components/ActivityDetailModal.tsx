@@ -6,27 +6,16 @@ import { useModalEscape } from '@/hooks/useModalEscape'
 import { FadeReveal } from './FadeReveal'
 import { MemberAvatar } from '@/components/MemberAvatar'
 import type { Activity, ActivityRating, Member, Rating } from '@pulse/types'
+import { RATING_PILL, RATING_BUTTON, RATING_LABELS } from '@pulse/types'
 
 // TODO(mobile): revisit rating UX for touch — consider long-press popover or
 // swipe gesture instead of tapping into detail modal. Web option 2 (modal chips)
 // may not be the best mobile pattern.
 
-const ratingColor: Record<Rating, string> = {
-  MUST:  'bg-must  text-must-text',
-  MAYBE: 'bg-maybe text-maybe-text',
-  SKIP:  'bg-skip  text-skip-text',
-}
-
 const ratingRing: Record<Rating, string> = {
   MUST:  'ring-must',
   MAYBE: 'ring-maybe',
   SKIP:  'ring-skip',
-}
-
-const ratingLabel: Record<Rating, string> = {
-  MUST:  "Can't miss",
-  MAYBE: 'Maybe',
-  SKIP:  'Skip',
 }
 
 const ratings: Rating[] = ['MUST', 'MAYBE', 'SKIP']
@@ -139,12 +128,12 @@ export function ActivityDetailModal({
                     onClick={() => { setJustRated(true); onRate(r) }}
                     className={`flex-1 py-2 rounded-[var(--radius-card)] text-sm font-semibold transition-all disabled:opacity-50 ${
                       active
-                        ? `${ratingColor[r]} ring-2 ring-offset-2 ${ratingRing[r]}`
+                        ? `${RATING_BUTTON[r].active} ring-2 ring-offset-2 ${ratingRing[r]}`
                         : 'bg-bg border border-border text-text-muted hover:border-accent/40 hover:text-text-primary'
                     }`}
                   >
                     <span key={showCheck ? 'check' : r} className={showCheck ? 'pop-in' : ''}>
-                      {showCheck ? '✓' : ratingLabel[r]}
+                      {showCheck ? '✓' : RATING_LABELS[r]}
                     </span>
                   </button>
                 )
@@ -173,8 +162,8 @@ export function ActivityDetailModal({
                           <MemberAvatar name={member.name} avatarUrl={member.avatar_url} size="md" />
                           <span className="text-sm text-text-primary">{member.name.split(' ')[0]}</span>
                         </div>
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] ${ratingColor[r.rating]}`}>
-                          {ratingLabel[r.rating]}
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-[var(--radius-badge)] ${RATING_PILL[r.rating]}`}>
+                          {RATING_LABELS[r.rating]}
                         </span>
                       </div>
                     )

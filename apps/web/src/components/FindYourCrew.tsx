@@ -6,6 +6,7 @@ import { useTripStore } from "@pulse/store";
 import { useSession } from "@pulse/hooks";
 import { useRateActivity } from "@pulse/hooks";
 import type { Activity, Member, Rating, Stop } from "@pulse/types";
+import { RATING_BUTTON, RATING_LABELS } from "@pulse/types";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { KebabMenu } from "@/components/KebabMenu";
 
@@ -472,21 +473,16 @@ function CrewModalD2({
             <div className="grid grid-cols-3 gap-2">
               {(["MUST", "MAYBE", "SKIP"] as Rating[]).map((r) => {
                 const active = pendingRating === r;
-                const cfg: Record<Rating, { label: string; activeCls: string; ghostCls: string }> = {
-                  MUST: { label: "Can't miss", activeCls: "bg-must text-must-text border-transparent", ghostCls: "border-must/40 text-must/60" },
-                  MAYBE: { label: "Maybe", activeCls: "bg-[#FFE566] text-[#7A6200] border-transparent", ghostCls: "border-[#B8960A]/40 text-[#7A6200]/60" },
-                  SKIP: { label: "Skip", activeCls: "bg-text-subtle/30 text-text-primary border-text-subtle/40", ghostCls: "border-border text-text-subtle" },
-                };
                 return (
                   <button
                     key={r}
                     onClick={() => handleRate(r)}
                     disabled={ratingLoading}
                     className={`min-h-[44px] flex items-center justify-center rounded-xl border text-[11px] font-bold transition-all disabled:opacity-50 ${
-                      active ? cfg[r].activeCls : `bg-transparent ${cfg[r].ghostCls} hover:opacity-80`
+                      active ? RATING_BUTTON[r].active : `bg-transparent ${RATING_BUTTON[r].idle} hover:opacity-80`
                     }`}
                   >
-                    {cfg[r].label}
+                    {RATING_LABELS[r]}
                   </button>
                 );
               })}

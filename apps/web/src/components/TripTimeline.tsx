@@ -5,6 +5,7 @@ import { useTripStore } from "@pulse/store";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { fmtDateRange } from "@/lib/date";
 import type { Rating, Stop, Activity, Member, ActivityRating } from "@pulse/types";
+import { RATING_PILL } from "@pulse/types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -23,14 +24,6 @@ function getMemberStopTier(
   if (memberRatings.length > 0) return "skip";
   return null;
 }
-
-// ─── Rating pill styles ───────────────────────────────────────────────────
-
-const ratingPill: Record<Rating, string> = {
-  MUST:  "bg-must/12 text-must",
-  MAYBE: "bg-maybe text-maybe-text",
-  SKIP:  "bg-skip text-skip-text",
-};
 
 const RATING_ORDER: Rating[] = ["MUST", "MAYBE", "SKIP"];
 
@@ -77,7 +70,7 @@ function ActivityRatingsGrid({
               <span className="text-[11px] font-medium text-text-primary flex-1 truncate">
                 {m.name.split(" ")[0]}
               </span>
-              <span className={`text-[8px] font-bold rounded-[5px] px-1.5 py-[2px] shrink-0 ${ratingPill[rating]}`}>
+              <span className={`text-[8px] font-bold rounded-[5px] px-1.5 py-[2px] shrink-0 ${RATING_PILL[rating]}`}>
                 {rating}
               </span>
             </div>
