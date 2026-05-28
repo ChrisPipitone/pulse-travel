@@ -51,10 +51,13 @@ type OpenModal =
 
 export default function TripPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ newMember?: string }>;
 }) {
   const { id } = use(params);
+  const { newMember } = use(searchParams);
   const { loading, error } = useTripData(id);
   const { session } = useSession();
   const trip = useTripStore((s) => s.trip);
@@ -267,6 +270,7 @@ export default function TripPage({
                 onDelete={handleDelete}
                 tripOwnerId={trip.created_by ?? undefined}
                 hiddenIds={hiddenActivityIds}
+                autoOpenFirstUnrated={newMember === "1"}
               />
             )}
 

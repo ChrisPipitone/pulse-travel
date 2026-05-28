@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useTripStore } from "@pulse/store";
 import { useSession } from "@pulse/hooks";
 import { useRateActivity } from "@pulse/hooks";
@@ -25,12 +26,14 @@ export function FindYourCrew({
   onDelete,
   tripOwnerId,
   hiddenIds,
+  autoOpenFirstUnrated = false,
 }: {
   onAdd?: () => void;
   onEdit?: (a: Activity) => void;
   onDelete?: (a: Activity) => void;
   tripOwnerId?: string;
   hiddenIds?: Set<string>;
+  autoOpenFirstUnrated?: boolean;
 } = {}) {
   const allActivities = useTripStore((s) => s.activities);
   const members = useTripStore((s) => s.members);
@@ -38,6 +41,8 @@ export function FindYourCrew({
   const stops = useTripStore((s) => s.stops);
   const { session } = useSession();
   const { rateActivity, loading: ratingLoading } = useRateActivity();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const activities = hiddenIds?.size
     ? allActivities.filter((a) => !hiddenIds.has(a.id))
@@ -46,20 +51,14 @@ export function FindYourCrew({
   const userId = session?.user.id;
   const [openId, setOpenId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("popular");
-  const [showNudge, setShowNudge] = useState(false);
-
-  useEffect(() => {
-    const key = "pulse:nudge:rated";
-    if (typeof window === "undefined" || localStorage.getItem(key)) return;
-    const hasAnyRating = ratings.some((r) => r.user_id === userId);
-    if (!hasAnyRating) setShowNudge(true);
-  }, [ratings, userId]);
+  const [didAutoOpen, setDidAutoOpen] = useState(false);
 
   function canEditActivity(a: Activity) {
     return userId === tripOwnerId || userId === a.added_by;
   }
 
   const rows = useMemo((): CrewRowData[] => {
+
     return activities
       .map((activity) => {
         const actRatings = ratings.filter((r) => r.activity_id === activity.id);
@@ -141,6 +140,19 @@ export function FindYourCrew({
   }
 
   useEffect(() => {
+    if (!autoOpenFirstUnrated || didAutoOpen || rows.length === 0) return;
+    const first = rows.find((r) => r.myRating === null);
+    if (first) {
+      setOpenId(first.activity.id);
+      setTimeout(() => {
+        document.getElementById(`crew-card-${first.activity.id}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }, 100);
+    }
+    setDidAutoOpen(true);
+    router.replace(pathname, { scroll: false });
+  }, [autoOpenFirstUnrated, didAutoOpen, rows, router, pathname]);
+
+  useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
       const tag = (document.activeElement as HTMLElement)?.tagName;
@@ -216,38 +228,40 @@ export function FindYourCrew({
     </div>
   ) : renderCards(rows);
 
-  function dismissNudge() {
-    setShowNudge(false);
-    localStorage.setItem("pulse:nudge:rated", "1");
-  }
-
   const crewModalProps = openRow ? {
     row: openRow,
     userId,
     onClose: () => setOpenId(null),
-    onRate: (r: Rating) => { dismissNudge(); rateActivity(openRow.activity.id, r); },
+    onRate: (r: Rating) => { rateActivity(openRow.activity.id, r); },
     ratingLoading,
     stops,
     canEdit: canEditActivity(openRow.activity),
     onEdit: onEdit ? () => onEdit(openRow.activity) : undefined,
   } : null;
 
+  const unratedCount = rows.filter((r) => r.myRating === null).length;
+
+  function openNextUnrated() {
+    const next = rows.find((r) => r.myRating === null);
+    if (!next) return;
+    setOpenId(next.activity.id);
+    document.getElementById(`crew-card-${next.activity.id}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+
   return (
     <>
-      {/* New-joiner nudge */}
-      {showNudge && (
+      {/* Rating progress banner — stays until all rated */}
+      {unratedCount > 0 && (
         <div className="flex items-center justify-between gap-3 bg-accent/8 border border-accent/20 rounded-[var(--radius-card)] px-4 py-3">
-          <p className="text-sm text-text-primary">
-            Rate activities to find your crew for each one.
-          </p>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-text-primary">Rate activities to find your crew</p>
+            <p className="text-xs text-text-muted mt-0.5">{unratedCount} of {rows.length} left</p>
+          </div>
           <button
-            onClick={dismissNudge}
-            aria-label="Dismiss"
-            className="shrink-0 text-text-subtle hover:text-text-primary transition-colors p-1"
+            onClick={openNextUnrated}
+            className="shrink-0 text-xs font-bold text-accent hover:opacity-80 transition-opacity whitespace-nowrap"
           >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-              <path d="M2 2l8 8M10 2L2 10" />
-            </svg>
+            Next unrated →
           </button>
         </div>
       )}

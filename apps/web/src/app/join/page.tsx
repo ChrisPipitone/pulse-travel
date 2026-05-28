@@ -44,7 +44,7 @@ function JoinPage() {
 
   async function handleJoin() {
     const joined = await joinTrip(code)
-    if (joined) router.replace(`/trip/${joined.id}`)
+    if (joined) router.replace(`/trip/${joined.id}?newMember=1`)
   }
 
   if (sessionLoading || !session) {

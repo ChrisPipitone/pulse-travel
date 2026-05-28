@@ -183,7 +183,7 @@ Option B (restructure): Crew tab becomes Travel Twin view (distinct value, not a
 |---|---|---|---|
 | 1 | Tab rename + sub-labels | ✅ done | — |
 | 2 | Activity Status Labels | ✅ done | — |
-| 3 | Post-join: auto-open first unrated | — | — |
+| 3 | Post-join: auto-open first unrated | ✅ done | — |
 | 4 | Flip invite CTA | — | — |
 | 5 | SetDisplayNameModal defer | — | — |
 | 6 | Post-join celebration toast | — | — |
