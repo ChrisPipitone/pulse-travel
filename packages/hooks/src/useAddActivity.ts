@@ -33,7 +33,7 @@ export function useAddActivity(): AddActivityState {
       // created_at before we can display the activity correctly.
       // The real-time subscription in useTripData will also fire; the store's
       // addActivity action handles the duplicate gracefully.
-      if (created) addToStore(created)
+      addToStore(created)
       return true
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to add activity')

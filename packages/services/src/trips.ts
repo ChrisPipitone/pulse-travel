@@ -181,9 +181,10 @@ export async function getActivities(client: SupabaseClient, tripId: string): Pro
   return data ?? []
 }
 
-export async function addActivity(client: SupabaseClient, activity: Omit<Activity, 'id' | 'created_at'>): Promise<Activity | null> {
-  const { data } = await client.from('activities').insert(activity).select().single()
-  return data
+export async function addActivity(client: SupabaseClient, activity: Omit<Activity, 'id' | 'created_at'>): Promise<Activity> {
+  const { data, error } = await client.from('activities').insert(activity).select().single()
+  if (error) throw new Error(error.message)
+  return data as Activity
 }
 
 export async function getRatings(client: SupabaseClient, activityIds: string[]): Promise<ActivityRating[]> {
@@ -208,7 +209,8 @@ export async function deleteActivity(client: SupabaseClient, id: string): Promis
 }
 
 export async function upsertRating(client: SupabaseClient, rating: Omit<ActivityRating, 'id'>): Promise<void> {
-  await client.from('activity_ratings').upsert(rating, { onConflict: 'activity_id,user_id' })
+  const { error } = await client.from('activity_ratings').upsert(rating, { onConflict: 'activity_id,user_id' })
+  if (error) throw new Error(error.message)
 }
 
 export async function updateMemberDates(
