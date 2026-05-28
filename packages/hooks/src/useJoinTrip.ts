@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import type { Trip } from '@pulse/types'
+import type { TripPreview } from '@pulse/types'
 import { useSupabase } from './SupabaseContext'
 import { getTripByInviteCode, joinTrip as joinTripService } from '@pulse/services'
 
 type JoinTripState = {
-  joinTrip: (inviteCode: string) => Promise<Trip | null>
+  joinTrip: (inviteCode: string) => Promise<TripPreview | null>
   loading: boolean
   error: string | null
 }
@@ -14,7 +14,7 @@ export function useJoinTrip(): JoinTripState {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function joinTrip(inviteCode: string): Promise<Trip | null> {
+  async function joinTrip(inviteCode: string): Promise<TripPreview | null> {
     setLoading(true)
     setError(null)
 

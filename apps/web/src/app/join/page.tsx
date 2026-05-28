@@ -6,15 +6,8 @@ import { useSession, useJoinTrip } from '@pulse/hooks'
 import { Button } from '@pulse/ui'
 import { getTripByInviteCode, getMembers } from '@pulse/services'
 import { supabase } from '@/lib/supabase'
-import type { Trip } from '@pulse/types'
-
-function formatDateRange(start?: string | null, end?: string | null) {
-  if (!start && !end) return null
-  const fmt = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  if (start && end) return `${fmt(start)} – ${fmt(end)}`
-  if (start) return `From ${fmt(start)}`
-  return `Until ${fmt(end!)}`
-}
+import { fmtDateRange } from '@/lib/date'
+import type { TripPreview } from '@pulse/types'
 
 function JoinPage() {
   const router = useRouter()
@@ -24,7 +17,7 @@ function JoinPage() {
   const { session, loading: sessionLoading } = useSession()
   const { joinTrip, loading: joining, error: joinError } = useJoinTrip()
 
-  const [trip, setTrip] = useState<Trip | null>(null)
+  const [trip, setTrip] = useState<TripPreview | null>(null)
   const [alreadyMember, setAlreadyMember] = useState(false)
   const [lookupError, setLookupError] = useState<string | null>(null)
   const [lookupDone, setLookupDone] = useState(false)
@@ -80,7 +73,7 @@ function JoinPage() {
     )
   }
 
-  const dates = formatDateRange(trip.start_date, trip.end_date)
+  const dates = fmtDateRange(trip.start_date, trip.end_date)
 
   if (alreadyMember) {
     return (

@@ -7,18 +7,7 @@ import { Button } from "@pulse/ui";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import type { TripSummary, TripMemberAvatar } from "@pulse/services";
-
-function formatDateRange(start?: string | null, end?: string | null) {
-  if (!start && !end) return null;
-  const fmt = (d: string) =>
-    new Date(d + "T00:00:00").toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  if (start && end) return `${fmt(start)} – ${fmt(end)}`;
-  if (start) return `From ${fmt(start)}`;
-  return `Until ${fmt(end!)}`;
-}
+import { fmtDateRange } from "@/lib/date";
 
 function MemberDots({
   count,
@@ -194,7 +183,7 @@ export default function Home() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {trips.map((trip: TripSummary) => {
-                const dates = formatDateRange(trip.start_date, trip.end_date);
+                const dates = fmtDateRange(trip.start_date, trip.end_date);
                 const isOwner = trip.created_by === session.user.id;
                 return (
                   <button

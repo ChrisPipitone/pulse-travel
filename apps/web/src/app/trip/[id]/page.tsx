@@ -29,6 +29,7 @@ import { useToast } from "@/components/ToastProvider";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { KebabMenu } from "@/components/KebabMenu";
 import type { Activity, Stop } from "@pulse/types";
+import { fmtDateRange } from "@/lib/date";
 
 type Tab = "activities" | "timeline" | "crew";
 
@@ -37,30 +38,6 @@ const TAB_LABELS: Record<Tab, { short: string; full: string }> = {
   timeline:   { short: "Timeline",   full: "Timeline" },
   crew:       { short: "Crew",       full: "Find your crew" },
 };
-
-function formatDateRange(start: string, end: string) {
-  const fmt = (d: string) =>
-    new Date(d + "T00:00:00").toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  return `${fmt(start)} – ${fmt(end)}`;
-}
-
-function formatMemberDates(
-  arrival?: string,
-  departure?: string,
-): string | null {
-  const fmt = (d: string) =>
-    new Date(d + "T00:00:00").toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  if (arrival && departure) return `${fmt(arrival)} – ${fmt(departure)}`;
-  if (arrival) return `From ${fmt(arrival)}`;
-  if (departure) return `Until ${fmt(departure)}`;
-  return null;
-}
 
 type ModalState =
   | { mode: "closed" }
@@ -357,7 +334,7 @@ export default function TripPage({
                     <rect x="1.5" y="2.5" width="11" height="10" rx="1.5" />
                     <path d="M1.5 6h11M4.5 1v3M9.5 1v3" />
                   </svg>
-                  {formatDateRange(trip.start_date, trip.end_date)}
+                  {fmtDateRange(trip.start_date, trip.end_date)}
                 </div>
               )}
 
@@ -403,10 +380,7 @@ export default function TripPage({
                   <div className="flex flex-col gap-2">
                     {inlineList.map((m) => {
                       const isMe = m.id === userId;
-                      const dateStr = formatMemberDates(
-                        m.arrival_date,
-                        m.departure_date,
-                      );
+                      const dateStr = fmtDateRange(m.arrival_date, m.departure_date);
                       return (
                         <div key={m.id} className="flex items-center gap-2.5">
                           <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="lg" />

@@ -3,6 +3,7 @@
 import { useState, useMemo, Fragment } from "react";
 import { useTripStore } from "@pulse/store";
 import { MemberAvatar } from "@/components/MemberAvatar";
+import { fmtDateRange } from "@/lib/date";
 import type { Rating, Stop, Activity, Member, ActivityRating } from "@pulse/types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -20,20 +21,6 @@ function getMemberStopTier(
   if (memberRatings.includes("MUST")) return "must";
   if (memberRatings.includes("MAYBE")) return "maybe";
   if (memberRatings.length > 0) return "skip";
-  return null;
-}
-
-function fmtDate(date: string) {
-  return new Date(date + "T00:00:00").toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatStopDates(from?: string | null, to?: string | null) {
-  if (from && to) return `${fmtDate(from)} – ${fmtDate(to)}`;
-  if (from) return `From ${fmtDate(from)}`;
-  if (to) return `Until ${fmtDate(to)}`;
   return null;
 }
 
@@ -188,7 +175,7 @@ function StopCard({
   onToggleActivity: (id: string) => void;
 }) {
   const hasDate = !!(stop.date_from || stop.date_to);
-  const dateStr = formatStopDates(stop.date_from, stop.date_to);
+  const dateStr = fmtDateRange(stop.date_from, stop.date_to);
   const activityIds = stopActivities.map(a => a.id);
 
   const mustMembers: Member[] = [];

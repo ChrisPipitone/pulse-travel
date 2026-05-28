@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Trip, Activity, ActivityRating, Member, Stop } from '@pulse/types'
+import type { Trip, TripPreview, Activity, ActivityRating, Member, Stop } from '@pulse/types'
 
 export type TripMemberAvatar = { id: string; name: string; avatar_url?: string | null }
 export type TripSummary = Trip & { member_count: number; member_avatars: TripMemberAvatar[]; activity_count: number; my_rated_count: number }
@@ -139,12 +139,13 @@ export async function getTrip(client: SupabaseClient, id: string): Promise<Trip 
   return data
 }
 
-export async function getTripByInviteCode(client: SupabaseClient, code: string): Promise<Trip | null> {
+export async function getTripByInviteCode(client: SupabaseClient, code: string): Promise<TripPreview | null> {
   // Direct table query fails for non-members (trips SELECT RLS requires membership).
   // RPC calls the SECURITY DEFINER function which bypasses RLS for this lookup only.
+  // Returns only {id, name, destination, start_date, end_date} — see migration 000006.
   const { data, error } = await client.rpc('get_trip_by_invite_code', { p_code: code })
   if (error) throw new Error(error.message)
-  return (data as Trip[] | null)?.[0] ?? null
+  return (data as TripPreview[] | null)?.[0] ?? null
 }
 
 export async function getMembers(client: SupabaseClient, tripId: string): Promise<Member[]> {

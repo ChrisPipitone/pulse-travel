@@ -6,24 +6,14 @@ import { useStopActions } from '@pulse/hooks'
 import { useToast } from '@/components/ToastProvider'
 import { KebabMenu } from '@/components/KebabMenu'
 import type { Stop } from '@pulse/types'
+import { fmtDateRange } from '@/lib/date'
 
 type Props = {
   tripId: string
   userId: string | undefined
-  tripOwnerId: string
+  tripOwnerId: string | undefined
   onOpenAdd: () => void
   onOpenEdit: (stop: Stop) => void
-}
-
-function fmt(date: string) {
-  return new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
-
-function formatStopDates(from?: string | null, to?: string | null): string | null {
-  if (from && to) return `${fmt(from)} – ${fmt(to)}`
-  if (from) return `From ${fmt(from)}`
-  if (to) return `Until ${fmt(to)}`
-  return null
 }
 
 export function StopsPanel({ userId, tripOwnerId, onOpenAdd, onOpenEdit }: Props) {
@@ -87,7 +77,7 @@ export function StopsPanel({ userId, tripOwnerId, onOpenAdd, onOpenEdit }: Props
         <div className="flex flex-col gap-1.5">
           {visibleStops.map((stop) => {
             const count = countByStop[stop.id] ?? 0
-            const dateStr = formatStopDates(stop.date_from, stop.date_to)
+            const dateStr = fmtDateRange(stop.date_from, stop.date_to)
             return (
               <div key={stop.id} className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-accent/50 shrink-0 mt-0.5" />

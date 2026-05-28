@@ -27,6 +27,9 @@ export interface Trip {
   invite_code: string
 }
 
+// Returned by get_trip_by_invite_code RPC — restricted to safe columns only (JAB-14).
+export type TripPreview = Pick<Trip, 'id' | 'name' | 'destination' | 'start_date' | 'end_date'>
+
 export interface ActivityCategory {
   id: string
   name: string
