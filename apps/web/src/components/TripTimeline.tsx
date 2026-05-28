@@ -40,9 +40,9 @@ function formatStopDates(from?: string | null, to?: string | null) {
 // ─── Rating pill styles ───────────────────────────────────────────────────
 
 const ratingPill: Record<Rating, string> = {
-  MUST:  "bg-[rgba(255,92,53,0.12)] text-must",
-  MAYBE: "bg-[#FFF8D6] text-[#8a6e00]",
-  SKIP:  "bg-[#EDECEA] text-[#888]",
+  MUST:  "bg-must/12 text-must",
+  MAYBE: "bg-maybe text-maybe-text",
+  SKIP:  "bg-skip text-skip-text",
 };
 
 const RATING_ORDER: Rating[] = ["MUST", "MAYBE", "SKIP"];
@@ -216,7 +216,8 @@ function StopCard({
           height="10"
           viewBox="0 0 24 24"
           fill="none"
-          stroke={hasDate ? "#fff" : "var(--spine-node)"}
+          stroke="currentColor"
+          className={hasDate ? "text-white" : "text-[var(--spine-node)]"}
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -262,7 +263,7 @@ function StopCard({
             )}
             {maybeMembers.length > 0 && (
               <div className="flex items-start gap-2.5">
-                <span className="text-[9px] font-bold uppercase tracking-[0.06em] text-[#8a6e00] w-8 shrink-0 pt-1">
+                <span className="text-[9px] font-bold uppercase tracking-[0.06em] text-maybe-text w-8 shrink-0 pt-1">
                   MAYBE
                 </span>
                 <div className="flex flex-wrap gap-2.5">
