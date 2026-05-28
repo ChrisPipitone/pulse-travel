@@ -266,39 +266,38 @@ export function FindYourCrew({
         </div>
       )}
 
-      {/* Sort bar */}
-      <div className="flex items-center justify-between gap-2">
-        {onAdd ? (
-          <button
-            onClick={onAdd}
-            className="text-xs font-semibold px-3 py-1.5 rounded-[var(--radius-btn)] bg-accent text-white hover:opacity-90 transition-opacity shrink-0"
-          >
-            + Add activity
-          </button>
-        ) : <div />}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] text-text-subtle">Sort:</span>
-          <div className="flex items-center gap-0.5 bg-bg-card border border-border rounded-lg p-0.5">
-            {(Object.keys(SORT_LABELS) as SortKey[]).map((k) => (
-              <button
-                key={k}
-                onClick={() => setSortKey(k)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-                  sortKey === k
-                    ? "bg-accent text-white shadow-sm"
-                    : "text-text-muted hover:text-text-primary"
-                }`}
-              >
-                {SORT_LABELS[k]}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Split-pane: card list + desktop detail panel */}
       <div className="flex gap-5 lg:items-start">
         <div className="flex-1 min-w-0 flex flex-col gap-2.5">
+          {/* Sort bar — inside left pane */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1">
+              <span className="hidden lg:inline text-[11px] text-text-subtle mr-0.5">Sort:</span>
+              <div className="flex items-center gap-0.5 bg-bg-card border border-border rounded-lg p-0.5">
+                {(Object.keys(SORT_LABELS) as SortKey[]).map((k) => (
+                  <button
+                    key={k}
+                    onClick={() => setSortKey(k)}
+                    className={`px-1.5 py-0.5 lg:px-2.5 lg:py-1 rounded-md text-[10px] lg:text-[11px] font-semibold transition-all ${
+                      sortKey === k
+                        ? "bg-accent text-white shadow-sm"
+                        : "text-text-muted hover:text-text-primary"
+                    }`}
+                  >
+                    {SORT_LABELS[k]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {onAdd && (
+              <button
+                onClick={onAdd}
+                className="text-[10px] lg:text-xs font-semibold px-2.5 py-1 lg:px-3 lg:py-1.5 rounded-[var(--radius-btn)] bg-accent text-white hover:opacity-90 transition-opacity shrink-0"
+              >
+                + Add activity
+              </button>
+            )}
+          </div>
           {cards}
         </div>
 
