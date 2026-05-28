@@ -8,6 +8,8 @@ import { Input } from '@pulse/ui'
 import { getTripByInviteCode, getMembers } from '@pulse/services'
 import { supabase } from '@/lib/supabase'
 import { fmtDateRange } from '@/lib/date'
+import { destinationEmoji } from '@/lib/destination'
+import { useToast } from '@/components/ToastProvider'
 import type { TripPreview } from '@pulse/types'
 
 function JoinPage() {
@@ -18,6 +20,7 @@ function JoinPage() {
   const { session, loading: sessionLoading } = useSession()
   const { joinTrip, loading: joining, error: joinError } = useJoinTrip()
   const { needsOnboarding, submit: submitName, loading: nameLoading, error: nameError } = useOnboarding()
+  const { showToast } = useToast()
 
   const [trip, setTrip] = useState<TripPreview | null>(null)
   const [alreadyMember, setAlreadyMember] = useState(false)
@@ -49,6 +52,7 @@ function JoinPage() {
   async function handleJoin() {
     const joined = await joinTrip(code)
     if (!joined) return
+    showToast(`You're in! ${destinationEmoji(trip?.destination)} ${trip?.name}`)
     if (needsOnboarding(session)) {
       const meta = session?.user.user_metadata ?? {}
       setNameValue((meta.name as string | undefined) ?? session?.user.email?.split('@')[0] ?? '')
