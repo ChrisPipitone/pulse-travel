@@ -32,6 +32,7 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
   const inviteUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/join?code=${inviteCode}`
     : ''
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Join ${tripName} on Pulse — rate activities and find your crew: ${inviteUrl}`)}`
 
   useModalEscape(onClose)
 
@@ -139,11 +140,54 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
         {(state === 'idle' || state === 'checking' || state === 'sending' || state === 'error') && (
           <>
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-text-primary">Invite someone</h2>
-              <p className="text-sm text-text-muted mt-1">
-                They'll get an email with a link to join{' '}
-                <span className="text-text-primary font-medium">{tripName}</span>.
-              </p>
+              <h2 className="text-xl font-semibold text-text-primary">Invite to {tripName}</h2>
+              <p className="text-sm text-text-muted mt-1">Share the link or send an email.</p>
+            </div>
+
+            {/* Primary: copy link */}
+            <Button
+              className="w-full"
+              onClick={handleCopyLink}
+              disabled={copyState !== 'idle'}
+            >
+              {copyState === 'copied' ? (
+                <>
+                  <svg className="w-4 h-4 mr-2 inline-block text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  Link copied!
+                </>
+              ) : copyState === 'error' ? (
+                'Copy failed — try manually'
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                  Copy invite link
+                </>
+              )}
+            </Button>
+
+            {/* WhatsApp — mobile only */}
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sm:hidden w-full flex items-center justify-center gap-2 border border-border rounded-xl py-2.5 px-4 text-sm font-medium text-text-primary hover:bg-bg transition-colors"
+            >
+              <svg className="w-4 h-4 shrink-0" style={{ color: "#25D366" }} viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                <path d="M12.005 0C5.379 0 0 5.38 0 12.005c0 2.134.557 4.12 1.529 5.842L.057 23.943l6.254-1.638A11.953 11.953 0 0012.005 24C18.625 24 24 18.621 24 12.005 24 5.38 18.625 0 12.005 0zm0 21.818a9.808 9.808 0 01-5.026-1.385l-.36-.214-3.726.977.993-3.634-.235-.374A9.808 9.808 0 012.18 12.005c0-5.42 4.41-9.836 9.825-9.836 5.415 0 9.82 4.416 9.82 9.836 0 5.42-4.405 9.813-9.82 9.813z"/>
+              </svg>
+              Share via WhatsApp
+            </a>
+
+            <div className="flex items-center gap-3 w-full">
+              <div className="flex-1 h-px bg-border" />
+              <span className="text-xs text-text-subtle">or invite by email</span>
+              <div className="flex-1 h-px bg-border" />
             </div>
 
             <form onSubmit={handleSend} className="w-full flex flex-col gap-2">
@@ -163,46 +207,14 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
                 <p className="text-xs text-red-500 px-0.5">{errorMsg}</p>
               )}
               <Button
+                variant="outline"
                 type="submit"
                 disabled={state === 'checking' || state === 'sending' || (!emailValid && touched)}
-                className="w-full mt-1"
+                className="w-full"
               >
-                {state === 'checking' ? 'Checking…' : state === 'sending' ? 'Sending…' : 'Send invite'}
+                {state === 'checking' ? 'Checking…' : state === 'sending' ? 'Sending…' : 'Send email invite'}
               </Button>
             </form>
-
-            <>
-              <div className="flex items-center gap-3 w-full">
-                <div className="flex-1 h-px bg-border" />
-                <span className="text-xs text-text-subtle">or</span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleCopyLink}
-                disabled={copyState !== 'idle'}
-              >
-                {copyState === 'copied' ? (
-                  <>
-                    <svg className="w-4 h-4 mr-2 inline-block text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    Link copied!
-                  </>
-                ) : copyState === 'error' ? (
-                  'Copy failed — try manually'
-                ) : (
-                  <>
-                    <svg className="w-4 h-4 mr-2 inline-block" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                    </svg>
-                    Copy invite link
-                  </>
-                )}
-              </Button>
-            </>
 
             <button
               onClick={onClose}
