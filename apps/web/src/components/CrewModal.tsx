@@ -248,7 +248,7 @@ export function CrewModal({ row, userId, onClose, onRate, ratingLoading, variant
 
   if (variant === "panel") {
     return (
-      <div className="bg-bg-card rounded-[var(--radius-card)] border border-border flex flex-col overflow-hidden max-h-[calc(100vh-8rem)] overflow-y-auto">
+      <div className="bg-bg-card rounded-[var(--radius-card)] border border-border flex flex-col overflow-y-auto max-h-[calc(100vh-8rem)] section-in">
         {inner}
       </div>
     );

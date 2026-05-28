@@ -140,20 +140,43 @@ export function FindYourCrew({
     setOpenId((prev) => (prev === activityId ? null : activityId));
   }
 
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      const tag = (document.activeElement as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      e.preventDefault();
+      const idx = openId ? rows.findIndex((r) => r.activity.id === openId) : -1;
+      let nextId: string | null = null;
+      if (e.key === "ArrowDown") {
+        nextId = rows[idx + 1]?.activity.id ?? rows[0]?.activity.id ?? null;
+      } else {
+        nextId = idx > 0 ? rows[idx - 1].activity.id : null;
+      }
+      setOpenId(nextId);
+      if (nextId) {
+        document.getElementById(`crew-card-${nextId}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [openId, rows]);
+
   function renderCards(cardRows: typeof rows) {
     return (
       <div className="flex flex-col gap-2.5">
         {cardRows.map((row) => (
-          <CrewCard
-            key={row.activity.id}
-            row={row}
-            userId={userId}
-            canEdit={canEditActivity(row.activity)}
-            selected={row.activity.id === openId}
-            onOpen={() => toggleOpen(row.activity.id)}
-            onEdit={onEdit ? () => onEdit(row.activity) : undefined}
-            onDelete={onDelete ? () => onDelete(row.activity) : undefined}
-          />
+          <div key={row.activity.id} id={`crew-card-${row.activity.id}`}>
+            <CrewCard
+              row={row}
+              userId={userId}
+              canEdit={canEditActivity(row.activity)}
+              selected={row.activity.id === openId}
+              onOpen={() => toggleOpen(row.activity.id)}
+              onEdit={onEdit ? () => onEdit(row.activity) : undefined}
+              onDelete={onDelete ? () => onDelete(row.activity) : undefined}
+            />
+          </div>
         ))}
       </div>
     );
@@ -268,7 +291,7 @@ export function FindYourCrew({
         {/* Desktop panel — hidden on mobile */}
         <aside className="hidden lg:block w-[360px] shrink-0 sticky top-20">
           {crewModalProps ? (
-            <CrewModal variant="panel" {...crewModalProps} />
+            <CrewModal key={openId ?? "none"} variant="panel" {...crewModalProps} />
           ) : (
             <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-10 flex flex-col items-center justify-center text-center gap-1.5">
               <p className="text-sm font-medium text-text-muted">Select an activity</p>
