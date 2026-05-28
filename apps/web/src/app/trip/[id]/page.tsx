@@ -280,6 +280,7 @@ export default function TripPage({
       <MemberSchedulesModal
         open={openModal.kind === "schedules"}
         members={members}
+        trip={trip}
         userId={userId}
         onEditDates={() => setOpenModal({ kind: "memberDates" })}
         onClose={closeModal}
