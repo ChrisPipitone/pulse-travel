@@ -204,6 +204,9 @@ export function FindYourCrew({
     onClose: () => setOpenId(null),
     onRate: (r: Rating) => { dismissNudge(); rateActivity(openRow.activity.id, r); },
     ratingLoading,
+    stops,
+    canEdit: canEditActivity(openRow.activity),
+    onEdit: onEdit ? () => onEdit(openRow.activity) : undefined,
   } : null;
 
   return (

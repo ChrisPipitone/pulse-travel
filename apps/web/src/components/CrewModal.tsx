@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useModalEscape } from "@/hooks/useModalEscape";
-import type { Rating } from "@pulse/types";
+import type { Rating, Stop } from "@pulse/types";
 import { RATING_BUTTON, RATING_LABELS } from "@pulse/types";
 import { AvatarChip, PinIcon, StatusPill, type CrewRowData } from "@/components/CrewCard";
 
@@ -13,10 +13,24 @@ type Props = {
   onRate: (r: Rating) => void;
   ratingLoading: boolean;
   variant?: "modal" | "panel";
+  stops?: Stop[];
+  canEdit?: boolean;
+  onEdit?: () => void;
 };
 
-export function CrewModal({ row, userId, onClose, onRate, ratingLoading, variant = "modal" }: Props) {
+function fmtDuration(hours: number): string {
+  if (hours < 1) return `${Math.round(hours * 60)}m`;
+  if (hours % 1 === 0) return `${hours}h`;
+  const h = Math.floor(hours);
+  const m = Math.round((hours % 1) * 60);
+  return `${h}h ${m}m`;
+}
+
+export function CrewModal({ row, userId, onClose, onRate, ratingLoading, variant = "modal", stops, canEdit, onEdit }: Props) {
   const { activity, mustMembers, maybeMembers, skipMembers, unratedMembers, myRating } = row;
+  const allMembers = [...mustMembers, ...maybeMembers, ...skipMembers, ...unratedMembers];
+  const addedByMember = activity.added_by ? allMembers.find((m) => m.id === activity.added_by) ?? null : null;
+  const stop = stops?.find((s) => s.id === activity.stop_id) ?? null;
   const [pendingRating, setPendingRating] = useState<Rating | null>(myRating);
 
   useModalEscape(onClose);
@@ -41,6 +55,17 @@ export function CrewModal({ row, userId, onClose, onRate, ratingLoading, variant
         </div>
         <div className="flex items-center gap-2 shrink-0 mt-0.5">
           <StatusPill rating={myRating} />
+          {canEdit && onEdit && (
+            <button
+              onClick={onEdit}
+              aria-label="Edit activity"
+              className="shrink-0 text-text-subtle hover:text-text-primary p-2.5 rounded-lg transition-colors"
+            >
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11.5 2.5a1.414 1.414 0 0 1 2 2L5 13H3v-2L11.5 2.5z" />
+              </svg>
+            </button>
+          )}
           <button onClick={onClose} className="shrink-0 text-text-subtle hover:text-text-primary p-2.5 rounded-lg transition-colors">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M3 3l10 10M13 3L3 13" />
@@ -51,6 +76,48 @@ export function CrewModal({ row, userId, onClose, onRate, ratingLoading, variant
 
       {/* Body */}
       <div className="flex flex-col gap-5 px-6 py-5 flex-1">
+        {/* Activity metadata */}
+        {(activity.description || activity.url || activity.duration_hours || stop || addedByMember) && (
+          <div className="flex flex-col gap-2 -mt-1">
+            {activity.description && (
+              <p className="text-sm text-text-muted leading-relaxed">{activity.description}</p>
+            )}
+            <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5">
+              {activity.duration_hours && (
+                <span className="text-xs text-text-subtle flex items-center gap-1">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <circle cx="6" cy="6" r="5" />
+                    <path d="M6 3.5V6l1.5 1.5" />
+                  </svg>
+                  {fmtDuration(activity.duration_hours)}
+                </span>
+              )}
+              {stop && (
+                <span className="text-xs text-text-subtle flex items-center gap-1">
+                  <PinIcon />
+                  {stop.name}
+                </span>
+              )}
+              {activity.url && (
+                <a
+                  href={activity.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-xs text-accent hover:underline flex items-center gap-0.5"
+                >
+                  ↗ Website
+                </a>
+              )}
+              {addedByMember && (
+                <span className="text-xs text-text-subtle">
+                  Added by {addedByMember.id === userId ? "you" : addedByMember.name.split(" ")[0]}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         {mustMembers.length > 0 && (
           <div
             className="section-in rounded-xl p-3 flex flex-col gap-2.5"
