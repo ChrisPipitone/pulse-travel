@@ -323,3 +323,44 @@ Non-technical users (family) must onboard in under 60 seconds. Share link → in
 
 ## Biggest Risk
 Infrequent use cycle — 1–2 big trips/year. Retention is low by nature. ***REMOVED*** revenue mitigates this — revenue per session can be high even with low return visits.
+
+---
+
+## Code Standards
+
+These rules apply in every session. Claude must enforce them without being asked.
+
+### File size limits
+- **Components**: 300 lines max. Above = split into sub-components in `components/[feature]/`.
+- **Pages**: 250 lines max. Extract sidebar, skeleton, sub-views to separate files.
+- **Services**: no hard limit, but > 250 lines = consider splitting by domain.
+- **Hooks**: one concern per file. Never mix fetch + UI state in one hook.
+
+### Canonical utility locations — never inline these
+| Concern | File | Exported as |
+|---|---|---|
+| Date formatting | `apps/web/src/lib/date.ts` | `fmtDate`, `fmtDateRange` |
+| App-wide constants | `apps/web/src/lib/constants.ts` | `UNDO_DURATION_MS`, `AVATAR_PREVIEW_CAP`, `PG_NOT_FOUND`, etc. |
+| Rating display styles | `packages/types/src/index.ts` | `RATING_PILL`, `RATING_BUTTON` |
+| Undo/timer pattern | `packages/hooks/src/useUndoAction.ts` | `useUndoAction` |
+
+Never define `fmtDate` / `formatDateRange` inline in a component or page. Import from `lib/date.ts`.
+Never hardcode `4000` / `5000` / `'PGRST116'` / `'23505'` — import from `lib/constants.ts`.
+Never define `Record<Rating, string>` style lookup objects in components — import from `@pulse/types`.
+
+### Services rules
+- Always destructure `{ data, error }` from every Supabase call. Always throw on `error`.
+- No `any` casts. Use explicit inline types (`as { id: string; trip_id: string }[]`) or the Supabase typed client.
+- No silent null returns on write operations — `addActivity`, `upsertRating`, etc. must throw on failure.
+- Dead branches (identical if/else arms) are bugs. Remove them.
+
+### Component rules
+- Helper components used only in one file and < 50 lines: OK inline.
+- Helper components > 50 lines (even if only used in one file): extract to own file.
+- Modals with their own state and > 100 lines: always extract to `components/FeatureModal.tsx`.
+- No inline date formatting, no inline rating color maps, no inline magic numbers.
+
+### Code review
+Full code review lives in `docs/code-reviews/ROUND_N.md` (same pattern as `docs/ui-reviews/`).
+Run a review round when a significant feature lands. Use `/review` skill or ask Claude directly.
+Open items carry forward each round — do not re-evaluate completed ones.
