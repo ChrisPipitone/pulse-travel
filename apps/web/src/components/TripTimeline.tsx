@@ -57,21 +57,24 @@ function ActivityRatingsGrid({
     );
   }
 
+  const LABEL_COLOR: Record<Rating, string> = {
+    MUST: "text-must",
+    MAYBE: "text-maybe-text",
+    SKIP: "text-text-subtle",
+  };
+
   return (
     <div className="bg-bg border-t border-border px-4 py-2.5 grid grid-cols-2 gap-x-4 gap-y-0">
       {sections.map(({ rating, raters }) => (
         <Fragment key={rating}>
-          <div className="col-span-2 pt-2 pb-0.5 first:pt-1 text-[9px] font-bold uppercase tracking-[0.07em] text-text-subtle">
+          <div className={`col-span-2 pt-2 pb-0.5 first:pt-1 text-[9px] font-bold uppercase tracking-[0.07em] ${LABEL_COLOR[rating]}`}>
             {rating}
           </div>
           {raters.map(m => (
             <div key={m.id} className="flex items-center gap-1.5 py-[3px]">
               <MemberAvatar name={m.name} avatarUrl={m.avatar_url} size="xs" />
-              <span className="text-[11px] font-medium text-text-primary flex-1 truncate">
+              <span className="text-[11px] font-medium text-text-primary truncate">
                 {m.name.split(" ")[0]}
-              </span>
-              <span className={`text-[8px] font-bold rounded-[5px] px-1.5 py-[2px] shrink-0 ${RATING_PILL[rating]}`}>
-                {rating}
               </span>
             </div>
           ))}
@@ -212,12 +215,9 @@ function StopCard({
       </div>
 
       {/* Card */}
-      <div className={`flex-1 min-w-0 bg-bg-card rounded-[var(--radius-card)] border overflow-hidden mb-3 shadow-sm transition-all ${isSelected ? "border-accent/50 shadow-md" : "border-border"}`}>
-        {/* Header — click to select/deselect in detail panel */}
-        <div
-          className="flex items-center gap-2.5 px-4 py-3 cursor-pointer hover:bg-bg/60 transition-colors"
-          onClick={onSelect}
-        >
+      <div className={`flex-1 min-w-0 bg-bg-card rounded-[var(--radius-card)] border border-border overflow-hidden mb-3 shadow-sm transition-all${isSelected ? " lg:border-accent/50" : ""}`}>
+        {/* Header */}
+        <div className="flex items-center gap-2.5 px-4 py-3">
           <div className="flex-1 min-w-0">
             <h3 className="text-[14px] font-bold text-text-primary leading-tight">
               {stop.name}
@@ -226,11 +226,28 @@ function StopCard({
               {dateStr ?? "No dates set"}
             </p>
           </div>
-          {stopActivities.length > 0 && (
-            <span className="text-[10px] font-semibold text-text-subtle bg-bg border border-border rounded-full px-2.5 py-0.5 shrink-0 whitespace-nowrap">
-              {stopActivities.length} {stopActivities.length === 1 ? "activity" : "activities"}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {stopActivities.length > 0 && (
+              <span className="text-[10px] font-semibold text-text-subtle bg-bg border border-border rounded-full px-2.5 py-0.5 shrink-0 whitespace-nowrap">
+                {stopActivities.length} {stopActivities.length === 1 ? "activity" : "activities"}
+              </span>
+            )}
+            {/* Detail panel trigger — desktop only */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onSelect(); }}
+              aria-label={isSelected ? "Close detail panel" : "Open detail panel"}
+              className={`hidden lg:flex items-center justify-center w-6 h-6 rounded-md border transition-all ${
+                isSelected
+                  ? "bg-accent text-white border-accent"
+                  : "text-text-subtle hover:text-text-primary border-border hover:border-accent/40"
+              }`}
+            >
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="1" y="2" width="12" height="10" rx="1.5"/>
+                <line x1="8" y1="2" x2="8" y2="12"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Tier block — always visible when there are ratings */}
@@ -320,6 +337,12 @@ function ActivityDetailSection({
     r => r.activity_id === activity.id && (r.rating === "MUST" || r.rating === "MAYBE")
   ).length;
 
+  const LABEL_COLOR: Record<Rating, string> = {
+    MUST: "text-must",
+    MAYBE: "text-maybe-text",
+    SKIP: "text-text-subtle",
+  };
+
   return (
     <div className="border-t border-border">
       <div className="flex items-center gap-2 px-4 py-2.5">
@@ -339,7 +362,7 @@ function ActivityDetailSection({
         <div className="bg-bg border-t border-border/50 px-4 py-2.5 grid grid-cols-2 gap-x-4">
           {sections.map(({ rating, raters }) => (
             <Fragment key={rating}>
-              <div className="col-span-2 pt-1.5 pb-0.5 first:pt-0 text-[9px] font-bold uppercase tracking-[0.07em] text-text-subtle">
+              <div className={`col-span-2 pt-1.5 pb-0.5 first:pt-0 text-[9px] font-bold uppercase tracking-[0.07em] ${LABEL_COLOR[rating]}`}>
                 {rating}
               </div>
               {raters.map(m => (
