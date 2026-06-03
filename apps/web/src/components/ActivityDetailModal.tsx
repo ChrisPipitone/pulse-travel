@@ -44,7 +44,7 @@ export function ActivityDetailModal({
   const modalRef = useRef<HTMLDivElement>(null)
   useFocusTrap(modalRef, open)
 
-  useModalEscape(onClose)
+  useModalEscape(onClose, open)
 
   useEffect(() => {
     if (!justRated || ratingLoading) return

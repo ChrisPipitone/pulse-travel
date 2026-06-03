@@ -89,7 +89,7 @@ export function CreateTripModal({
     })
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useModalEscape(onClose)
+  useModalEscape(onClose, open)
 
   if (!open) return null
 
