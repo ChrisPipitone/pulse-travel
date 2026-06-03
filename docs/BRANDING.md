@@ -50,36 +50,52 @@ Alternate (for A/B or secondary surfaces): *"A wedding, twelve people, and every
 
 ## Positioning
 
-One-sentence: **Pulse answers "who should do what together" before you plan anything — no other tool does that.**
+One-sentence: **Pulse is the real travel app for real people — because AI doesn't go on vacation, your friends do.**
 
 Competitive wedge:
-- **TripRelay** tells you *where* to go (curated spots → AI route). No crew layer.
-- **Frienzy / Wanderlog** coordinate *after* decisions are made. No compatibility model.
-- **Pulse** answers *who goes together* — before logistics start.
+- **AI "Planners":** They're all the same generic wrapper. A robot suggesting a "Top 10" list doesn't know your group's vibe. They ignore the people.
+- **TripRelay:** Tells you *where* to go (curated spots → AI route). No crew layer. Artificial.
+- **Frienzy / Wanderlog:** Logistics-heavy coordination *after* decisions are made. No compatibility model.
+- **Pulse:** We don't care where you get your ideas — AI, Instagram, or a napkin. Bring them here to see what your friends *actually* think. We own the **grouping**, the only part that matters.
+
+---
+
+## The "Anti-AI" Manifesto
+We are riding the "Sick of AI" wave. Our marketing should "shit talk" the generic, soulless AI itinerary trend.
+
+**The Narrative:**
+- "We're not another AI travel app."
+- "AI itineraries are just wrappers. They don't have skin in the game."
+- "A robot can't tell you if your cousin will actually enjoy a 4-hour hike."
+- "Enter your ideas, get them from anywhere, place them here, see what your friends think!"
 
 ---
 
 ## Brand Values
-- **Togetherness** — the whole point. Not solo planning, group harmony.
-- **Clarity** — non-technical users (grandma, the cousin who doesn't travel much) can use it in 60 seconds.
-- **Joy** — planning a trip should feel exciting, not like a spreadsheet exercise.
+- **Human-Powered** — Trips are about people, not algorithms. No AI "magic" itineraries. Real human desire and shared enthusiasm drive the plan.
+- **Real People / Real Trips** — We prioritize the messy, beautiful reality of group travel over "optimized" robot plans.
+- **Togetherness** — The whole point. Not solo planning, group harmony.
+- **Clarity** — Non-technical users (grandma, the cousin who doesn't travel much) can use it in 60 seconds.
 - **Honesty** — MAYBE is a valid answer. No pressure to fake enthusiasm.
 
 ## Personality / Voice
 - Warm, not corporate
 - Uplifting, not pushy
 - Direct, not jargon-heavy
-- Italian soul — passion, togetherness, *la dolce vita* — but never kitschy
+- **Anti-AI / Pro-Human** — We lean into the messiness and magic of human connection. We talk about *people*, *desire*, and *heartbeat*, never *data*, *optimization*, or *generative*.
+- **Authentic & Gritty** — We're the "Real Travel App." We call out the fluff.
 - Talks like a well-traveled friend, not a SaaS product
 
 ### Examples
 - ✅ "Who else is in for the Vatican?"
 - ✅ "3 MUSTs. You're going."
 - ✅ "Lena and Marco both love this. Go together."
-- ✅ "Built for the trip with a wedding in the middle."
-- ❌ "Activity consensus metrics dashboard"
-- ❌ "Optimizing group itinerary alignment"
-- ❌ "Plan trips everyone will love." (generic — could be any travel app)
+- ✅ "No AI-generated fluff. Just what your friends actually want to do."
+- ✅ "AI can't go on a trip. You can. Use Pulse."
+- ✅ "Real trips with real people."
+- ❌ "AI-powered itinerary optimization"
+- ❌ "Generating the perfect travel plan for your group"
+- ❌ "Our algorithm predicts group satisfaction"
 
 ---
 
@@ -105,7 +121,8 @@ See `UI_DESIGN.md` for full design system.
 ---
 
 ## What to Avoid
-- Purple gradients, generic travel stock photos, globe icons
+- AI buzzwords: "Smart", "Optimized", "Intelligent", "Automated", "Generative"
+- Purple gradients (looks like "AI" brand), generic travel stock photos, globe icons
 - Corporate SaaS tone ("leverage group synergy")
 - Overcomplicating the Italian angle — it's soul, not costume
 - Making it feel like a work tool — this is joy, not productivity

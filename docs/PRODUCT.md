@@ -77,23 +77,25 @@ All five answered a different question about the same data. The matrix tab was r
 
 ## Defensible Lane
 
-- **Frienzy / Wanderlog = logistics coordination** — after decisions are made
-- **Pulse = decision intelligence** — before logistics start
-- The gap nobody owns: "who should do what together?" Stay in it.
+- **AI-First Apps (TripRelay, etc.) = Automated Generation** — AI finds, suggests, and schedules. The user is a passive observer of a generic "wrapper" itinerary.
+- **Frienzy / Wanderlog = Logistics Coordination** — Tools for *after* decisions are made.
+- **Pulse = Human-Led Decision Intelligence** — We focus on the part AI can't do: **validating desire.** Pulse is where ideas (from AI, Instagram, or friends) are put to the test by real people.
 
-One-sentence positioning: *Pulse answers "who should do what together" before you plan anything — no other tool does that.*
+One-sentence positioning: **Pulse is the real travel app for real people — because AI doesn't go on vacation, your friends do.**
 
-TripRelay tells you *where* to go. Pulse tells you *who to go with*. These are not the same product.
+### The "Human-Led" Moat
+While competitors use AI to "solve" travel, Pulse uses AI as a servant to human input. We don't just generate lists; we surface **The Crew**—the real people who actually want to do the thing. Competitors can copy our features, but we dominate the niche of **Human Validation.**
 
 ---
 
 ## What Makes Us Distinct
 
-- **MUST/MAYBE/SKIP vocabulary** — captures commitment level, not just preference
-- **Find Your Crew** — potential crew per activity, MUST = definite crew, MAYBE = available capacity; nobody else has this
-- **Travel Twin** — pairwise Jaccard compatibility, immediately legible
-- **Per-member date ranges** — crew is real (overlapping presence), not theoretical
-- **Potential crew → actual crew pipeline** — Find Your Crew surfaces who would go; itinerary resolves who actually goes given timing
+- **Human-Led "Idea Spark"** — We don't care where your ideas come from, but once they're in Pulse, they belong to your crew. No "robot-only" plans.
+- **MUST/MAYBE/SKIP vocabulary** — Captures commitment level, not just preference.
+- **Find Your Crew** — Potential crew per activity, MUST = definite crew, MAYBE = available capacity.
+- **Travel Twin** — Pairwise Jaccard compatibility, surfacing human alignment.
+- **Per-member date ranges** — Crew is real (overlapping presence), not theoretical.
+- **Potential crew → actual crew pipeline** — Find Your Crew surfaces who would go; itinerary resolves who actually goes given timing.
 
 ---
 
