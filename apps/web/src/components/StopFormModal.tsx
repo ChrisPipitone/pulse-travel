@@ -22,7 +22,7 @@ export function StopFormModal({ open, title, initial, loading, error, submitLabe
   const [fields, setFields] = useState<Fields>({ name: '', date_from: '', date_to: '' })
   const modalRef = useRef<HTMLDivElement>(null)
   useFocusTrap(modalRef, open)
-  useModalEscape(onClose, open)
+  useModalEscape(onClose)
 
   useEffect(() => {
     if (open) {

@@ -22,7 +22,7 @@ export function MemberSchedulesModal({ open, members, trip, userId, onEditDates,
   const [viewMode, setViewMode] = useState<'bars' | 'grid'>('bars')
   useFocusTrap(modalRef, open)
 
-  useModalEscape(onClose, open)
+  useModalEscape(onClose)
 
   if (!open) return null
 

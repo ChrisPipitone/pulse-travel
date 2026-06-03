@@ -33,7 +33,7 @@ export function MemberDatesModal({
     }
   }, [open, initialArrival, initialDeparture])
 
-  useModalEscape(onClose, open)
+  useModalEscape(onClose)
 
   if (!open) return null
 

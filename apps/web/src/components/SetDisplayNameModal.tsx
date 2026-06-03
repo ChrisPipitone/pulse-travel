@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSession, useOnboarding } from '@pulse/hooks'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
@@ -14,15 +14,8 @@ export function SetDisplayNameModal() {
     return (meta.name as string | undefined) ?? emailPrefix
   })
   const [done, setDone] = useState(false)
-  const isOpen = !done && !!session && needsOnboarding(session)
 
-  useEffect(() => {
-    if (!isOpen) return
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = '' }
-  }, [isOpen])
-
-  if (!isOpen) return null
+  if (done || !session || !needsOnboarding(session)) return null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

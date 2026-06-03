@@ -43,7 +43,7 @@ export function ActivityFormModal({ open, title, initial, stops = [], loading, e
     }
   }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useModalEscape(onClose, open)
+  useModalEscape(onClose)
 
   if (!open) return null
 
