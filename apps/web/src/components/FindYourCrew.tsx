@@ -260,35 +260,36 @@ export function FindYourCrew({
   }
 
   return (
-    <>
+    <div className="flex flex-col gap-5">
       {/* Rating progress / completion banner */}
       {unratedCount > 0 ? (
-        <div className="flex items-center justify-between gap-3 bg-accent/8 border border-accent/20 rounded-[var(--radius-card)] px-4 py-3">
+        <div className="flex items-center justify-between gap-3 bg-accent/10 border border-accent/30 rounded-2xl px-5 py-4 shadow-sm callout-in">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-text-primary">Rate activities to find your crew</p>
-            <p className="text-xs text-text-muted mt-0.5">{unratedCount} of {rows.length} left</p>
+            <p className="text-sm font-bold text-text-primary">Finish your ratings</p>
+            <p className="text-xs font-medium text-text-muted mt-0.5">
+              <span className="text-accent font-bold">{rows.length - unratedCount}</span> of {rows.length} activities rated
+            </p>
           </div>
           <button
             onClick={openNextUnrated}
-            className="shrink-0 text-xs font-bold text-accent hover:opacity-80 transition-opacity whitespace-nowrap"
+            className="shrink-0 text-xs font-bold bg-accent text-white px-4 py-2 rounded-full hover:shadow-lg hover:shadow-accent/30 transition-all active:scale-95 whitespace-nowrap"
           >
             Next unrated →
           </button>
         </div>
       ) : rows.length > 0 && (
         <div
-          className="flex items-center justify-between gap-3 rounded-[var(--radius-card)] px-4 py-3"
-          style={{ background: "rgba(22,163,74,.08)", border: "1px solid rgba(22,163,74,.2)" }}
+          className="flex items-center justify-between gap-3 rounded-2xl px-5 py-4 shadow-sm pop-in"
+          style={{ background: "rgba(22,163,74,.12)", border: "1px solid rgba(22,163,74,.3)" }}
         >
           <div className="min-w-0">
-            <p className="text-sm font-medium text-text-primary">All rated — you&apos;re done</p>
-            <p className="text-xs text-text-muted mt-0.5">See how the group lines up</p>
+            <p className="text-sm font-bold text-text-primary">🎉 All rated — you&apos;re done!</p>
+            <p className="text-xs font-medium text-text-muted mt-0.5">See how the group lines up and find your crew.</p>
           </div>
           {onSwitchToCrewTab && (
             <button
               onClick={onSwitchToCrewTab}
-              className="shrink-0 text-xs font-bold hover:opacity-80 transition-opacity whitespace-nowrap"
-              style={{ color: "#16A34A" }}
+              className="shrink-0 text-xs font-bold bg-[#16A34A] text-white px-4 py-2 rounded-full hover:shadow-lg hover:shadow-[#16A34A]/30 transition-all active:scale-95 whitespace-nowrap"
             >
               See your crew →
             </button>
@@ -346,6 +347,6 @@ export function FindYourCrew({
 
       {/* Mobile modal — only mounted on mobile to avoid DOM pollution */}
       {crewModalProps && isMobile && <CrewModal variant="modal" {...crewModalProps} />}
-    </>
+    </div>
   );
 }
