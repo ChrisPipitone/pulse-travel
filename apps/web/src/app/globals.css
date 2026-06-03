@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
+@source "../../../../packages";
+@source inline("bg-must bg-maybe bg-skip bg-must/10 bg-must/12 bg-maybe/20 bg-text-subtle/15 bg-text-subtle/30 text-must text-must-text text-maybe text-maybe-text text-skip-text border-must/40 border-maybe/40 border-maybe/50 border-text-subtle/40 text-must/60 ring-must ring-maybe ring-skip");
 
 /* ── Theme: modern (default) ───────────────────────────────── */
 :root,
@@ -228,6 +230,49 @@
   --spine-line:   #D4DCE4;
 }
 
+/* ── Theme: campari (canonical brand theme) ────────────────── */
+/*
+ * Pressed × Campari Paper hybrid.
+ * Deep warm paper bg so cards float. Campari red accent.
+ * Patina indigo for structural contrast. Grain via --grain var.
+ * DM Sans throughout — location-neutral, no cultural font coding.
+ */
+[data-theme="campari"] {
+  --bg:           #F0E4CC;
+  --bg-card:      #FDFCF9;
+  --text-primary: #1C0E08;
+  --text-muted:   #7A6558;
+  --text-subtle:  #A89080;
+  --accent:       #C8181E;
+  --border:       #E2D4C0;
+
+  --must-bg:      #C8181E;
+  --must-text:    #FFFFFF;
+  --maybe-bg:     #D4902A;
+  --maybe-text:   #FFFFFF;
+  --skip-bg:      #EDE8E0;
+  --skip-text:    #7A6558;
+
+  --cell-must:    #C8181E;
+  --cell-maybe:   #E8B458;
+  --cell-skip:    #D8D0C4;
+  --cell-empty:   #EDE8E0;
+
+  --radius-card:  12px;
+  --radius-badge: 8px;
+  --radius-btn:   10px;
+  --radius-cell:  6px;
+
+  --font-display: 'DM Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  --spine-node:   #C8181E;
+  --spine-empty:  #E8DED0;
+  --spine-line:   #E8DED0;
+
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='0.048'/%3E%3C/svg%3E");
+}
+
 @theme inline {
   --color-bg:           var(--bg);
   --color-bg-card:      var(--bg-card);
@@ -250,6 +295,8 @@
 
 body {
   background: var(--bg);
+  background-image: var(--grain, none);
+  background-repeat: repeat;
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 15px;
@@ -260,6 +307,10 @@ body {
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+/* Lock page scroll while any modal overlay is mounted */
+html:has(.modal-overlay),
+html:has(.modal-overlay) body { overflow: hidden; }
 
 /* ── Modal + toast animations ──────────────────────────────── */
 

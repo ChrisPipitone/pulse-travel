@@ -54,6 +54,7 @@ export function FindYourCrew({
   const [openId, setOpenId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("popular");
   const [didAutoOpen, setDidAutoOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   function canEditActivity(a: Activity) {
     return userId === tripOwnerId || userId === a.added_by;
@@ -114,6 +115,14 @@ export function FindYourCrew({
   function stopDateLabel(stop: Stop) {
     return fmtDateRange(stop.date_from, stop.date_to);
   }
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    setIsMobile(mq.matches)
+    const fn = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', fn)
+    return () => mq.removeEventListener('change', fn)
+  }, [])
 
   useEffect(() => {
     if (!autoOpenFirstUnrated || didAutoOpen || rows.length === 0) return;
@@ -335,8 +344,8 @@ export function FindYourCrew({
         </aside>
       </div>
 
-      {/* Mobile modal — CSS-hidden on desktop */}
-      {crewModalProps && <CrewModal variant="modal" {...crewModalProps} />}
+      {/* Mobile modal — only mounted on mobile to avoid DOM pollution */}
+      {crewModalProps && isMobile && <CrewModal variant="modal" {...crewModalProps} />}
     </>
   );
 }
