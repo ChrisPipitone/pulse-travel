@@ -72,6 +72,162 @@
   --spine-line:   #E8E6E0;
 }
 
+/* ── Theme: pulse (canonical brand theme) ──────────────────── */
+/*
+ * Palette story:
+ *   bg     = travertine linen     card  = warm parchment
+ *   accent = Mediterranean teal   (old atlas, copper patina, map ink)
+ *   MUST   = amber-gold           (sun on cobblestone — bright, city energy)
+ *   MAYBE  = dusty teal           (willing, present, cooler register)
+ *   SKIP   = warm limestone gray  (recessive, off the map)
+ */
+[data-theme="pulse"],
+[data-theme="terra"] {
+  --bg:           #E8E2D0;
+  --bg-card:      #F4F0E4;
+  --text-primary: #1C1812;
+  --text-muted:   #786E5E;
+  --text-subtle:  #A8A090;
+  --accent:       #1D6D78;
+  --border:       #D0C8B6;
+
+  --must-bg:      #C47C10;
+  --must-text:    #FFFFFF;
+  --maybe-bg:     #7AADA0;
+  --maybe-text:   #0E3430;
+  --skip-bg:      #C4BEB4;
+  --skip-text:    #625C54;
+
+  --cell-must:    #C47C10;
+  --cell-maybe:   #7AADA0;
+  --cell-skip:    #B8B2A8;
+  --cell-empty:   #DDD8CC;
+
+  --radius-card:  10px;
+  --radius-badge: 8px;
+  --radius-btn:   10px;
+  --radius-cell:  4px;
+
+  --font-display: 'DM Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  --spine-node:   #9AA89E;
+  --spine-empty:  #D4CEBC;
+  --spine-line:   #D4CEBC;
+}
+
+/* ── Theme: comic ──────────────────────────────────────────── */
+/*
+ * Palette story:
+ *   bg     = aged newsprint       card  = fresh page white
+ *   border = panel ink (dark)     accent = action red
+ *   MUST   = POW red              MAYBE = caption yellow
+ *   SKIP   = off-panel gray
+ */
+[data-theme="comic"] {
+  --bg:           #F5F2E0;
+  --bg-card:      #FFFEF8;
+  --text-primary: #0A0A0A;
+  --text-muted:   #3A3A3A;
+  --text-subtle:  #6A6060;
+  --accent:       #D91A0A;
+  --border:       #1A1A1A;
+
+  --must-bg:      #D91A0A;
+  --must-text:    #FFFFFF;
+  --maybe-bg:     #F5C000;
+  --maybe-text:   #0A0A0A;
+  --skip-bg:      #D0CCBE;
+  --skip-text:    #4A4A4A;
+
+  --cell-must:    #D91A0A;
+  --cell-maybe:   #F5C000;
+  --cell-skip:    #C8C4B6;
+  --cell-empty:   #EAE6D8;
+
+  --radius-card:  4px;
+  --radius-badge: 4px;
+  --radius-btn:   4px;
+  --radius-cell:  2px;
+
+  --font-display: 'DM Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  --spine-node:   #2A2A2A;
+  --spine-empty:  #D8D4C4;
+  --spine-line:   #D8D4C4;
+}
+
+/* ── Theme: sage ───────────────────────────────────────────── */
+[data-theme="sage"] {
+  --bg:           #F4F1E8;
+  --bg-card:      #FDFBF6;
+  --text-primary: #2B2418;
+  --text-muted:   #7D7265;
+  --text-subtle:  #A09585;
+  --accent:       #7A9470;
+  --border:       #DDD7CB;
+
+  --must-bg:      #B08050;
+  --must-text:    #FFFFFF;
+  --maybe-bg:     #BDD19E;
+  --maybe-text:   #3A5228;
+  --skip-bg:      #E6E1D8;
+  --skip-text:    #6B6258;
+
+  --cell-must:    #B08050;
+  --cell-maybe:   #BDD19E;
+  --cell-skip:    #D6D0C6;
+  --cell-empty:   #EDE9E0;
+
+  --radius-card:  12px;
+  --radius-badge: 16px;
+  --radius-btn:   16px;
+  --radius-cell:  6px;
+
+  --font-display: 'DM Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  --spine-node:   #9A8D7E;
+  --spine-empty:  #E2DDD4;
+  --spine-line:   #E2DDD4;
+}
+
+/* ── Theme: slate ──────────────────────────────────────────── */
+[data-theme="slate"] {
+  --bg:           #EDF0F4;
+  --bg-card:      #F7F9FB;
+  --text-primary: #1C2B3A;
+  --text-muted:   #667A8C;
+  --text-subtle:  #8FA0AE;
+  --accent:       #4E6D82;
+  --border:       #D0D8E2;
+
+  --must-bg:      #6D8977;
+  --must-text:    #FFFFFF;
+  --maybe-bg:     #B1C9CA;
+  --maybe-text:   #1C3A40;
+  --skip-bg:      #DDE3E8;
+  --skip-text:    #4A5C6A;
+
+  --cell-must:    #6D8977;
+  --cell-maybe:   #B1C9CA;
+  --cell-skip:    #C8D4DC;
+  --cell-empty:   #E4E9EE;
+
+  --radius-card:  10px;
+  --radius-badge: 8px;
+  --radius-btn:   8px;
+  --radius-cell:  4px;
+
+  --font-display: 'DM Sans', sans-serif;
+  --font-body:    'Inter', sans-serif;
+
+  --spine-node:   #7A90A2;
+  --spine-empty:  #D4DCE4;
+  --spine-line:   #D4DCE4;
+}
+
 @theme inline {
   --color-bg:           var(--bg);
   --color-bg-card:      var(--bg-card);

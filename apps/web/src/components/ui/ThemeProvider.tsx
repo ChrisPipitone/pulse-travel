@@ -10,8 +10,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
     <Provider
       attribute="data-theme"
-      defaultTheme="modern"
-      themes={['modern', 'editorial']}
+      defaultTheme="pulse"
+      themes={['pulse', 'terra', 'comic', 'modern', 'editorial', 'sage', 'slate']}
       disableTransitionOnChange
     >
       {children}
