@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useState, useEffect } from "react";
 import {
   useTripData,
   useSession,
@@ -92,6 +92,13 @@ export default function TripPage({
   const closeModal = () => setOpenModal({ kind: "none" });
   const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("activities");
+
+  // Reset scroll on entry — router.push from a scrolled Home doesn't reliably
+  // reset scroll when the initial paint (loading skeleton) is shorter than the
+  // prior scroll position. New-member flow scrolls to first unrated itself.
+  useEffect(() => {
+    if (newMember !== "1") window.scrollTo(0, 0);
+  }, [newMember]);
   const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(new Set());
 
   const userId = session?.user.id;
