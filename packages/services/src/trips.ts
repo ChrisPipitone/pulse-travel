@@ -252,11 +252,14 @@ export async function removeTripMember(client: SupabaseClient, tripId: string, u
   if (error) throw new Error(error.message)
 }
 
-export async function joinTrip(client: SupabaseClient, tripId: string, userId: string): Promise<void> {
-  const { error } = await client
-    .from('trip_members')
-    .upsert({ trip_id: tripId, user_id: userId }, { onConflict: 'trip_id,user_id', ignoreDuplicates: true })
+// Joins via the SECURITY DEFINER function so the invite code is verified
+// server-side (direct trip_members INSERT is owner-only — see migration 000005).
+// Returns the trip id, or null if the code is invalid. Idempotent: re-joining
+// as an existing member is a no-op success.
+export async function joinTrip(client: SupabaseClient, inviteCode: string): Promise<string | null> {
+  const { data, error } = await client.rpc('join_trip_by_invite_code', { p_code: inviteCode })
   if (error) throw new Error(error.message)
+  return (data as string | null) ?? null
 }
 
 export async function sendInviteEmail(

@@ -19,12 +19,21 @@ describe('useJoinTrip', () => {
     vi.mocked(client.auth.getUser).mockResolvedValue({ data: { user: { id: 'u1' } } } as never)
   })
 
+  // Both lookups go through client.rpc: get_trip_by_invite_code returns the
+  // preview, join_trip_by_invite_code verifies the code server-side and returns
+  // the joined trip id (null if the code is invalid).
+  function mockRpc(preview: Trip[], joinedId: string | null) {
+    vi.mocked(client.rpc).mockImplementation((fn: string) =>
+      Promise.resolve(
+        fn === 'join_trip_by_invite_code'
+          ? { data: joinedId, error: null }
+          : { data: preview, error: null },
+      ) as never,
+    )
+  }
+
   it('returns the trip on success', async () => {
-    // getTripByInviteCode now uses client.rpc; joinTrip uses client.from
-    vi.mocked(client.rpc).mockResolvedValue({ data: [fakeTrip], error: null } as never)
-    vi.mocked(client.from).mockReturnValue({
-      upsert: vi.fn().mockResolvedValue({ data: null, error: null }),
-    } as never)
+    mockRpc([fakeTrip], fakeTrip.id)
 
     const { result } = renderHookWithClient(() => useJoinTrip(), client)
     let returned: Trip | null = null
@@ -35,7 +44,7 @@ describe('useJoinTrip', () => {
   })
 
   it('sets error and returns null for invalid invite code', async () => {
-    vi.mocked(client.rpc).mockResolvedValue({ data: [], error: null } as never)
+    mockRpc([], null)
 
     const { result } = renderHookWithClient(() => useJoinTrip(), client)
     let returned: Trip | null = fakeTrip as Trip
@@ -45,17 +54,12 @@ describe('useJoinTrip', () => {
     expect(result.current.error).toMatch(/not found/i)
   })
 
-  it('upserts with ignoreDuplicates so re-joining is safe', async () => {
-    const upsertMock = vi.fn().mockResolvedValue({ data: null, error: null })
-    vi.mocked(client.rpc).mockResolvedValue({ data: [fakeTrip], error: null } as never)
-    vi.mocked(client.from).mockReturnValue({ upsert: upsertMock } as never)
+  it('joins via the invite-code RPC so re-joining is a safe no-op', async () => {
+    mockRpc([fakeTrip], fakeTrip.id)
 
     const { result } = renderHookWithClient(() => useJoinTrip(), client)
     await act(async () => { await result.current.joinTrip('italy25') })
 
-    expect(upsertMock).toHaveBeenCalledWith(
-      { trip_id: fakeTrip.id, user_id: 'u1' },
-      expect.objectContaining({ ignoreDuplicates: true }),
-    )
+    expect(client.rpc).toHaveBeenCalledWith('join_trip_by_invite_code', { p_code: 'italy25' })
   })
 })

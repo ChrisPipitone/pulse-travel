@@ -31,9 +31,13 @@ export function useJoinTrip(): JoinTripState {
         return null
       }
 
-      // upsert with ignoreDuplicates handles the case where a member clicks
-      // the invite link a second time — treated as success, not an error.
-      await joinTripService(client, trip.id, user.id)
+      // Server-side join: the SECURITY DEFINER function verifies the invite
+      // code and inserts membership. Idempotent for existing members.
+      const joinedTripId = await joinTripService(client, inviteCode)
+      if (!joinedTripId) {
+        setError('Invalid invite link — trip not found.')
+        return null
+      }
 
       return trip
     } catch (e) {
