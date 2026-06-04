@@ -1,3 +1,9 @@
+---
+tier: reference
+status: active
+updated: 2026-06-04
+---
+
 # MVP Architecture Optimization
 
 This document outlines the architectural strategy for scaling Pulse Travel across Web (Mobile/Desktop) and Native platforms while maintaining a lean MVP codebase.

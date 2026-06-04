@@ -1,3 +1,9 @@
+---
+tier: reference
+status: active
+updated: 2026-06-04
+---
+
 # MVP UX Strategy: Cross-Platform Strengths
 
 Pulse Travel follows a **"Mobile-First, Desktop-Enhanced"** strategy. Planning happens on the desktop; coordination happens on the phone.

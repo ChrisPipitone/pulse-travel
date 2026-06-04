@@ -1,3 +1,9 @@
+---
+tier: reference
+status: active
+updated: 2026-06-04
+---
+
 # Trip Flow
 
 Covers: trip creation, invite link lifecycle, join flow, and the UI state machine on the trip page.
@@ -87,7 +93,7 @@ migrations/20260522000000_user_tiers.sql         — replaced with tier-aware tr
 
 Trigger looks up the trip owner's `profiles.tier`, resolves the cap, and raises `'Trip is full (X plan allows up to Y members)'` if exceeded. The service layer (`joinTrip`) catches errors starting with `'Trip is full'` and passes the message through to the UI.
 
-**Gap before production:** trigger enforcement only. A client calling the API directly (or a compromised session) could attempt inserts that bypass UI guards. Needs server-side middleware or an RLS policy enforcing tier caps before real billing is live. See `docs/TIERS.md`.
+**Gap before production:** trigger enforcement only. A client calling the API directly (or a compromised session) could attempt inserts that bypass UI guards. Needs server-side middleware or an RLS policy enforcing tier caps before real billing is live. See `docs/reference/TIERS.md`.
 
 ---
 

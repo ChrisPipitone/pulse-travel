@@ -1,3 +1,10 @@
+---
+tier: decision
+status: proposed
+note: formerly canonical.md — unaccepted IA proposal, not current truth
+updated: 2026-06-04
+---
+
 Pulse — Canonical Information Architecture
 
 1. Core Product Structure — The Three Questions

@@ -1,45 +1,12 @@
 # Pulse — Group Vacation Planner
 
 > App name: **Pulse** | Repo: `pulse-travel`
+> **Product model + strategy:** `docs/canonical/PRODUCT.md` | **Brand/voice:** `docs/canonical/BRANDING.md` | **Design system:** `docs/reference/UI_DESIGN.md`
+> **Doc authority map + read order:** `docs/INDEX.md` (read first)
 
 ## What It Is
 
-Group vacation planner built around one question: *who should do what together?* Members rate activities MUST/MAYBE/SKIP; the app surfaces sub-groups (Find Your Crew), pairwise compatibility (Travel Twin), and a potential-to-actual crew pipeline via the itinerary.
-
----
-
-## Auto-loaded docs (always in context)
-
-@docs/NEW_USER_UX.md
-@docs/user_journey.md
-
----
-
-## Docs Reference — Read Before Working on These Areas
-
-| Task area | Read first |
-|---|---|
-| Product decisions, rating vocabulary, crew model | `docs/PRODUCT.md`, `docs/canonical.md` |
-| DB schema, entity relationships, RLS structure | `docs/DATA_MODEL.md` |
-| Auth flows, sign-in methods, session/JWT/RLS | `docs/AUTH.md` |
-| UI components, theming, CSS vars, color tokens | `docs/UI_DESIGN.md` |
-| Rating weights, scoring algorithm, compatibility | `docs/RATING_MATRIX.md` |
-| Trip creation, invite links, join flow, state machine | `docs/TRIP_FLOW.md` |
-| Find Your Crew feature design, sub-group logic | `docs/CREW_VIEW_DESIGN.md` |
-| Itinerary / Timeline feature design | `docs/ITINERARY_DESIGN.md` |
-| New user onboarding, user archetypes, user journey | `docs/NEW_USER_UX.md`, `docs/user_journey.md` |
-| Tiers, billing, member caps, trigger enforcement | `docs/TIERS.md` |
-| Deployment, env vars, Vercel/Supabase config | `docs/DEPLOYMENT.md` |
-| Monorepo structure, package boundaries | `docs/MONOREPO.md` |
-| Arch decisions, component decomposition | `docs/MVP_ARCHITECTURE.md` |
-| Brand voice, copy, origin story | `docs/BRANDING.md` |
-| Competitive positioning, market context | `docs/COMPETITIVE.md` |
-| Organizer mode (B2B, agents, templates) | `docs/ORGANIZER_MODE.md` |
-| All screens and routes inventory | `docs/screen_inventory.md` |
-
-> `docs/canonical.md` is the canonical information architecture — three-pillar framework (Agreement / Crew / Logistics). Read it when naming features, resolving product scope ambiguity, or designing new flows.
-
----
+Group vacation planner built around one question: *who should do what together?* Members rate activities MUST/MAYBE/SKIP; the app surfaces sub-groups (Find Your Crew), pairwise compatibility (Travel Twin), and a potential-to-actual crew pipeline via the itinerary. See `docs/canonical/PRODUCT.md` for the full rating model, crew model, positioning, and launch checklist.
 
 ## Current State
 
@@ -197,3 +164,20 @@ Never define `Record<Rating, string>` style lookup objects in components — imp
 Full code review lives in `docs/code-reviews/ROUND_N.md` (same pattern as `docs/ui-reviews/`).
 Run a review round when a significant feature lands. Use `/review` skill or ask Claude directly.
 Open items carry forward each round — do not re-evaluate completed ones.
+
+---
+
+## Documentation Authority
+
+Docs are tiered by **folder** — trust is encoded in the path. Read `docs/INDEX.md` first for the full map.
+
+| Tier | Folder | Trust | Read when |
+|---|---|---|---|
+| Canonical | `docs/canonical/` | Source of truth (PRODUCT, BRANDING, UX_SPEC, COMPETITIVE, ORGANIZER_MODE) | Always |
+| Reference | `docs/reference/` | How a subsystem works today | Working that area |
+| Decision | `docs/decisions/` | Why a choice was made (dated ADRs) | That area — `status: proposed` is NOT current truth |
+| Research | `docs/research/`, `docs/archive/` | Non-authoritative AI analysis | Only when explicitly told |
+
+**Conflict order (highest wins):** this `CLAUDE.md` → `canonical/` → `reference/` → accepted `decisions/`. Never cite `research/` or `archive/` as truth. `docs/decisions/ia-proposal.md` is an unaccepted proposal — do not treat its nav/IA as current.
+
+**Drift rule (applies to Claude and Gemini):** raw analysis lands in `docs/research/`, dated and frozen. It becomes truth only after a human promotes it into `canonical/` or an accepted `decisions/` ADR. Never edit `canonical/` directly from a raw sweep.

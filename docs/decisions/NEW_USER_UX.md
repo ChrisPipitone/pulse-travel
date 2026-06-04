@@ -1,4 +1,10 @@
-# New User Experience — Journey Archetypes
+---
+tier: decision
+status: accepted
+updated: 2026-06-04
+---
+
+# New User Experience — Journey Archetypes & Friction Analysis
 
 Pulse serves three distinct types of new users. Each requires a different balance of education, validation, and speed.
 
@@ -118,7 +124,7 @@ Desktop: the right-side crew panel is blank until a card is clicked. The "social
 - Effort: 15 min
 
 **[2] Activity Status Labels** `[ ]`
-Already specced in `docs/CREW_VIEW_DESIGN.md`. Implement on crew card header + modal.
+Already specced in `docs/decisions/CREW_VIEW_DESIGN.md`. Implement on crew card header + modal.
 
 | Label | Trigger |
 |---|---|

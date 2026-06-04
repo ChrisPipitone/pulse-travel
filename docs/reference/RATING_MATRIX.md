@@ -1,3 +1,9 @@
+---
+tier: reference
+status: active
+updated: 2026-06-04
+---
+
 # Rating & Compatibility Matrix
 
 ---

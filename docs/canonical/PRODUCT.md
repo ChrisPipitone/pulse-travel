@@ -1,8 +1,14 @@
+---
+tier: canonical
+status: active
+updated: 2026-06-04
+---
+
 # Pulse — Product Model & Strategy
 
 > Single source of truth for rating vocabulary, crew model, positioning, and product decisions.
-> Implementation details: `docs/RATING_MATRIX.md` (scoring/data flow), `docs/CREW_VIEW_DESIGN.md` (UI design).
-> Brand voice and origin story: `docs/BRANDING.md`. Competitive detail: `docs/COMPETITIVE.md`.
+> Implementation details: `docs/reference/RATING_MATRIX.md` (scoring/data flow), `docs/decisions/CREW_VIEW_DESIGN.md` (UI design).
+> Brand voice and origin story: `docs/canonical/BRANDING.md`. Competitive detail: `docs/canonical/COMPETITIVE.md`.
 
 ---
 
@@ -43,7 +49,7 @@ These are two separate problems solved by two separate features:
 - **Find Your Crew** → who would go (potential)
 - **Itinerary** → who goes when (actual, after timing conflicts resolved)
 
-A group of 4 who all MUST an activity may split into 2+2 at scheduling time if other MUSTs conflict. That is expected and correct behaviour — the potential crew was accurate, the actual instances just had to account for constraints. See `docs/ITINERARY_DESIGN.md` for the full four-layer model.
+A group of 4 who all MUST an activity may split into 2+2 at scheduling time if other MUSTs conflict. That is expected and correct behaviour — the potential crew was accurate, the actual instances just had to account for constraints. See `docs/decisions/ITINERARY_DESIGN.md` for the full four-layer model.
 
 ---
 

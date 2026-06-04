@@ -189,18 +189,18 @@ supabase/
 
 ## Docs & Workflow
 
-All product and technical documentation lives in `docs/`. The index is at [`docs/README.md`](docs/README.md).
+All product and technical documentation lives in `docs/`. The index is at [`docs/INDEX.md`](docs/INDEX.md).
 
 **Key files:**
 
 | File | Purpose |
 | ---- | ------- |
 | `CLAUDE.md` | AI context: stack, architecture rules, code standards, Linear workflow |
-| `docs/PRODUCT.md` | **Single source of truth** for rating vocabulary, crew model, positioning, and launch checklist |
-| `docs/RATING_MATRIX.md` | Scoring formula, data flow, CompatibilityScore type |
-| `docs/CREW_VIEW_DESIGN.md` | Find Your Crew UI — card/modal design, sub-group model |
-| `docs/BRANDING.md` | Origin story, positioning, voice |
+| `docs/canonical/PRODUCT.md` | **Single source of truth** for rating vocabulary, crew model, positioning, and launch checklist |
+| `docs/reference/RATING_MATRIX.md` | Scoring formula, data flow, CompatibilityScore type |
+| `docs/decisions/CREW_VIEW_DESIGN.md` | Find Your Crew UI — card/modal design, sub-group model |
+| `docs/canonical/BRANDING.md` | Origin story, positioning, voice |
 
-**Doc update rule:** Any `feat:` or `refactor:` commit that changes product-facing behaviour or vocabulary should be accompanied by a doc update in the same session. A post-commit hook will prompt you if you forget. `docs/PRODUCT.md` is the canonical source — update it first when vocabulary or the product model changes, then update feature docs that reference it.
+**Doc update rule:** Any `feat:` or `refactor:` commit that changes product-facing behaviour or vocabulary should be accompanied by a doc update in the same session. A post-commit hook will prompt you if you forget. `docs/canonical/PRODUCT.md` is the canonical source — update it first when vocabulary or the product model changes, then update feature docs that reference it.
 
 **Task tracking:** All open work lives in [Linear (Pulse MVP)](***REMOVED***). Not in `.md` files.

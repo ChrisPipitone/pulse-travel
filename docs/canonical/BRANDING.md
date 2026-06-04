@@ -1,3 +1,9 @@
+---
+tier: canonical
+status: active
+updated: 2026-06-04
+---
+
 # Pulse — Brand Document
 
 ## Name
@@ -107,7 +113,7 @@ We lean into the "Human-Led" movement. Our marketing shouldn't just "shit talk" 
 ---
 
 ## Visual Identity
-See `UI_DESIGN.md` for full design system.
+See `../reference/UI_DESIGN.md` for full design system.
 - Active theme: **modern** (coral + mint, DM Sans, warm off-white)
 - Alternate theme: **editorial** (terracotta + sand, Playfair Display, cream)
 - Pulse as a concept → could inform logo: a waveform, a heartbeat line, a ripple

@@ -1,3 +1,9 @@
+---
+tier: reference
+status: active
+updated: 2026-06-04
+---
+
 # Authentication
 
 Pulse uses [Supabase Auth (GoTrue)](https://supabase.com/docs/guides/auth) for all authentication. Three sign-in methods are supported. After sign-in, all data access is enforced by Postgres RLS — the auth server is not involved in subsequent requests.

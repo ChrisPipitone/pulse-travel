@@ -1,3 +1,9 @@
+---
+tier: decision
+status: accepted
+updated: 2026-06-04
+---
+
 # Find Your Crew — Design Sprint Handoff
 
 Session date: 2026-05-23. Updated to sharpen sub-group formation as the core model.

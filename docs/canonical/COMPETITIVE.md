@@ -1,3 +1,9 @@
+---
+tier: canonical
+status: active
+updated: 2026-06-04
+---
+
 # Pulse — Competitive Landscape & Differentiation
 
 ## The Real Competitor

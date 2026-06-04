@@ -1,3 +1,9 @@
+---
+tier: reference
+status: active
+updated: 2026-06-04
+---
+
 # Monorepo Architecture Decision
 
 ## Decision: Turborepo + pnpm workspaces

@@ -1,3 +1,9 @@
+---
+tier: reference
+status: active
+updated: 2026-06-04
+---
+
 # Data Model
 
 ---
@@ -115,7 +121,7 @@ erDiagram
 |---|---|
 | `profiles` | PK = `auth.users.id` — 1:1. Stores display name and avatar. No trigger yet: profile row must be created explicitly after sign-up. |
 | `trips` | `invite_code` unique, default `substr(md5(random()), 1, 8)` — 8-char hex. |
-| `trip_members` | Unique on `(trip_id, user_id)` — duplicate join is a no-op via upsert. Cap enforced by `enforce_trip_member_limit` trigger; limit is per trip owner's tier (free=5, planner=25, enterprise=unlimited). See `docs/TIERS.md`. |
+| `trip_members` | Unique on `(trip_id, user_id)` — duplicate join is a no-op via upsert. Cap enforced by `enforce_trip_member_limit` trigger; limit is per trip owner's tier (free=5, planner=25, enterprise=unlimited). See `docs/reference/TIERS.md`. |
 | `activities` | Soft FK: no FK from `trip_members` to `profiles` — member profiles are fetched in a separate query joined in application code. |
 | `activity_ratings` | Unique on `(activity_id, user_id)` — one rating per person per activity. Upserted on change. `rating` is a Postgres enum: `MUST \| MAYBE \| SKIP`. |
 | `activity_categories` | Static reference data. Seeded in `init_schema` migration. Not user-editable. 8 categories. |
