@@ -5,6 +5,34 @@ Priority = user-perceived quality × maintenance cost × risk.
 
 ---
 
+## Reconciliation — 2026-06-04
+
+> Verified against current code. **All ~18 findings below shipped in subsequent sessions.** This document is a historical record; do not re-action resolved items (per CLAUDE.md "open items carry forward, don't re-evaluate completed ones"). Only the file-size residuals remain open → tracked in **JAB-96**.
+
+| Item | Status | Evidence |
+|---|---|---|
+| C1 split `FindYourCrew.tsx` | ✅ done | 824 → 352 lines; `CrewCard.tsx`/`CrewModal.tsx` extracted (flat, not under `crew/`) |
+| C2 split `trip/[id]/page.tsx` | ✅ done | 642 → 430; `TripSidebar.tsx` + `TripLoadingSkeleton.tsx` extracted |
+| D1 date utility | ✅ done | `apps/web/src/lib/date.ts` |
+| D2 rating pill/button styles | ✅ done | `RATING_PILL` + `RATING_BUTTON` in `@pulse/types` |
+| D3 undo timer | ✅ done | `packages/hooks/src/useUndoAction.ts` |
+| D4 `MemberDots` | ✅ done | `components/MemberDots.tsx` |
+| T1 `TripPreview` type | ✅ done | `getTripByInviteCode → TripPreview` |
+| T2 `any` in services | ✅ done | explicit inline shapes |
+| T3 magic error codes | ✅ done | `PG_NOT_FOUND` / `PG_UNIQUE_VIOLATION` in `lib/constants.ts` |
+| T4 `joinTrip` dead branch | ✅ done | single throw |
+| S1 `addActivity` silent null | ✅ done | throws on error (`trips.ts:192`) |
+| S2 `upsertRating` ignores error | ✅ done | throws on error (`trips.ts:219`) |
+| S3 O(n²) lookup | ✅ done | map-based lookup |
+| P5 magic numbers | ✅ done | `lib/constants.ts` |
+| P6 modal state | ✅ done | discriminated union `ModalState` |
+| P7 standards | ✅ done | CLAUDE.md "Code Standards" section |
+| **Residual — file size** | ◻ **open** | `FindYourCrew.tsx` 352 > 300; `page.tsx` 430 > 250 → **JAB-96** |
+
+The original findings are preserved below as written.
+
+---
+
 ## PRIORITY 1 — CRITICAL: Monolithic files
 
 These files need to be split. Each is doing 3–5 things that should live in separate files.
