@@ -104,7 +104,7 @@ Raw AI output is never canonical. Gemini = divergent sweeps → `research/`. Cla
 
 ## 11. Open decisions (pending human call)
 
-- **Theme:** `modern` (coral+mint, per `reference/UI_DESIGN.md` + `canonical/BRANDING.md`) vs `human` (terracotta/indigo, in the obsolete `BRANDING_STRATEGY.md`). Resolve and delete the loser.
+- **Theme:** direction chosen = `human` (terracotta/indigo/bone). **Not yet implemented** — `reference/UI_DESIGN.md` only defines `modern` (active) + `editorial`; the `human` palette exists only as prose in the deferred `BRANDING_STRATEGY.md`. Implementation waits for the branding revisit; until then code stays on `modern`.
 - **IA pivot:** accept or reject `decisions/ia-proposal.md`. Until then its navigation is not current truth.
 
 ## 12. Pending cleanup (not yet filed)
