@@ -28,7 +28,7 @@ export function useOnboarding(): OnboardingState {
     setError(null)
     try {
       await updateDisplayName(client, userId, name.trim())
-      await client.auth.updateUser({ data: { onboarded: true } })
+      await client.auth.updateUser({ data: { onboarded: true, display_name: name.trim() } })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to save name')
       throw e

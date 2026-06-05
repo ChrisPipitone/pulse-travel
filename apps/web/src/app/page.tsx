@@ -148,7 +148,8 @@ export default function Home() {
         const meta = session.user.user_metadata ?? {}
         const isReturning = !!(meta.onboarded || meta.full_name)
         const firstName = (meta.full_name as string | undefined)?.split(' ')[0]
-          ?? (session.user.email?.split('@')[0])
+          ?? (meta.display_name as string | undefined)?.split(' ')[0]
+          ?? session.user.email?.split('@')[0]
         if (isReturning) {
           return (
             <ReturningUserScreen
