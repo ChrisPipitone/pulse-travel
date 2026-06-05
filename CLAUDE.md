@@ -8,6 +8,13 @@ Group vacation planner built around one question: *who should do what together?*
 
 ---
 
+## Auto-loaded docs (always in context)
+
+@docs/NEW_USER_UX.md
+@docs/user_journey.md
+
+---
+
 ## Docs Reference — Read Before Working on These Areas
 
 | Task area | Read first |
@@ -20,7 +27,7 @@ Group vacation planner built around one question: *who should do what together?*
 | Trip creation, invite links, join flow, state machine | `docs/TRIP_FLOW.md` |
 | Find Your Crew feature design, sub-group logic | `docs/CREW_VIEW_DESIGN.md` |
 | Itinerary / Timeline feature design | `docs/ITINERARY_DESIGN.md` |
-| New user onboarding, user archetypes | `docs/NEW_USER_UX.md` |
+| New user onboarding, user archetypes, user journey | `docs/NEW_USER_UX.md`, `docs/user_journey.md` |
 | Tiers, billing, member caps, trigger enforcement | `docs/TIERS.md` |
 | Deployment, env vars, Vercel/Supabase config | `docs/DEPLOYMENT.md` |
 | Monorepo structure, package boundaries | `docs/MONOREPO.md` |

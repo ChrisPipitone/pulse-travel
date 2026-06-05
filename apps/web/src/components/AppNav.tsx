@@ -47,14 +47,21 @@ export function AppNav() {
           </Link>
         )}
 
-        {/* Right: sign out */}
-        {session && (
+        {/* Right: sign out (authed) or sign in (unauthed) */}
+        {session ? (
           <button
             onClick={handleSignOut}
             disabled={loading}
             className="text-xs font-medium text-text-muted hover:text-text-primary border border-border hover:border-border/60 rounded-lg px-3 py-1.5 transition-colors disabled:opacity-40"
           >
             {loading ? 'Signing out…' : 'Sign out'}
+          </button>
+        ) : (
+          <button
+            onClick={() => router.push('/login')}
+            className="text-xs font-medium text-text-muted hover:text-text-primary border border-border hover:border-border/60 rounded-lg px-3 py-1.5 transition-colors"
+          >
+            Sign in
           </button>
         )}
       </div>

@@ -154,6 +154,26 @@ export async function getTripByInviteCode(client: SupabaseClient, code: string):
   return (data as TripPreview[] | null)?.[0] ?? null
 }
 
+export type TripPreviewPublic = {
+  name: string
+  destination: string
+  start_date: string | null
+  end_date: string | null
+  member_count: number
+  activity_count: number
+}
+
+export async function getTripPreview(
+  client: SupabaseClient,
+  code: string
+): Promise<TripPreviewPublic | null> {
+  // Safe for anon — returns display-only fields, no trip ID.
+  // See migration 20260606000000_trip_preview_anon.sql.
+  const { data, error } = await client.rpc('get_trip_preview', { p_code: code })
+  if (error) throw new Error(error.message)
+  return (data as TripPreviewPublic[] | null)?.[0] ?? null
+}
+
 export async function getMembers(client: SupabaseClient, tripId: string): Promise<Member[]> {
   const { data: rows, error } = await client
     .from('trip_members')

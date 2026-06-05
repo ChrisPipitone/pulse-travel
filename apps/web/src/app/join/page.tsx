@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession, useJoinTrip, useOnboarding } from '@pulse/hooks'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
-import { getTripByInviteCode, getMembers } from '@pulse/services'
+import { getTripByInviteCode, getTripPreview, getMembers } from '@pulse/services'
+import type { TripPreviewPublic } from '@pulse/services'
 import { supabase } from '@/lib/supabase'
 import { fmtDateRange } from '@/lib/date'
 import { destinationEmoji } from '@/lib/destination'
 import { useToast } from '@/components/ToastProvider'
+import { VibeCheckCard } from '@/components/VibeCheckCard'
 import type { TripPreview } from '@pulse/types'
 
 function JoinPage() {
@@ -22,6 +24,11 @@ function JoinPage() {
   const { needsOnboarding, submit: submitName, loading: nameLoading, error: nameError } = useOnboarding()
   const { showToast } = useToast()
 
+  // Unauthenticated preview — fetched with anon client, no session needed
+  const [unauthedPreview, setUnauthedPreview] = useState<TripPreviewPublic | null>(null)
+  const [unauthedPreviewDone, setUnauthedPreviewDone] = useState(false)
+
+  // Authenticated trip state
   const [trip, setTrip] = useState<TripPreview | null>(null)
   const [alreadyMember, setAlreadyMember] = useState(false)
   const [lookupError, setLookupError] = useState<string | null>(null)
@@ -29,13 +36,16 @@ function JoinPage() {
   const [joinedTripId, setJoinedTripId] = useState<string | null>(null)
   const [nameValue, setNameValue] = useState('')
 
+  // Fetch anon preview on mount — runs regardless of auth state
   useEffect(() => {
-    if (!sessionLoading && !session) {
-      router.replace(`/login?returnTo=${encodeURIComponent(`/join?code=${code}`)}`)
-      return
-    }
-  }, [session, sessionLoading, router, code])
+    if (!code) { setUnauthedPreviewDone(true); return }
+    getTripPreview(supabase, code)
+      .then((p) => setUnauthedPreview(p))
+      .catch(() => {})
+      .finally(() => setUnauthedPreviewDone(true))
+  }, [code])
 
+  // Authenticated lookup — only runs once session is established
   useEffect(() => {
     if (!code || sessionLoading || !session) return
     getTripByInviteCode(supabase, code)
@@ -69,10 +79,34 @@ function JoinPage() {
     router.replace(`/trip/${joinedTripId}?newMember=1`)
   }
 
-  if (sessionLoading || !session) {
+  // Session loading
+  if (sessionLoading) {
     return <Screen><p className="text-text-muted text-sm">Loading…</p></Screen>
   }
 
+  // Unauthenticated — show Vibe Check preview (no redirect to /login)
+  if (!session) {
+    if (!unauthedPreviewDone) {
+      return <Screen><p className="text-text-muted text-sm">Looking up invite…</p></Screen>
+    }
+    if (!code || !unauthedPreview) {
+      return (
+        <Screen>
+          <p className="text-sm text-text-muted text-center">
+            {code ? 'Invite not found. Ask the trip organizer for a new link.' : 'No invite code provided.'}
+          </p>
+          <Button variant="outline" onClick={() => router.push('/login')}>Sign in</Button>
+        </Screen>
+      )
+    }
+    return (
+      <Screen>
+        <VibeCheckCard preview={unauthedPreview} code={code} />
+      </Screen>
+    )
+  }
+
+  // Authenticated — existing join flow
   if (!code) {
     return (
       <Screen>
@@ -139,8 +173,8 @@ function JoinPage() {
       <Screen>
         <div className="w-full max-w-sm flex flex-col gap-6">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold text-text-primary">You're already in</h1>
-            <p className="text-sm text-text-muted mt-1">You're already a member of this trip.</p>
+            <h1 className="text-2xl font-semibold text-text-primary">You&apos;re already in</h1>
+            <p className="text-sm text-text-muted mt-1">You&apos;re already a member of this trip.</p>
           </div>
 
           <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-5 flex flex-col gap-1">
@@ -163,7 +197,7 @@ function JoinPage() {
     <Screen>
       <div className="w-full max-w-sm flex flex-col gap-6">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold text-text-primary">You're invited</h1>
+          <h1 className="text-2xl font-semibold text-text-primary">You&apos;re invited</h1>
           <p className="text-sm text-text-muted mt-1">Join to rate activities and see who you&apos;re going with.</p>
         </div>
 
@@ -198,7 +232,7 @@ function JoinPage() {
 
 function Screen({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-bg flex flex-col items-center justify-center gap-4 p-8">
+    <main className="min-h-[calc(100vh-4rem)] bg-bg flex flex-col items-center justify-center gap-4 p-8">
       {children}
     </main>
   )

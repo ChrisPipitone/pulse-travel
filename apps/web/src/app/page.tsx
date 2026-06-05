@@ -6,6 +6,7 @@ import { useSession, useUserTrips, useCreateTrip } from "@pulse/hooks";
 import { Button } from "@pulse/ui";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
+import { LandingPage } from "@/components/LandingPage";
 import type { TripSummary } from "@pulse/services";
 import { fmtDateRange } from "@/lib/date";
 import { MemberDots } from "@/components/MemberDots";
@@ -19,9 +20,7 @@ export default function Home() {
   const [showCreate, setShowCreate] = useState(false);
   const [joinCode, setJoinCode] = useState("");
 
-  useEffect(() => {
-    if (!sessionLoading && !session) router.replace("/login");
-  }, [session, sessionLoading, router]);
+  // No redirect — unauthenticated users see the landing page.
 
   useEffect(() => {
     const handler = () => refresh();
@@ -64,11 +63,20 @@ export default function Home() {
     router.push(`/join?code=${encodeURIComponent(raw.trim())}`)
   }
 
-  if (sessionLoading || !session) {
+  if (sessionLoading) {
     return (
       <main className="min-h-screen bg-bg flex items-center justify-center">
         <p className="text-text-muted text-sm">Loading…</p>
       </main>
+    );
+  }
+
+  if (!session) {
+    return (
+      <LandingPage
+        onCreateTrip={() => router.push("/login")}
+        onJoinWithCode={handleJoinCode}
+      />
     );
   }
 
