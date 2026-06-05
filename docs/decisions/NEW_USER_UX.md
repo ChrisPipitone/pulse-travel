@@ -15,20 +15,13 @@ Pulse serves three distinct types of new users. Each requires a different balanc
 ### A. The "Curious Wanderer" (Organic / Marketing)
 - **Source:** Finds `pulse.travel` via search, ads, or social.
 - **Goal:** Understand value and convert to "Trip Lead."
-- **Current Problem:** Lands on a login gate or a generic welcome screen.
-- **Proposed Solution: The "Anti-Spreadsheet" Landing.**
-    - High-impact visual: "Move your trip out of the group chat."
-    - **Read-Only Demo:** "See a Sample Trip" button. Drops them into a live, pre-populated Italy trip. They can see crews forming, twins matching, and "split crowds" without an account.
-    - **Subtle Anti-AI:** "A robot can plan a route. We coordinate the humans."
+- **Status:** ✅ Shipped — `LandingPage.tsx` renders at `/` for unauthenticated users. Headline: "Move your trip out of the group chat." Three feature highlights. Create/Join CTAs. AppNav shows Sign in.
+- **Still open:** Read-only demo trip ("See a Sample Trip") — deferred post-MVP (item 17).
 
 ### B. The "Invited Guest" (Share Link)
 - **Source:** Clicks a WhatsApp/iMessage link (`/join?code=xxx`).
 - **Goal:** Social validation ("Is this my group?") and friction-free joining.
-- **Current Problem:** Redirected to login before seeing anything.
-- **Proposed Solution: The "Vibe Check" Preview.**
-    - **Unauthenticated Preview:** Show the trip name, destination, and the **Crew Avatars** ("Join 8 others").
-    - **The Value Hook:** Show a "Pulse Strip" summary: "4 Universal Favorites identified."
-    - **Join Sequence:** "Join the Crew" button → Auth → "How should we call you?" → Redirect to Trip.
+- **Status:** ✅ Shipped — `VibeCheckCard.tsx` renders at `/join?code=...` for unauthenticated users. Shows trip name, destination, dates, member count, activity count. Animated crew formation teases the grouping concept. "Join the Crew" CTA → auth → existing join flow. Backed by `get_trip_preview` Postgres function (anon-safe, no trip ID exposed).
 
 ### C. The "Power User" (Native App)
 - **Source:** Downloads the app.
@@ -234,3 +227,8 @@ Option B (restructure): Crew tab becomes Travel Twin view (distinct value, not a
 | 10 | Set dates inline | — | — |
 | 11 | Unrated sort filter | — | — |
 | 12 | Rating progress ring | — | — |
+| 13 | Vibe Check — unauthenticated /join preview | ✅ done | 0b2643a |
+| 14 | Marketing landing page at / (Curious Wanderer) | ✅ done | 0b2643a |
+| 15 | Returning user empty state (personalized, no re-education) | ✅ done | 867f57a |
+| 16 | display_name persisted to user_metadata on onboarding | ✅ done | e80965e |
+| 17 | Read-only demo trip (Curious Wanderer deep hook) | deferred post-MVP | — |
