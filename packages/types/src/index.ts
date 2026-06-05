@@ -99,3 +99,16 @@ export interface CompatibilityScore {
   skip_count: number
   ratings: Record<string, Rating>
 }
+
+export type SortKey = 'popular' | 'my-recs' | 'cant-miss' | 'newest' | 'by-stop'
+
+export interface CrewRowData {
+  activity: Activity
+  mustMembers: Member[]
+  maybeMembers: Member[]
+  skipMembers: Member[]
+  unratedMembers: Member[]
+  myRating: Rating | null
+  mustCount: number
+  maybeCount: number
+}

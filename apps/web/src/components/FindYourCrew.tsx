@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useTripStore } from "@pulse/store";
-import { useSession } from "@pulse/hooks";
-import { useRateActivity } from "@pulse/hooks";
-import type { Activity, Rating, Stop } from "@pulse/types";
+import { useSession, useRateActivity, useCrewRows } from "@pulse/hooks";
+import type { Activity, Rating, Stop, SortKey } from "@pulse/types";
 import { fmtDateRange } from "@/lib/date";
 import { CrewCard, type CrewRowData } from "@/components/CrewCard";
 import { CrewModal } from "@/components/CrewModal";
-
-type SortKey = "popular" | "my-recs" | "cant-miss" | "newest" | "by-stop";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const SORT_LABELS: Record<SortKey, string> = {
   popular: "Popular",
@@ -51,59 +49,16 @@ export function FindYourCrew({
     : allActivities;
 
   const userId = session?.user.id;
+  const isMobile = useIsMobile();
   const [openId, setOpenId] = useState<string | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("popular");
   const [didAutoOpen, setDidAutoOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
   function canEditActivity(a: Activity) {
     return userId === tripOwnerId || userId === a.added_by;
   }
 
-  const rows = useMemo((): CrewRowData[] => {
-
-    return activities
-      .map((activity) => {
-        const actRatings = ratings.filter((r) => r.activity_id === activity.id);
-        const ratingMap = new Map(actRatings.map((r) => [r.user_id, r.rating]));
-        const mustMembers = members.filter((m) => ratingMap.get(m.id) === "MUST");
-        const maybeMembers = members.filter((m) => ratingMap.get(m.id) === "MAYBE");
-        const skipMembers = members.filter((m) => ratingMap.get(m.id) === "SKIP");
-        const ratedIds = new Set(actRatings.map((r) => r.user_id));
-        const unratedMembers = members.filter((m) => !ratedIds.has(m.id));
-        const myRating = userId ? (ratingMap.get(userId) ?? null) : null;
-        return {
-          activity,
-          mustMembers,
-          maybeMembers,
-          skipMembers,
-          unratedMembers,
-          myRating,
-          mustCount: mustMembers.length,
-          maybeCount: maybeMembers.length,
-        };
-      })
-      .sort((a, b) => {
-        if (sortKey === "by-stop") {
-          return b.mustCount * 3 + b.maybeCount - (a.mustCount * 3 + a.maybeCount);
-        }
-        if (sortKey === "my-recs") {
-          const aMe = a.activity.added_by === userId ? 0 : 1;
-          const bMe = b.activity.added_by === userId ? 0 : 1;
-          if (aMe !== bMe) return aMe - bMe;
-        }
-        if (sortKey === "cant-miss") {
-          const TIER: Record<string, number> = { MUST: 0, MAYBE: 1, SKIP: 2 };
-          const av = a.myRating ? (TIER[a.myRating] ?? 3) : 3;
-          const bv = b.myRating ? (TIER[b.myRating] ?? 3) : 3;
-          if (av !== bv) return av - bv;
-        }
-        if (sortKey === "newest") {
-          return new Date(b.activity.created_at).getTime() - new Date(a.activity.created_at).getTime();
-        }
-        return b.mustCount * 3 + b.maybeCount - (a.mustCount * 3 + a.maybeCount);
-      });
-  }, [activities, members, ratings, userId, sortKey]);
+  const rows = useCrewRows({ activities, members, ratings, userId, sortKey });
 
   const sortedStops = useMemo(
     () => [...stops].sort((a, b) => a.position - b.position),
@@ -115,14 +70,6 @@ export function FindYourCrew({
   function stopDateLabel(stop: Stop) {
     return fmtDateRange(stop.date_from, stop.date_to);
   }
-
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 1023px)')
-    setIsMobile(mq.matches)
-    const fn = (e: MediaQueryListEvent) => setIsMobile(e.matches)
-    mq.addEventListener('change', fn)
-    return () => mq.removeEventListener('change', fn)
-  }, [])
 
   useEffect(() => {
     if (!autoOpenFirstUnrated || didAutoOpen || rows.length === 0) return;
@@ -207,7 +154,7 @@ export function FindYourCrew({
 
   const cards = sortKey === "by-stop" ? (
     <div className="flex flex-col gap-5">
-      {sortedStops.map((stop) => {
+      {sortedStops.map((stop: Stop) => {
         const stopRows = rows.filter((r) => r.activity.stop_id === stop.id);
         if (stopRows.length === 0) return null;
         const dateLabel = stopDateLabel(stop);
@@ -345,7 +292,6 @@ export function FindYourCrew({
         </aside>
       </div>
 
-      {/* Mobile modal — only mounted on mobile to avoid DOM pollution */}
       {crewModalProps && isMobile && <CrewModal variant="modal" {...crewModalProps} />}
     </div>
   );

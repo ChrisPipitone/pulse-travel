@@ -1,21 +1,12 @@
 "use client";
 
-import type { Activity, Member, Rating } from "@pulse/types";
+import type { Activity, Member, Rating, CrewRowData } from "@pulse/types";
 import { RATING_BUTTON, RATING_LABELS } from "@pulse/types";
 import { AVATAR_PREVIEW_CAP } from "@/lib/constants";
 import { MemberAvatar } from "@/components/MemberAvatar";
 import { KebabMenu } from "@/components/KebabMenu";
 
-export interface CrewRowData {
-  activity: Activity;
-  mustMembers: Member[];
-  maybeMembers: Member[];
-  skipMembers: Member[];
-  unratedMembers: Member[];
-  myRating: Rating | null;
-  mustCount: number;
-  maybeCount: number;
-}
+export type { CrewRowData } from "@pulse/types";
 
 export const CHIP_RING: Record<Rating, string> = {
   MUST:  'var(--must-bg)',
