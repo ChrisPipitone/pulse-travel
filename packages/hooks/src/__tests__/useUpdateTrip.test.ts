@@ -9,7 +9,7 @@ import type { Trip } from '@pulse/types'
 const trip: Trip = {
   id: 'trip1', name: 'Italy', destination: 'Rome',
   start_date: '2025-06-03', end_date: '2025-06-24',
-  created_by: 'u1', invite_code: 'abc',
+  created_by: 'u1', invite_code: 'abc', invite_code_expires_at: '2099-01-01T00:00:00Z',
 }
 
 describe('useUpdateTrip', () => {

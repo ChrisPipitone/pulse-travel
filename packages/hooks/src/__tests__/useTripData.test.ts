@@ -6,7 +6,7 @@ import { useTripData } from '../useTripData'
 import { useTripStore } from '@pulse/store'
 import type { Trip, Member, Activity } from '@pulse/types'
 
-const fakeTrip: Trip = { id: 't1', name: 'Italy 2025', destination: 'Italy', start_date: '', end_date: '', created_by: 'u1', invite_code: 'abc' }
+const fakeTrip: Trip = { id: 't1', name: 'Italy 2025', destination: 'Italy', start_date: '', end_date: '', created_by: 'u1', invite_code: 'abc', invite_code_expires_at: '2099-01-01T00:00:00Z' }
 // getMembers fetches trip_members rows then joins profiles — fakeMembers reflects the mapped output.
 const fakeTripMemberRows = [{ user_id: 'u1', arrival_date: '', departure_date: '' }]
 const fakeProfileRows = [{ id: 'u1', display_name: 'Marco', avatar_url: null }]

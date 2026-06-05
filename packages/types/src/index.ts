@@ -37,6 +37,7 @@ export interface Trip {
   end_date: string
   created_by: string | null
   invite_code: string
+  invite_code_expires_at: string
 }
 
 // Returned by get_trip_by_invite_code RPC — restricted to safe columns only (JAB-14).

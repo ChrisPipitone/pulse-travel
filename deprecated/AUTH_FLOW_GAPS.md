@@ -18,9 +18,9 @@ Audited 2026-05-23. All three user paths traced end-to-end.
 
 ### G1 — Invite email has no context [HIGH — pre-launch]
 
-**Where:** `sendInviteEmail` calls `supabase.auth.signInWithOtp` with `emailRedirectTo`. Supabase sends its default "Magic Link / Sign in" template.
+**Where:** `sendInviteEmail` calls `supabase.auth.signInWithOtp` with **no** `emailRedirectTo` — Supabase sends its default 6-digit code template.
 
-**Problem:** Recipient gets a cold "click here to sign in" email with no mention of the trip name, who invited them, or Pulse. Extremely confusing for a new user. Looks like phishing.
+**Problem:** Recipient gets a cold "here is your code" email with no mention of the trip name, who invited them, or Pulse. Confusing for a new user. (Magic link removed; the branding/context gap below remains.)
 
 **Fix options:**
 - Supabase Pro: custom email templates (easiest, costs money)
@@ -31,7 +31,7 @@ Audited 2026-05-23. All three user paths traced end-to-end.
 
 ---
 
-### G2 — Already-authenticated user clicking a magic link gets signed out [LOW]
+### G2 — Already-authenticated user clicking a magic link gets signed out [LOW] ✅ RESOLVED VIA REMOVAL
 
 **Where:** `/auth/callback` calls `supabase.auth.signOut()` before `exchangeCodeForSession`.
 
@@ -39,7 +39,9 @@ Audited 2026-05-23. All three user paths traced end-to-end.
 
 **Fix:** Check if the code's email matches the current session before signing out. Server-only operation — requires an API route or Supabase Edge Function to inspect the code. Complex for the gain.
 
-**Status:** Known limitation. Acceptable for MVP. Revisit if user reports confusion.
+**Status:** Resolved via removal. Magic links are gone — `sendInviteEmail` now sends a
+6-digit OTP code (no `emailRedirectTo`), so there is no link to click and no mid-session
+sign-out path. N/A going forward.
 
 ---
 
@@ -55,18 +57,26 @@ Audited 2026-05-23. All three user paths traced end-to-end.
 
 ---
 
-### G4 — Invite code format is opaque [LOW]
+### G4 — Invite code format is opaque [LOW] ✅ FIXED + HARDENED (JAB-21, JAB-46)
 
-**Where:** `crypto_invite_codes` migration generates 12-char hex (`a3f9c2d1e8b4`).
+**Was:** invite code was 8-char hex (~32 bits), permanent, no expiry/revoke. Docs/UI
+incorrectly described it as 12-char hex (`a3f9c2d1e8b4`). The "Join a trip" input had no
+format hint.
 
-**Problem:** The "Join a trip" input on the home page has no format hint. Code is fine for copy-paste, unusable for verbal/visual sharing.
+**Now (migration `20260606000001_invite_token_hardening`):**
+- **12-char Crockford base32 (~60 bits)** — `gen_invite_code()`, CSPRNG, alphabet excludes
+  I/L/O/U. Typeable and unambiguous. Enumeration is computationally infeasible (2^60), so the
+  anon `get_trip_preview` oracle is no longer a practical threat (no Postgres rate-limiter —
+  it would only see the Kong gateway IP anyway; edge/WAF is the right layer if ever needed).
+- **14-day expiry** (`invite_code_expires_at`) — `get_trip_by_invite_code`,
+  `get_trip_preview`, and `join_trip_by_invite_code` all reject expired codes.
+- **Owner regenerate** — `regenerate_invite_code(trip_id)` (owner-only) mints a fresh code,
+  killing the old link instantly. Surfaced in InviteMemberModal.
+- **Format hint** — WelcomeScreen placeholder shows a real base32 sample (JAB-21).
 
-**Fix options:**
-- Show format hint: "12-character code e.g. `a3f9c2d1e8b4`"
-- Switch to human-readable codes: 3-word phrases (like Vercel preview URLs), adjective-noun-number patterns
-- QR code on the invite card (ideal for in-person groups)
-
-**Status:** Nice-to-have. Low effort fix is just adding placeholder/hint text.
+**Deferred:** hard-lock toggle (block all new joins) — expiry + regenerate already cover the
+leak threat. Expired-link gets the generic "not found / ask organizer" copy rather than a
+dedicated "expired" screen — nice-to-have.
 
 ---
 

@@ -5,12 +5,16 @@ import { useModalEscape } from '@/hooks/useModalEscape'
 import { Button } from '@pulse/ui'
 import { Input } from '@pulse/ui'
 import { sendInviteEmail, isEmailTripMember } from '@pulse/services'
+import { useRegenerateInvite } from '@pulse/hooks'
+import { fmtExpiry } from '@/lib/date'
 import { supabase } from '@/lib/supabase'
 
 type Props = {
   tripName: string
   tripId: string
   inviteCode: string
+  expiresAt: string
+  isOwner: boolean
   onClose: () => void
 }
 
@@ -18,12 +22,21 @@ type State = 'idle' | 'checking' | 'already_member' | 'sending' | 'sent' | 'erro
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Props) {
+export function InviteMemberModal({ tripName, tripId, inviteCode, expiresAt, isOwner, onClose }: Props) {
   const [email, setEmail] = useState('')
   const [touched, setTouched] = useState(false)
   const [state, setState] = useState<State>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [confirmingRegen, setConfirmingRegen] = useState(false)
+  const { regenerate, loading: regenerating, error: regenError } = useRegenerateInvite()
+
+  const expired = new Date(expiresAt).getTime() <= Date.now()
+
+  async function handleRegenerate() {
+    const ok = await regenerate()
+    if (ok) setConfirmingRegen(false)
+  }
 
   const trimmed = email.trim()
   const emailValid = EMAIL_RE.test(trimmed)
@@ -101,7 +114,7 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
               <h2 className="text-xl font-semibold text-text-primary">Invite sent!</h2>
               <p className="text-sm text-text-muted mt-1">
                 Email sent to <span className="text-text-primary">{trimmed}</span>.
-                They'll get a link to join <span className="text-text-primary font-medium">{tripName}</span>.
+                They'll get a 6-digit code to sign in and join <span className="text-text-primary font-medium">{tripName}</span>.
               </p>
             </div>
             <div className="w-full flex flex-col gap-2">
@@ -170,6 +183,44 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
               )}
             </Button>
 
+            {/* Expiry status + owner regenerate */}
+            <div className="w-full flex items-center justify-between gap-2 -mt-2">
+              <span className={`text-xs ${expired ? 'text-red-500' : 'text-text-subtle'}`}>
+                {expired ? 'This link has expired' : fmtExpiry(expiresAt)}
+              </span>
+              {isOwner && (
+                confirmingRegen ? (
+                  <span className="flex items-center gap-2 text-xs">
+                    <span className="text-text-muted">Disable old link?</span>
+                    <button
+                      onClick={handleRegenerate}
+                      disabled={regenerating}
+                      className="font-medium text-accent hover:underline disabled:opacity-50"
+                    >
+                      {regenerating ? 'Working…' : 'Confirm'}
+                    </button>
+                    <button
+                      onClick={() => setConfirmingRegen(false)}
+                      disabled={regenerating}
+                      className="text-text-subtle hover:text-text-muted"
+                    >
+                      Cancel
+                    </button>
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => setConfirmingRegen(true)}
+                    className="text-xs font-medium text-accent hover:underline"
+                  >
+                    {expired ? 'Generate new link' : 'Regenerate'}
+                  </button>
+                )
+              )}
+            </div>
+            {regenError && (
+              <p className="text-xs text-red-500 px-0.5 -mt-3 w-full">{regenError}</p>
+            )}
+
             {/* WhatsApp — mobile only */}
             <a
               href={whatsappUrl}
@@ -186,7 +237,7 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, onClose }: Pro
 
             <div className="flex items-center gap-3 w-full">
               <div className="flex-1 h-px bg-border" />
-              <span className="text-xs text-text-subtle">or invite by email</span>
+              <span className="text-xs text-text-subtle">or email a 6-digit code</span>
               <div className="flex-1 h-px bg-border" />
             </div>
 

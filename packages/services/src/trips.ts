@@ -289,9 +289,22 @@ export async function sendInviteEmail(
 ): Promise<void> {
   const { error } = await client.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: inviteUrl, shouldCreateUser: true },
+    options: { shouldCreateUser: true },
   })
   if (error) throw new Error(error.message)
+}
+
+// Owner-only — mints a fresh invite code and 14-day expiry, invalidating the old
+// link instantly. Enforced server-side in regenerate_invite_code (created_by check).
+export async function regenerateInviteCode(
+  client: SupabaseClient,
+  tripId: string,
+): Promise<{ code: string; expiresAt: string }> {
+  const { data, error } = await client.rpc('regenerate_invite_code', { p_trip_id: tripId })
+  if (error) throw new Error(error.message)
+  const row = (data as { invite_code: string; invite_code_expires_at: string }[] | null)?.[0]
+  if (!row) throw new Error('Failed to regenerate invite code')
+  return { code: row.invite_code, expiresAt: row.invite_code_expires_at }
 }
 
 export async function listStops(client: SupabaseClient, tripId: string): Promise<Stop[]> {

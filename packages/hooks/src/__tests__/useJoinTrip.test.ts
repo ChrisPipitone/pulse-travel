@@ -8,7 +8,7 @@ import type { Trip } from '@pulse/types'
 const fakeTrip: Trip = {
   id: 'trip-1', name: 'Italy 2025', destination: 'Italy',
   start_date: '2025-06-03', end_date: '2025-06-24',
-  created_by: 'owner-id', invite_code: 'italy25',
+  created_by: 'owner-id', invite_code: 'italy25', invite_code_expires_at: '2099-01-01T00:00:00Z',
 }
 
 describe('useJoinTrip', () => {

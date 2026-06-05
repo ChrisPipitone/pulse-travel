@@ -62,6 +62,8 @@ export function TripModals({ actions, trip, members, userId, stops }: TripModals
           tripName={trip.name}
           tripId={trip.id}
           inviteCode={trip.invite_code}
+          expiresAt={trip.invite_code_expires_at}
+          isOwner={trip.created_by === userId}
           onClose={closeModal}
         />
       )}

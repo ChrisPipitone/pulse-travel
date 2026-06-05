@@ -8,12 +8,12 @@ const fakeTrips: Trip[] = [
   {
     id: 'trip-1', name: 'Italy 2025', destination: 'Italy',
     start_date: '2025-06-03', end_date: '2025-06-24',
-    created_by: 'u1', invite_code: 'italy25',
+    created_by: 'u1', invite_code: 'italy25', invite_code_expires_at: '2099-01-01T00:00:00Z',
   },
   {
     id: 'trip-2', name: 'Tokyo', destination: 'Japan',
     start_date: '2025-09-01', end_date: '2025-09-10',
-    created_by: 'u2', invite_code: 'tokyo25',
+    created_by: 'u2', invite_code: 'tokyo25', invite_code_expires_at: '2099-01-01T00:00:00Z',
   },
 ]
 
