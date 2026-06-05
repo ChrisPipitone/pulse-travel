@@ -1,55 +1,22 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
-import {
-  useTripData,
-  useSession,
-  useAddActivity,
-  useActivityActions,
-  useUpdateMemberDates,
-  useUpdateTrip,
-  useDeleteTrip,
-  useRemoveMember,
-  useStopActions,
-  useUndoAction,
-} from "@pulse/hooks";
+import { use, useEffect, useState } from "react";
+import { useTripData, useSession } from "@pulse/hooks";
 import { useTripStore } from "@pulse/store";
-import { ActivityFormModal } from "@/components/ActivityFormModal";
 import { FindYourCrew } from "@/components/FindYourCrew";
 import { FindYourCrewOverview } from "@/components/FindYourCrewOverview";
-import { MemberDatesModal } from "@/components/MemberDatesModal";
-import { CreateTripModal } from "@/components/CreateTripModal";
-import { MemberSchedulesModal } from "@/components/MemberSchedulesModal";
-import { InviteMemberModal } from "@/components/InviteMemberModal";
-import { StopFormModal } from "@/components/StopFormModal";
 import { TripTimeline } from "@/components/TripTimeline";
 import { TripSidebar } from "@/components/TripSidebar";
 import { TripLoadingSkeleton } from "@/components/TripLoadingSkeleton";
-import { SetDisplayNameModal } from "@/components/SetDisplayNameModal";
 import { TripSetupStrip } from "@/components/TripSetupStrip";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/components/ToastProvider";
-import type { Activity, Stop } from "@pulse/types";
-import { UNDO_DURATION_MS, TRIP_DELETE_DELAY_MS } from "@/lib/constants";
-
-type Tab = "activities" | "timeline" | "crew";
+import { TripModals } from "@/components/TripModals";
+import { useTripActions, type Tab } from "@/hooks/useTripActions";
 
 const TAB_LABELS: Record<Tab, { short: string; full: string; sub: string }> = {
   activities: { short: "Rate",     full: "Rate",           sub: "What do you want to do?" },
   crew:       { short: "Crew",     full: "Find Your Crew", sub: "Who are you going with?" },
   timeline:   { short: "Timeline", full: "Timeline",       sub: "When and where?"          },
 };
-
-type OpenModal =
-  | { kind: "none" }
-  | { kind: "addActivity"; prefill?: { name: string } }
-  | { kind: "editActivity"; activity: Activity }
-  | { kind: "addStop" }
-  | { kind: "editStop"; stop: Stop }
-  | { kind: "editTrip" }
-  | { kind: "memberDates" }
-  | { kind: "schedules" }
-  | { kind: "invite" };
 
 export default function TripPage({
   params,
@@ -67,30 +34,9 @@ export default function TripPage({
   const activities = useTripStore((s) => s.activities);
   const stops = useTripStore((s) => s.stops);
 
-  const { addActivity, loading: adding, error: addError } = useAddActivity();
-  const {
-    updateActivity,
-    deleteActivity,
-    loading: acting,
-    error: actError,
-  } = useActivityActions();
-  const {
-    updateDates,
-    loading: datesLoading,
-    error: datesError,
-  } = useUpdateMemberDates();
-  const { updateTrip, loading: updating, error: updateError } = useUpdateTrip();
-  const { deleteTrip } = useDeleteTrip();
-  const { createStop, updateStop, loading: stopLoading, error: stopError } = useStopActions();
-  const { removeMember, removingId, error: removeError } = useRemoveMember();
-  const router = useRouter();
+  const actions = useTripActions(id);
+  const { setOpenModal, copied, hiddenActivityIds } = actions;
 
-  const { showToast } = useToast();
-  const { schedule: scheduleUndo } = useUndoAction();
-
-  const [openModal, setOpenModal] = useState<OpenModal>({ kind: "none" });
-  const closeModal = () => setOpenModal({ kind: "none" });
-  const [copied, setCopied] = useState(false);
   const [tab, setTab] = useState<Tab>("activities");
 
   // Reset scroll on entry — router.push from a scrolled Home doesn't reliably
@@ -99,121 +45,9 @@ export default function TripPage({
   useEffect(() => {
     if (newMember !== "1") window.scrollTo(0, 0);
   }, [newMember]);
-  const [hiddenActivityIds, setHiddenActivityIds] = useState<Set<string>>(new Set());
 
   const userId = session?.user.id;
   const isOwner = !!userId && trip?.created_by === userId;
-
-  function canEdit(activity: Activity) {
-    return isOwner || activity.added_by === userId;
-  }
-
-  async function handleAdd(fields: {
-    name: string;
-    location: string;
-    description: string;
-    url: string;
-    stop_id: string | null;
-  }) {
-    const ok = await addActivity({
-      trip_id: id,
-      name: fields.name,
-      location: fields.location || null,
-      description: fields.description || null,
-      url: fields.url || null,
-      stop_id: fields.stop_id || null,
-      region: null,
-      duration_hours: null,
-      category_id: null,
-    });
-    if (ok) {
-      closeModal();
-      showToast("Activity added");
-    }
-  }
-
-  async function handleEdit(fields: {
-    name: string;
-    location: string;
-    description: string;
-    url: string;
-    stop_id: string | null;
-  }) {
-    if (openModal.kind !== "editActivity") return;
-    const ok = await updateActivity(openModal.activity.id, {
-      name: fields.name,
-      location: fields.location || null,
-      description: fields.description || null,
-      url: fields.url || null,
-      stop_id: fields.stop_id ?? undefined,
-    });
-    if (ok) {
-      closeModal();
-      showToast("Activity saved");
-    }
-  }
-
-  function unhide(id: string) {
-    setHiddenActivityIds((prev) => { const s = new Set(prev); s.delete(id); return s });
-  }
-
-  async function handleDelete(activity: Activity) {
-    setHiddenActivityIds((prev) => new Set(prev).add(activity.id));
-    const cancel = scheduleUndo(activity.id, async () => {
-      unhide(activity.id);
-      const ok = await deleteActivity(activity.id);
-      if (!ok) showToast("Failed to delete — activity restored");
-    });
-    showToast(`"${activity.name}" deleted`, () => { cancel(); unhide(activity.id); }, UNDO_DURATION_MS);
-  }
-
-  async function handleEditTrip(fields: {
-    name: string;
-    destination: string;
-    start_date: string;
-    end_date: string;
-  }) {
-    const ok = await updateTrip({
-      name: fields.name,
-      destination: fields.destination,
-      start_date: fields.start_date || null,
-      end_date: fields.end_date || null,
-    });
-    if (ok) {
-      closeModal();
-      showToast("Trip updated");
-    }
-  }
-
-  async function handleDeleteTrip() {
-    const tripId = trip!.id;
-    const tripName = trip!.name;
-    router.replace("/");
-    const cancel = scheduleUndo("trip", async () => {
-      await deleteTrip(tripId, () => {});
-      window.dispatchEvent(new Event("pulse:trips:changed"));
-    }, TRIP_DELETE_DELAY_MS);
-    showToast(`Trip "${tripName}" deleted`, () => { cancel(); router.push(`/trip/${tripId}`); }, TRIP_DELETE_DELAY_MS);
-  }
-
-  async function handleAddStop(fields: { name: string; date_from: string | null; date_to: string | null }) {
-    const ok = await createStop(id, fields.name, fields.date_from, fields.date_to);
-    if (ok) closeModal();
-  }
-
-  async function handleEditStop(fields: { name: string; date_from: string | null; date_to: string | null }) {
-    if (openModal.kind !== "editStop") return;
-    const ok = await updateStop(openModal.stop.id, { name: fields.name, date_from: fields.date_from, date_to: fields.date_to });
-    if (ok) closeModal();
-  }
-
-  function handleCopyInvite() {
-    const url = `${window.location.origin}/join?code=${trip!.invite_code}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
 
   if (loading) return <TripLoadingSkeleton />;
 
@@ -238,11 +72,11 @@ export default function TripPage({
             isOwner={isOwner}
             copied={copied}
             onEditTrip={() => setOpenModal({ kind: "editTrip" })}
-            onDeleteTrip={handleDeleteTrip}
+            onDeleteTrip={actions.handleDeleteTrip}
             onShowDatesModal={() => setOpenModal({ kind: "memberDates" })}
             onShowSchedulesModal={() => setOpenModal({ kind: "schedules" })}
             onShowInviteModal={() => setOpenModal({ kind: "invite" })}
-            onCopyInvite={handleCopyInvite}
+            onCopyInvite={actions.handleCopyInvite}
             onOpenAddStop={() => setOpenModal({ kind: "addStop" })}
             onOpenEditStop={(stop) => setOpenModal({ kind: "editStop", stop })}
           />
@@ -288,7 +122,7 @@ export default function TripPage({
               <FindYourCrew
                 onAdd={() => setOpenModal({ kind: "addActivity" })}
                 onEdit={(a) => setOpenModal({ kind: "editActivity", activity: a })}
-                onDelete={handleDelete}
+                onDelete={actions.handleDelete}
                 tripOwnerId={trip.created_by ?? undefined}
                 hiddenIds={hiddenActivityIds}
                 autoOpenFirstUnrated={newMember === "1"}
@@ -310,122 +144,13 @@ export default function TripPage({
         </div>
       </div>
 
-      <MemberSchedulesModal
-        open={openModal.kind === "schedules"}
-        members={members}
+      <TripModals
+        actions={actions}
         trip={trip}
-        userId={userId}
-        onEditDates={() => setOpenModal({ kind: "memberDates" })}
-        onClose={closeModal}
-      />
-
-      {openModal.kind === "invite" && trip && (
-        <InviteMemberModal
-          tripName={trip.name}
-          tripId={trip.id}
-          inviteCode={trip.invite_code}
-          onClose={closeModal}
-        />
-      )}
-
-      <CreateTripModal
-        open={openModal.kind === "editTrip"}
-        title="Edit trip"
-        initial={{
-          name: trip.name,
-          destination: trip.destination,
-          start_date: trip.start_date ?? "",
-          end_date: trip.end_date ?? "",
-        }}
-        submitLabel="Save"
-        loading={updating}
-        error={updateError}
-        onClose={closeModal}
-        onSubmit={handleEditTrip}
         members={members}
-        ownerId={trip.created_by ?? undefined}
-        onRemoveMember={removeMember}
-        removingMemberId={removingId}
-        removeError={removeError}
-      />
-
-      <StopFormModal
-        open={openModal.kind === "addStop"}
-        title="Add stop"
-        submitLabel="Add stop"
-        loading={stopLoading}
-        error={stopError}
-        onClose={closeModal}
-        onSubmit={handleAddStop}
-      />
-
-      <StopFormModal
-        open={openModal.kind === "editStop"}
-        title="Edit stop"
-        submitLabel="Save"
-        loading={stopLoading}
-        error={stopError}
-        initial={openModal.kind === "editStop" ? { name: openModal.stop.name, date_from: openModal.stop.date_from, date_to: openModal.stop.date_to } : undefined}
-        onClose={closeModal}
-        onSubmit={handleEditStop}
-      />
-
-      <ActivityFormModal
-        open={openModal.kind === "addActivity"}
-        title="Add Activity"
-        submitLabel="Add"
+        userId={userId}
         stops={stops}
-        loading={adding}
-        error={addError}
-        onClose={closeModal}
-        onSubmit={handleAdd}
-        initial={openModal.kind === "addActivity" && openModal.prefill
-          ? { name: openModal.prefill.name }
-          : undefined}
       />
-
-      {(() => {
-        const me = members.find((m) => m.id === userId);
-        return (
-          <MemberDatesModal
-            open={openModal.kind === "memberDates"}
-            tripStart={trip.start_date ?? null}
-            tripEnd={trip.end_date ?? null}
-            initialArrival={me?.arrival_date ?? null}
-            initialDeparture={me?.departure_date ?? null}
-            loading={datesLoading}
-            error={datesError}
-            onClose={closeModal}
-            onSubmit={async (arrival, departure) => {
-              await updateDates(arrival, departure);
-              closeModal();
-            }}
-          />
-        );
-      })()}
-
-      <ActivityFormModal
-        open={openModal.kind === "editActivity"}
-        title="Edit Activity"
-        stops={stops}
-        initial={
-          openModal.kind === "editActivity"
-            ? {
-                name: openModal.activity.name,
-                location: openModal.activity.location ?? "",
-                description: openModal.activity.description ?? "",
-                url: openModal.activity.url ?? "",
-                stop_id: openModal.activity.stop_id ?? null,
-              }
-            : undefined
-        }
-        loading={acting}
-        error={actError}
-        onClose={closeModal}
-        onSubmit={handleEdit}
-      />
-
-      <SetDisplayNameModal />
     </main>
   );
 }
