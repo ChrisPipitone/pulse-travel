@@ -99,7 +99,7 @@ export function WelcomeScreen({ onPlanTrip, onJoinTrip }: Props) {
             <input
               ref={inputRef}
               type="text"
-              placeholder="Invite code or link"
+              placeholder="e.g. BY87M5ZT0PC4 (or paste link)"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               maxLength={200}
