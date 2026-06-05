@@ -51,6 +51,7 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 max_frequency = "60s"
+otp_expiry = 300
 
 [auth.external.google]
 enabled = true

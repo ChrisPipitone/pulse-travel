@@ -49,7 +49,10 @@ sequenceDiagram
 
 ---
 
-### 2 — OTP (email code)
+### 2 — OTP (email code) — primary email method
+
+Magic links were removed (they break inside mobile in-app browsers — WhatsApp/iMessage open
+a new context that loses the session). OTP is now the primary email sign-in and invite path.
 
 ```mermaid
 sequenceDiagram
@@ -73,7 +76,11 @@ sequenceDiagram
 - Passwordless — user only needs email access
 - Local dev: GoTrue intercepts all outbound email → Mailpit at `http://127.0.0.1:54324`
 - OTP type is `'email'` (not `'magiclink'`) — returns a 6-digit code, not a clickable link
-- Rate limit: `max_frequency = "1s"` in `supabase/config.toml` — increase to `"60s"` before prod
+- Invites (`sendInviteEmail`) call `signInWithOtp` with **no** `emailRedirectTo` — this forces
+  the 6-digit code template instead of a magic link
+- Security (`supabase/config.toml [auth.email]`): `otp_expiry = 300` (5-min expiry),
+  `max_frequency = "60s"` (rate limit), `enable_confirmations = true`. Mirror these in the
+  hosted Supabase dashboard (Auth → Providers → Email)
 
 ---
 
@@ -215,8 +222,9 @@ graph LR
 
 | Item                   | Location                                      | Action                                                        |
 | ---------------------- | --------------------------------------------- | ------------------------------------------------------------- |
-| Email confirmation     | `supabase/config.toml [auth.email]`           | `enable_confirmations = true`                                 |
-| OTP rate limit         | `supabase/config.toml [auth.email]`           | `max_frequency = "60s"`                                       |
+| Email confirmation     | `supabase/config.toml [auth.email]`           | `enable_confirmations = true` ✅                              |
+| OTP rate limit         | `supabase/config.toml [auth.email]`           | `max_frequency = "60s"` ✅                                    |
+| OTP expiry             | `supabase/config.toml [auth.email]`           | `otp_expiry = 300` (5 min) ✅                                 |
 | Profile creation       | New migration                                 | Trigger on `auth.users` INSERT → insert `public.profiles` row |
 | Session storage        | `apps/web/src/lib/supabase.ts`                | `@supabase/ssr` + httpOnly cookies if XSS hardening needed    |
 | Google redirect URIs   | Google Cloud Console                          | Add production domain                                         |
