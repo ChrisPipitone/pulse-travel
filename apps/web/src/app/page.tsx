@@ -7,6 +7,7 @@ import { Button } from "@pulse/ui";
 import { CreateTripModal } from "@/components/CreateTripModal";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { LandingPage } from "@/components/LandingPage";
+import { ReturningUserScreen } from "@/components/ReturningUserScreen";
 import type { TripSummary } from "@pulse/services";
 import { fmtDateRange } from "@/lib/date";
 import { MemberDots } from "@/components/MemberDots";
@@ -142,13 +143,28 @@ export default function Home() {
         </div>
       )}
 
-      {/* Welcome screen — zero trips */}
-      {!tripsLoading && !tripsError && !hasTrips && (
-        <WelcomeScreen
-          onPlanTrip={() => setShowCreate(true)}
-          onJoinTrip={handleJoinCode}
-        />
-      )}
+      {/* Empty state — zero trips */}
+      {!tripsLoading && !tripsError && !hasTrips && (() => {
+        const meta = session.user.user_metadata ?? {}
+        const isReturning = !!(meta.onboarded || meta.full_name)
+        const firstName = (meta.full_name as string | undefined)?.split(' ')[0]
+          ?? (session.user.email?.split('@')[0])
+        if (isReturning) {
+          return (
+            <ReturningUserScreen
+              name={firstName ?? ''}
+              onPlanTrip={() => setShowCreate(true)}
+              onJoinTrip={handleJoinCode}
+            />
+          )
+        }
+        return (
+          <WelcomeScreen
+            onPlanTrip={() => setShowCreate(true)}
+            onJoinTrip={handleJoinCode}
+          />
+        )
+      })()}
 
       {/* Normal home — has trips */}
       {hasTrips && (
