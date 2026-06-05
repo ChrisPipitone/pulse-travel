@@ -1,11 +1,38 @@
 # Pulse — Group Vacation Planner
 
 > App name: **Pulse** | Repo: `pulse-travel`
-> **Product model + strategy:** `docs/PRODUCT.md` | **Brand/voice:** `docs/BRANDING.md` | **Design system:** `docs/UI_DESIGN.md`
 
 ## What It Is
 
-Group vacation planner built around one question: *who should do what together?* Members rate activities MUST/MAYBE/SKIP; the app surfaces sub-groups (Find Your Crew), pairwise compatibility (Travel Twin), and a potential-to-actual crew pipeline via the itinerary. See `docs/PRODUCT.md` for the full rating model, crew model, positioning, and launch checklist.
+Group vacation planner built around one question: *who should do what together?* Members rate activities MUST/MAYBE/SKIP; the app surfaces sub-groups (Find Your Crew), pairwise compatibility (Travel Twin), and a potential-to-actual crew pipeline via the itinerary.
+
+---
+
+## Docs Reference — Read Before Working on These Areas
+
+| Task area | Read first |
+|---|---|
+| Product decisions, rating vocabulary, crew model | `docs/PRODUCT.md`, `docs/canonical.md` |
+| DB schema, entity relationships, RLS structure | `docs/DATA_MODEL.md` |
+| Auth flows, sign-in methods, session/JWT/RLS | `docs/AUTH.md` |
+| UI components, theming, CSS vars, color tokens | `docs/UI_DESIGN.md` |
+| Rating weights, scoring algorithm, compatibility | `docs/RATING_MATRIX.md` |
+| Trip creation, invite links, join flow, state machine | `docs/TRIP_FLOW.md` |
+| Find Your Crew feature design, sub-group logic | `docs/CREW_VIEW_DESIGN.md` |
+| Itinerary / Timeline feature design | `docs/ITINERARY_DESIGN.md` |
+| New user onboarding, user archetypes | `docs/NEW_USER_UX.md` |
+| Tiers, billing, member caps, trigger enforcement | `docs/TIERS.md` |
+| Deployment, env vars, Vercel/Supabase config | `docs/DEPLOYMENT.md` |
+| Monorepo structure, package boundaries | `docs/MONOREPO.md` |
+| Arch decisions, component decomposition | `docs/MVP_ARCHITECTURE.md` |
+| Brand voice, copy, origin story | `docs/BRANDING.md` |
+| Competitive positioning, market context | `docs/COMPETITIVE.md` |
+| Organizer mode (B2B, agents, templates) | `docs/ORGANIZER_MODE.md` |
+| All screens and routes inventory | `docs/screen_inventory.md` |
+
+> `docs/canonical.md` is the canonical information architecture — three-pillar framework (Agreement / Crew / Logistics). Read it when naming features, resolving product scope ambiguity, or designing new flows.
+
+---
 
 ## Current State
 

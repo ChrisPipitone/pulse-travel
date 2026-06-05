@@ -53,21 +53,20 @@ Alternate (for A/B or secondary surfaces): *"A wedding, twelve people, and every
 One-sentence: **Pulse is the real travel app for real people — because AI doesn't go on vacation, your friends do.**
 
 Competitive wedge:
-- **AI "Planners":** They're all the same generic wrapper. A robot suggesting a "Top 10" list doesn't know your group's vibe. They ignore the people.
-- **TripRelay:** Tells you *where* to go (curated spots → AI route). No crew layer. Artificial.
-- **Frienzy / Wanderlog:** Logistics-heavy coordination *after* decisions are made. No compatibility model.
-- **Pulse:** We don't care where you get your ideas — AI, Instagram, or a napkin. Bring them here to see what your friends *actually* think. We own the **grouping**, the only part that matters.
+- **The Group Chat / Spreadsheet Default:** This is the primary problem we solve. Spreadsheets are for data; trips are for people. Pulse replaces the "noisy monolith" of a 14-person WhatsApp group with organized sub-groups (Crews).
+- **AI "Planners":** They're often generic wrappers. A robot suggesting a "Top 10" list doesn't know your group's vibe. Pulse doesn't replace the idea-finding (use AI, Instagram, or a napkin) — we replace the **grouping** and **validation** stage.
+- **Pulse:** We own the **grouping**, the only part that matters.
 
 ---
 
-## The "Anti-AI" Manifesto
-We are riding the "Sick of AI" wave. Our marketing should "shit talk" the generic, soulless AI itinerary trend.
+## The "Human-Led" Manifesto
+We lean into the "Human-Led" movement. Our marketing shouldn't just "shit talk" AI — it should highlight what AI *cannot* do: validate human desire.
 
 **The Narrative:**
-- "We're not another AI travel app."
-- "AI itineraries are just wrappers. They don't have skin in the game."
-- "A robot can't tell you if your cousin will actually enjoy a 4-hour hike."
-- "Enter your ideas, get them from anywhere, place them here, see what your friends think!"
+- "We're not another AI travel bot. We're a human coordination engine."
+- "AI can generate a list. It can't tell you if your cousin will actually enjoy the plan."
+- "Stop fighting the spreadsheet. Move out of the group chat and into your Crew."
+- "Enter your ideas from anywhere, see what your friends actually think."
 
 ---
 

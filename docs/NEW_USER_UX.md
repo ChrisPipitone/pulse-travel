@@ -1,4 +1,39 @@
-# New User Experience — Friction Analysis & Improvements
+# New User Experience — Journey Archetypes
+
+Pulse serves three distinct types of new users. Each requires a different balance of education, validation, and speed.
+
+---
+
+## 1. The Archetypes
+
+### A. The "Curious Wanderer" (Organic / Marketing)
+- **Source:** Finds `pulse.travel` via search, ads, or social.
+- **Goal:** Understand value and convert to "Trip Lead."
+- **Current Problem:** Lands on a login gate or a generic welcome screen.
+- **Proposed Solution: The "Anti-Spreadsheet" Landing.**
+    - High-impact visual: "Move your trip out of the group chat."
+    - **Read-Only Demo:** "See a Sample Trip" button. Drops them into a live, pre-populated Italy trip. They can see crews forming, twins matching, and "split crowds" without an account.
+    - **Subtle Anti-AI:** "A robot can plan a route. We coordinate the humans."
+
+### B. The "Invited Guest" (Share Link)
+- **Source:** Clicks a WhatsApp/iMessage link (`/join?code=xxx`).
+- **Goal:** Social validation ("Is this my group?") and friction-free joining.
+- **Current Problem:** Redirected to login before seeing anything.
+- **Proposed Solution: The "Vibe Check" Preview.**
+    - **Unauthenticated Preview:** Show the trip name, destination, and the **Crew Avatars** ("Join 8 others").
+    - **The Value Hook:** Show a "Pulse Strip" summary: "4 Universal Favorites identified."
+    - **Join Sequence:** "Join the Crew" button → Auth → "How should we call you?" → Redirect to Trip.
+
+### C. The "Power User" (Native App)
+- **Source:** Downloads the app.
+- **Goal:** Efficiency and "Daily Driver" status.
+- **Proposed Solution: Interactive Training.**
+    - **The 3-Card Stack:** A quick interactive tutorial using MUST/MAYBE/SKIP on 3 sample activities. 
+    - **Immediate Context:** "Now, let's get your first trip started."
+
+---
+
+## 2. Friction Analysis & Improvements
 
 > Synthesized 2026-05-28 from two independent AI reviews of the current codebase.
 > Implementation order agreed at bottom. Check off as each ships.

@@ -38,14 +38,35 @@ Partiful wins on *speed*; Pulse wins on *effectiveness*.
 
 ---
 
+## Wonderkit & The "AI Wrappers"
+
+Wonderkit = AI-first total travel assistant. Generates itineraries, packing lists, and budgets.
+
+### The Anti-AI Wedge
+We "shit talk" the AI trend. AI can't go on vacation; your friends can. 
+
+| Feature | Wonderkit (AI) | Pulse (Human) |
+|---|---|---|
+| **Identity** | The Robot Planner | **The Human Validation Layer** |
+| **Core Promise** | "I'll plan it for you" | "I'll tell you what your friends actually want" |
+| **Philosophy** | Generative (Robot-first) | Investigative (People-first) |
+| **Voting** | Democracy (One plan wins) | **Crew Formation (Sub-groups form)** |
+| **Value** | Automation & Efficiency | **Harmony & Social Confidence** |
+
+**Selling them short:**
+AI "planners" are just thin wrappers for ChatGPT. They offer a soulless "Top 10" list that ignores your group's unique vibe. A robot doesn't have skin in the game; it doesn't know if your cousin will actually enjoy a 4-hour hike or if the restaurant is actually a tourist trap. Pulse doesn't care where your ideas come from (AI, Instagram, or a napkin) — we care what your friends *think* of them. We provide the **Human-Verified Signal**.
+
+---
+
 ## Other Players
 
 | Competitor | Gap |
 |---|---|
-| Wanderlog | Itinerary-focused, no group compatibility |
-| TripIt | Individual only, no group voting |
-| Google Trips | Dead |
-| Airbnb / TripAdvisor | No planning/decision layer |
+| Wanderlog | Itinerary-focused, no group compatibility. |
+| TripIt | Individual only, no group voting. |
+| Frienzy | Logistics-heavy coordination *after* decisions are made. No compatibility model. |
+| Doodle / When2Meet / LettuceMeet | Solves *when*, but ignores *what*. No social context, no excitement signal. |
+| Google Trips | Dead. |
 
 ---
 
@@ -55,16 +76,16 @@ Partiful wins on *speed*; Pulse wins on *effectiveness*.
 Nobody has named this space yet. "Who should do what together" ≠ "who's coming." Own the framing of "Harmony-as-a-Service."
 
 **2. The Crew View (Sub-Group Formation).**
-Building for the *split* rather than the *whole*. Pulse's data model assumes the group is dynamic, not a monolith. This is technically and psychologically difficult for itinerary-first (Wanderlog) or invite-first (Partiful) apps to retro-fit.
+Building for the *split* rather than the *whole*. Pulse's data model assumes the group is dynamic, not a monolith. This is technically and psychologically difficult for itinerary-first (Wanderlog) or invite-first (Partiful/Wonderkit) apps to retro-fit.
 
-**3. Decision-First Architecture.**
-Every feature is filtered through one lens: *"Does this help the group decide what to do Tuesday at 4 PM?"* This prevents feature creep into social feeds or photo albums.
+**3. The "Human-Verified" Badge (The Anti-AI Wedge).**
+We are the "No-Robot Zone." We emphasize human desire and shared enthusiasm. In an era of AI fluff, a plan that is **Human-Verified** is a premium signal. We own the **Human Validation Layer**.
 
-**4. ***REMOVED*** revenue changes incentives.**
+**4. Decision-First Architecture.**
+Every feature is filtered through one lens: *"Does this help the group decide what to do Tuesday at 4 PM?"* This prevents feature creep into packing lists or flight tracking (Wonderkit's lane).
+
+**5. ***REMOVED*** revenue changes incentives.**
 Pulse can stay free forever. If a large player launches a competing product and charges, Pulse undercuts on price while matching on features.
-
-**5. Complexity tolerance.**
-Pulse users *expect* to spend 20 minutes. Depth is the product. Partiful cannot serve this user without a full reposition.
 
 ---
 
