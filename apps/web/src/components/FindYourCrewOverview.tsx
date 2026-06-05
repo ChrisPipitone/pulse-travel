@@ -8,7 +8,7 @@ import { useCompatibilityMatrix } from "@pulse/hooks";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { Activity, Member, Rating } from "@pulse/types";
 import { RATING_PILL } from "@pulse/types";
-import { MemberAvatar } from "@/components/MemberAvatar";
+import { MemberEnthusiasmRing, EnthusiasmRingLegend } from "@/components/MemberEnthusiasmRing";
 import { GroupiesMemberCard, type MemberCategoryChip } from "./GroupiesMemberCard";
 import { TravelTwinCard } from "./TravelTwinCard";
 type MainView = "groupies" | "travelTwin";
@@ -122,19 +122,10 @@ function MemberDetailModal({
   const inner = (
     <>
       {/* Header */}
-      <div className="flex items-center gap-[10px] px-[18px] pt-4 pb-3 border-b border-border sticky top-0 bg-bg-card z-10 flex-shrink-0">
-        <MemberAvatar name={member.name} avatarUrl={member.avatar_url} size="xl" className="flex-shrink-0" />
-        <div className="flex-1 min-w-0">
-          <div className="text-base font-bold leading-tight">
-            {firstName}{lastName && <span className="font-normal text-text-muted"> {lastName}</span>}
-          </div>
-          <div className="text-[11px] text-text-subtle mt-0.5">
-            {musts > 0 ? `${musts} must · ` : ''}{wants > 0 ? `${wants} want · ` : ''}{total} total
-          </div>
-        </div>
+      <div className="relative flex flex-col items-center px-[18px] pt-4 pb-3 border-b border-border sticky top-0 bg-bg-card z-10 flex-shrink-0">
         <button
           onClick={onClose}
-          className="w-7 h-7 rounded-full border border-border flex items-center justify-center flex-shrink-0 text-text-muted hover:text-text-primary transition-colors"
+          className="absolute top-3 right-3 w-7 h-7 rounded-full border border-border flex items-center justify-center text-text-muted hover:text-text-primary transition-colors"
           aria-label="Close"
         >
           <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -142,6 +133,14 @@ function MemberDetailModal({
             <line x1="13" y1="3" x2="3" y2="13" />
           </svg>
         </button>
+        <MemberEnthusiasmRing name={member.name} avatarUrl={member.avatar_url} size="3xl" musts={musts} wants={wants} activityCount={activities.length} />
+        <div className="text-base font-bold leading-tight text-center mt-2">
+          {firstName}{lastName && <span className="font-normal text-text-muted"> {lastName}</span>}
+        </div>
+        <div className="text-[11px] text-text-subtle mt-0.5">
+          {musts > 0 ? `${musts} must · ` : ''}{wants > 0 ? `${wants} maybe · ` : ''}{total} total
+        </div>
+        <EnthusiasmRingLegend className="mt-2" />
       </div>
 
       {/* Body */}
@@ -265,7 +264,7 @@ function TwinComparisonPanel({
           </div>
           <div className="flex items-center gap-3">
             <div className="flex-1 flex flex-col items-center gap-1 text-center">
-              <MemberAvatar name={memberSummary.member.name} avatarUrl={memberSummary.member.avatar_url} size="2xl" />
+              <MemberEnthusiasmRing name={memberSummary.member.name} avatarUrl={memberSummary.member.avatar_url} size="3xl" musts={memberSummary.musts} wants={memberSummary.wants} activityCount={activities.length} />
               <span className="text-xs font-semibold text-text-primary">{fnA}</span>
               <span className="text-[10px] text-text-subtle">{memberSummary.musts} must</span>
             </div>
@@ -274,11 +273,12 @@ function TwinComparisonPanel({
               <span className="text-[9px] font-bold uppercase tracking-wide text-text-subtle">match</span>
             </div>
             <div className="flex-1 flex flex-col items-center gap-1 text-center">
-              <MemberAvatar name={twin.member.name} avatarUrl={twin.member.avatar_url} size="2xl" />
+              <MemberEnthusiasmRing name={twin.member.name} avatarUrl={twin.member.avatar_url} size="3xl" musts={twin.musts} wants={twin.wants} activityCount={activities.length} />
               <span className="text-xs font-semibold text-text-primary">{fnB}</span>
               <span className="text-[10px] text-text-subtle">{twin.musts} must</span>
             </div>
           </div>
+          <EnthusiasmRingLegend className="mt-3" />
         </div>
 
         {/* Body */}
