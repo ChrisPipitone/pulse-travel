@@ -285,31 +285,25 @@ export default function TripPage({
 
             {/* Activities tab */}
             {tab === "activities" && (
-              <div className="section-in">
-                <FindYourCrew
-                  onAdd={() => setOpenModal({ kind: "addActivity" })}
-                  onEdit={(a) => setOpenModal({ kind: "editActivity", activity: a })}
-                  onDelete={handleDelete}
-                  tripOwnerId={trip.created_by ?? undefined}
-                  hiddenIds={hiddenActivityIds}
-                  autoOpenFirstUnrated={newMember === "1"}
-                  onSwitchToCrewTab={() => setTab("crew")}
-                />
-              </div>
+              <FindYourCrew
+                onAdd={() => setOpenModal({ kind: "addActivity" })}
+                onEdit={(a) => setOpenModal({ kind: "editActivity", activity: a })}
+                onDelete={handleDelete}
+                tripOwnerId={trip.created_by ?? undefined}
+                hiddenIds={hiddenActivityIds}
+                autoOpenFirstUnrated={newMember === "1"}
+                onSwitchToCrewTab={() => setTab("crew")}
+              />
             )}
 
             {/* Timeline tab */}
             {tab === "timeline" && (
-              <div className="section-in">
-                <TripTimeline />
-              </div>
+              <TripTimeline />
             )}
 
             {/* Find your crew tab */}
             {tab === "crew" && (
-              <div className="section-in">
-                <FindYourCrewOverview />
-              </div>
+              <FindYourCrewOverview />
             )}
 
           </div>

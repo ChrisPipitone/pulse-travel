@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef } from "react";
 import { useModalEscape } from "@/hooks/useModalEscape";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { useTripStore } from "@pulse/store";
 import { useCompatibilityMatrix } from "@pulse/hooks";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -192,7 +193,7 @@ function MemberDetailModal({
   }
 
   return (
-    <div className="lg:hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
         ref={panelRef}
@@ -342,7 +343,7 @@ function TwinComparisonPanel({
   }
 
   return (
-    <div className="lg:hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-md max-h-[88vh] overflow-y-auto flex flex-col">
         {inner}
@@ -457,6 +458,7 @@ export function FindYourCrewOverview() {
   const ratings = useTripStore((s) => s.ratings)
   const { matrix } = useCompatibilityMatrix()
 
+  const isMobile = useIsMobile()
   const [mainView, setMainView] = useState<MainView>("groupies")
   const [query, setQuery] = useState("")
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null)
@@ -648,7 +650,7 @@ export function FindYourCrewOverview() {
       </div>
 
       {/* Mobile modal */}
-      {selectedSummary && (
+      {selectedSummary && isMobile && (
         mainView === "travelTwin" ? (
           <TwinComparisonPanel
             variant="modal"

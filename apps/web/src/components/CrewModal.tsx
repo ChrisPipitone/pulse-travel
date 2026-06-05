@@ -265,7 +265,7 @@ export function CrewModal({ row, userId, onClose, onRate, ratingLoading, variant
   }
 
   return (
-    <div className="lg:hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="modal-overlay absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div
         className="modal-panel relative bg-bg-card rounded-t-[var(--radius-card)] sm:rounded-[var(--radius-card)] border border-border w-full sm:max-w-[600px] max-h-[92vh] sm:max-h-[86vh] overflow-y-auto flex flex-col"

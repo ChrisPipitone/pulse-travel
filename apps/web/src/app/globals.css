@@ -342,18 +342,18 @@ html:has(.modal-overlay) body { overflow: hidden; }
 
 @keyframes callout-in {
   from { opacity: 0; transform: translateY(6px) }
-  to   { opacity: 1; transform: translateY(0) }
+  to   { opacity: 1 }
 }
 .callout-in { animation: callout-in 160ms ease-out both }
 
 @keyframes pop-in {
   from { transform: scale(0.5); opacity: 0 }
-  to   { transform: scale(1);   opacity: 1 }
+  to   { opacity: 1 }
 }
 .pop-in { animation: pop-in 120ms cubic-bezier(0.34, 1.56, 0.64, 1) both }
 
 @keyframes section-in {
   from { opacity: 0; transform: translateY(4px) }
-  to   { opacity: 1; transform: translateY(0) }
+  to   { opacity: 1 }
 }
-.section-in { animation: section-in 180ms ease-out both }
+.section-in { animation: section-in 180ms ease-out backwards }
