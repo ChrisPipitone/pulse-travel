@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Trip, TripPreview, Activity, ActivityRating, Member, Stop } from '@pulse/types'
+import type { Trip, TripPreview, Activity, ActivityRating, Member, Stop, ItinerarySlot } from '@pulse/types'
 
 const PG_NOT_FOUND        = 'PGRST116'
 const PG_UNIQUE_VIOLATION = '23505'
@@ -361,6 +361,21 @@ export async function updateStop(
 export async function deleteStop(client: SupabaseClient, stopId: string): Promise<void> {
   const { error } = await client.from('stops').delete().eq('id', stopId)
   if (error) throw new Error(error.message)
+}
+
+export async function listSlots(client: SupabaseClient, tripId: string): Promise<ItinerarySlot[]> {
+  const { data, error } = await client
+    .from('itinerary_slots')
+    .select('*, itinerary_slot_members(user_id)')
+    .eq('trip_id', tripId)
+    .order('date')
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row) => {
+    const { itinerary_slot_members, ...slot } = row as ItinerarySlot & {
+      itinerary_slot_members: { user_id: string }[]
+    }
+    return { ...slot, member_ids: (itinerary_slot_members ?? []).map((m) => m.user_id) }
+  })
 }
 
 export async function updateDisplayName(

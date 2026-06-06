@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSupabase } from './SupabaseContext'
 import { useTripStore } from '@pulse/store'
-import { getTrip, getMembers, getActivities, getRatings, listStops } from '@pulse/services'
+import { getTrip, getMembers, getActivities, getRatings, listStops, listSlots } from '@pulse/services'
 
 type TripDataState = {
   loading: boolean
@@ -12,7 +12,7 @@ export function useTripData(tripId: string): TripDataState {
   const client = useSupabase()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { setTrip, setMembers, setActivities, setRatings, setStops } = useTripStore()
+  const { setTrip, setMembers, setActivities, setRatings, setStops, setSlots } = useTripStore()
 
   useEffect(() => {
     if (!tripId) return
@@ -23,11 +23,12 @@ export function useTripData(tripId: string): TripDataState {
       try {
         // Trip, members, activities, and stops have no inter-dependency — fetch in parallel.
         // Ratings depend on activity IDs, so they follow in a second round.
-        const [trip, members, activities, stops] = await Promise.all([
+        const [trip, members, activities, stops, slots] = await Promise.all([
           getTrip(client, tripId),
           getMembers(client, tripId),
           getActivities(client, tripId),
           listStops(client, tripId),
+          listSlots(client, tripId),
         ])
 
         const ratings = await getRatings(client, activities.map((a) => a.id))
@@ -37,6 +38,7 @@ export function useTripData(tripId: string): TripDataState {
         setActivities(activities)
         setRatings(ratings)
         setStops(stops)
+        setSlots(slots)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load trip')
       } finally {
@@ -66,6 +68,16 @@ export function useTripData(tripId: string): TripDataState {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'stops', filter: `trip_id=eq.${tripId}` },
         () => { listStops(client, tripId).then(setStops) }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'itinerary_slots', filter: `trip_id=eq.${tripId}` },
+        () => { listSlots(client, tripId).then(setSlots) }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'itinerary_slot_members' },
+        () => { listSlots(client, tripId).then(setSlots) }
       )
       .subscribe()
 

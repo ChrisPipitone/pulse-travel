@@ -92,6 +92,24 @@ export interface TripEvent {
   member_ids: string[]
 }
 
+// Convergence Calendar (Plan surface) — see docs/decisions/CONVERGENCE_CALENDAR.md.
+// A slot = a proposed day for an activity with a crew subset. Multiple slots per
+// activity = the 2+N split. member_ids is the joined crew subset (like TripEvent).
+export interface ItinerarySlot {
+  id: string
+  trip_id: string
+  activity_id: string
+  date: string
+  created_by: string | null
+  created_at: string
+  member_ids: string[]
+}
+
+export interface SlotMember {
+  slot_id: string
+  user_id: string
+}
+
 export interface CompatibilityScore {
   activity_id: string
   score: number

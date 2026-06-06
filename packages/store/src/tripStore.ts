@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Trip, Activity, ActivityRating, Member, Stop } from '@pulse/types'
+import type { Trip, Activity, ActivityRating, Member, Stop, ItinerarySlot } from '@pulse/types'
 
 interface TripStore {
   trip: Trip | null
@@ -7,11 +7,13 @@ interface TripStore {
   activities: Activity[]
   ratings: ActivityRating[]
   stops: Stop[]
+  slots: ItinerarySlot[]
   setTrip: (trip: Trip | null) => void
   setMembers: (members: Member[]) => void
   setActivities: (activities: Activity[]) => void
   setRatings: (ratings: ActivityRating[]) => void
   setStops: (stops: Stop[]) => void
+  setSlots: (slots: ItinerarySlot[]) => void
   addActivity: (activity: Activity) => void
   updateActivity: (activity: Activity) => void
   removeActivity: (id: string) => void
@@ -21,6 +23,9 @@ interface TripStore {
   addStop: (stop: Stop) => void
   updateStop: (stop: Stop) => void
   removeStop: (id: string) => void
+  addSlot: (slot: ItinerarySlot) => void
+  updateSlot: (slot: ItinerarySlot) => void
+  removeSlot: (id: string) => void
   reset: () => void
 }
 
@@ -30,6 +35,7 @@ const initialState = {
   activities: [],
   ratings: [],
   stops: [],
+  slots: [],
 }
 
 export const useTripStore = create<TripStore>((set) => ({
@@ -39,6 +45,7 @@ export const useTripStore = create<TripStore>((set) => ({
   setActivities: (activities) => set({ activities }),
   setRatings: (ratings) => set({ ratings }),
   setStops: (stops) => set({ stops }),
+  setSlots: (slots) => set({ slots }),
   addActivity: (activity) =>
     set((state) => ({ activities: [...state.activities, activity] })),
   updateActivity: (activity) =>
@@ -76,5 +83,11 @@ export const useTripStore = create<TripStore>((set) => ({
       stops: state.stops.filter((s) => s.id !== id),
       activities: state.activities.map((a) => a.stop_id === id ? { ...a, stop_id: null } : a),
     })),
+  addSlot: (slot) =>
+    set((state) => ({ slots: [...state.slots, slot] })),
+  updateSlot: (slot) =>
+    set((state) => ({ slots: state.slots.map((s) => s.id === slot.id ? slot : s) })),
+  removeSlot: (id) =>
+    set((state) => ({ slots: state.slots.filter((s) => s.id !== id) })),
   reset: () => set(initialState),
 }))
