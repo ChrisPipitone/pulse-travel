@@ -15,7 +15,7 @@ import { useToast } from "@/components/ToastProvider";
 import type { Activity, Stop } from "@pulse/types";
 import { UNDO_DURATION_MS, TRIP_DELETE_DELAY_MS } from "@/lib/constants";
 
-export type Tab = "activities" | "timeline" | "crew";
+export type Tab = "activities" | "timeline" | "crew" | "plan";
 
 export type OpenModal =
   | { kind: "none" }

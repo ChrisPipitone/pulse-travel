@@ -6,6 +6,7 @@ import { useTripStore } from "@pulse/store";
 import { FindYourCrew } from "@/components/FindYourCrew";
 import { FindYourCrewOverview } from "@/components/FindYourCrewOverview";
 import { TripTimeline } from "@/components/TripTimeline";
+import { PlanCalendar } from "@/components/plan/PlanCalendar";
 import { TripSidebar } from "@/components/TripSidebar";
 import { TripLoadingSkeleton } from "@/components/TripLoadingSkeleton";
 import { TripSetupStrip } from "@/components/TripSetupStrip";
@@ -15,6 +16,7 @@ import { useTripActions, type Tab } from "@/hooks/useTripActions";
 const TAB_LABELS: Record<Tab, { short: string; full: string; sub: string }> = {
   activities: { short: "Rate",     full: "Rate",           sub: "What do you want to do?" },
   crew:       { short: "Crew",     full: "Find Your Crew", sub: "Who are you going with?" },
+  plan:       { short: "Plan",     full: "Plan",           sub: "When does each crew meet?" },
   timeline:   { short: "Timeline", full: "Timeline",       sub: "When and where?"          },
 };
 
@@ -96,7 +98,7 @@ export default function TripPage({
 
             {/* Tab bar */}
             <div role="tablist" className="flex border-b border-border">
-              {(["activities", "crew", "timeline"] as Tab[]).map((t) => (
+              {(["activities", "crew", "plan", "timeline"] as Tab[]).map((t) => (
                 <button
                   key={t}
                   role="tab"
@@ -128,6 +130,11 @@ export default function TripPage({
                 autoOpenFirstUnrated={newMember === "1"}
                 onSwitchToCrewTab={() => setTab("crew")}
               />
+            )}
+
+            {/* Plan tab — convergence calendar (read-only). Coexists with Timeline. */}
+            {tab === "plan" && (
+              <PlanCalendar />
             )}
 
             {/* Timeline tab */}
