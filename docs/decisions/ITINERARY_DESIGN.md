@@ -1,10 +1,15 @@
 ---
 tier: decision
 status: accepted
-updated: 2026-06-04
+updated: 2026-06-06
+note: superseded in part by CONVERGENCE_CALENDAR.md (2026-06-06) — convergence, conflict detection, and the 2+N split are pulled forward from post-MVP into the MVP Plan surface. The four-layer model, potential-vs-actual crew insight, region clustering, and split framing here still hold.
 ---
 
 # Itinerary Design
+
+> **Superseded in part by `CONVERGENCE_CALENDAR.md` (accepted 2026-06-06).** The sequencing below
+> ("manual = MVP, smart scheduling = post-MVP") no longer holds; convergence is now the MVP point of
+> the Plan surface. The conceptual model in this doc remains valid groundwork.
 
 Session date: 2026-05-24.
 

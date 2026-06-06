@@ -1,8 +1,8 @@
 ---
 tier: decision
-status: proposed
+status: accepted
 updated: 2026-06-06
-note: supersedes ITINERARY_DESIGN.md's "manual-only MVP, smart scheduling post-MVP" stance. NOT current truth until a human flips status to accepted. Building schema/code is gated on acceptance.
+note: supersedes ITINERARY_DESIGN.md's "manual-only MVP, smart scheduling post-MVP" stance. Accepted by Chris 2026-06-06.
 ---
 
 # Convergence Calendar
