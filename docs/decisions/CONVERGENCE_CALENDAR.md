@@ -8,8 +8,8 @@ note: supersedes ITINERARY_DESIGN.md's "manual-only MVP, smart scheduling post-M
 # Convergence Calendar
 
 Session date: 2026-06-06. Prototyped as `ia-calendar-v11.html` (steps v6→v11). Thesis carried in
-memory `project_convergence_calendar_thesis`. Implementation handoff (non-authoritative):
-`docs/research/calendar_v11_implementation_handoff_2026-06-06.md`.
+memory `project_convergence_calendar_thesis`. Prototype and implementation handoff are kept
+locally in `docs/private/` (gitignored).
 
 ---
 
