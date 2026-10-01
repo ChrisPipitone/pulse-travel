@@ -15,7 +15,7 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [pwLoading, setPwLoading] = useState(false)
   const [pwError, setPwError] = useState<string | null>(null)
-  const { sendOtp, verifyOtp, signInWithGoogle, loading, error } = useSignIn()
+  const { sendOtp, verifyOtp, signInWithGoogle, signInAsDemo, loading, error } = useSignIn()
   const router = useRouter()
   const searchParams = useSearchParams()
   const returnTo = searchParams.get('returnTo') || '/'
@@ -52,6 +52,18 @@ function LoginPage() {
   function handleChangeEmail() {
     setSent(false)
     setOtp('')
+  }
+
+  // Public demo account — the button only renders when both vars are set, so
+  // local dev and forks don't show a control that cannot work.
+  const demoEmail = process.env.NEXT_PUBLIC_DEMO_EMAIL
+  const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD
+  const demoEnabled = Boolean(demoEmail && demoPassword)
+
+  async function handleDemoSignIn() {
+    if (!demoEmail || !demoPassword) return
+    const ok = await signInAsDemo(demoEmail, demoPassword)
+    if (ok) router.replace('/')
   }
 
   function handleGoogleSignIn() {
@@ -184,6 +196,12 @@ function LoginPage() {
         <Button variant="outline" disabled={loading} onClick={handleGoogleSignIn}>
           Continue with Google
         </Button>
+
+        {demoEnabled && (
+          <Button variant="outline" disabled={loading} onClick={handleDemoSignIn}>
+            Explore the demo trip
+          </Button>
+        )}
 
         {error && <p className="text-xs text-red-500">{error}</p>}
 

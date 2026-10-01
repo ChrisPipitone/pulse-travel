@@ -7,6 +7,9 @@ type SignInState = {
   // redirectTo: where Supabase sends the user after Google auth completes.
   // Passed by the caller so this hook stays platform-agnostic (no window ref).
   signInWithGoogle: (redirectTo: string) => Promise<void>
+  // Public demo account. Credentials are deliberately public — the caller
+  // supplies them, so this hook holds no secrets and stays platform-agnostic.
+  signInAsDemo: (email: string, password: string) => Promise<boolean>
   loading: boolean
   error: string | null
 }
@@ -48,5 +51,14 @@ export function useSignIn(): SignInState {
     }
   }
 
-  return { sendOtp, verifyOtp, signInWithGoogle, loading, error }
+  async function signInAsDemo(email: string, password: string): Promise<boolean> {
+    setLoading(true)
+    setError(null)
+    const { error } = await client.auth.signInWithPassword({ email, password })
+    if (error) setError(error.message)
+    setLoading(false)
+    return !error
+  }
+
+  return { sendOtp, verifyOtp, signInWithGoogle, signInAsDemo, loading, error }
 }
