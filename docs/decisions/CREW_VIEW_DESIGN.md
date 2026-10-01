@@ -164,7 +164,7 @@ This turns a planning tool into a social discovery tool.
 
 ## Prototype Files
 
-All in `apps/web/public/prototypes/`. Open directly in browser or via dev server at `/prototypes/crew-vN.html`.
+All in `docs/private/prototypes/` (gitignored, local only). Open the HTML files directly in a browser.
 
 | File | What it shows |
 |---|---|
@@ -222,7 +222,6 @@ MVP (shipped):
 Post-MVP, in rough order:
 - [ ] Schedule for this sub-group — "which days work for everyone in this crew?" (needs date availability data)
 - [ ] Notify sub-group — message or push to crew members for this activity
-- [ ] Book for this size — ***REMOVED*** link pre-filtered to crew count (***REMOVED***, ***REMOVED***)
 - [ ] Sub-group overlap — surface activities where two crews share members (sequence them on the same day)
 - [ ] Nudge unvoted — prompt unrated members to weigh in, expands the crew signal
 - [ ] Sub-group chat — discuss just this activity with your crew (needs messaging infra)

@@ -109,5 +109,4 @@ Owner-only. Edit (pencil) icon on sidebar trip info card → opens modal pre-fil
 - Dark mode (CSS vars already support it — just add `[data-theme="dark"]` block)
 - Keyboard shortcuts: `n` for new activity, `/` for search
 - `beforeunload` warning when form is dirty in modal
-- ***REMOVED*** links on activity cards (***REMOVED***, ***REMOVED***)
 - Revist UI for past Trips

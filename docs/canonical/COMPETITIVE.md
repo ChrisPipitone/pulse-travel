@@ -90,14 +90,11 @@ We are the "No-Robot Zone." We emphasize human desire and shared enthusiasm. In 
 **4. Decision-First Architecture.**
 Every feature is filtered through one lens: *"Does this help the group decide what to do Tuesday at 4 PM?"* This prevents feature creep into packing lists or flight tracking (Wonderkit's lane).
 
-**5. ***REMOVED*** revenue changes incentives.**
-Pulse can stay free forever. If a large player launches a competing product and charges, Pulse undercuts on price while matching on features.
-
 ---
 
 ## Real Threats
 
-- **Google / Airbnb / TripAdvisor** — distribution advantage. Defense: own "group compatibility matrix" in users' minds + build ***REMOVED*** relationships before they enter.
+- **Google / Airbnb / TripAdvisor** — distribution advantage. Defense: own "group compatibility matrix" in users' minds.
 - **Partiful expanding into travel** — possible but foreign to their brand DNA. Monitor.
 
 ---
