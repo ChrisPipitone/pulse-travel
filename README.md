@@ -193,11 +193,8 @@ Documentation is tiered by folder — trust is encoded in the path. Start at [`d
 | `docs/canonical/`    | Source of truth — product model, branding, UX spec     |
 | `docs/reference/`    | How a subsystem works today                            |
 | `docs/decisions/`    | Dated ADRs — why a choice was made                     |
-| `docs/research/`     | Raw analysis, frozen and non-authoritative             |
 
 Key entry points: [`PRODUCT.md`](docs/canonical/PRODUCT.md) for the rating vocabulary and crew model, [`RATING_MATRIX.md`](docs/reference/RATING_MATRIX.md) for the scoring formula, [`CLAUDE.md`](CLAUDE.md) for architecture rules and code standards.
-
-Open work is tracked in Linear, not in markdown.
 
 ---
 

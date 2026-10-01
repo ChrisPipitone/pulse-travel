@@ -10,7 +10,7 @@ Group vacation planner built around one question: *who should do what together?*
 
 ## Current State
 
-Not yet deployed. Core loop ships: create trip → invite → rate MUST/MAYBE/SKIP → Find Your Crew shows sub-groups → Timeline for itinerary. Auth works (email+password, OTP, Google OAuth). Trip page has 3 tabs: Activities, Find Your Crew, Timeline. 18 hooks, 63 tests across 16 files, 9 modal components, UI audit rounds 1–7 done. All open work in Linear ([Pulse MVP](***REMOVED***)).
+Not yet deployed. Core loop ships: create trip → invite → rate MUST/MAYBE/SKIP → Find Your Crew shows sub-groups → Timeline for itinerary. Auth works (email+password, OTP, Google OAuth). Trip page has 3 tabs: Activities, Find Your Crew, Timeline. 18 hooks, 9 modal components, UI audit rounds 1–7 done. All open work lives in the issue tracker — see `docs/private/LINKS.md`.
 
 ---
 
@@ -99,15 +99,15 @@ Vercel deployment: set `rootDirectory=apps/web` in project settings.
 Non-technical users (family) must onboard in under 60 seconds. Share link → in app → rating → done. If it takes longer, it failed.
 
 ## Biggest Risk
-Infrequent use cycle — 1–2 big trips/year. Retention is low by nature. ***REMOVED*** revenue mitigates this — revenue per session can be high even with low return visits.
+Infrequent use cycle — 1–2 big trips/year. Retention is low by nature.
 
 ---
 
-## Linear Workflow
+## Issue Workflow
 
-All open work tracked in Linear ([Pulse MVP](***REMOVED***), team `JAB`).
+All open work is tracked in the issue tracker, team `JAB` — see `docs/private/LINKS.md` (local only).
 
-**Branches:** When work maps to a Linear issue, name the branch `jab-N-short-description`.
+**Branches:** When work maps to a ticket, name the branch `jab-N-short-description`.
 Example: `jab-13-restrict-profiles-select`
 
 **Commits:** Append the ticket ID to the subject line.
@@ -173,11 +173,13 @@ Docs are tiered by **folder** — trust is encoded in the path. Read `docs/INDEX
 
 | Tier | Folder | Trust | Read when |
 |---|---|---|---|
-| Canonical | `docs/canonical/` | Source of truth (PRODUCT, BRANDING, UX_SPEC, COMPETITIVE, ORGANIZER_MODE) | Always |
+| Canonical | `docs/canonical/` | Source of truth (PRODUCT, BRANDING, UX_SPEC, COMPETITIVE) | Always |
 | Reference | `docs/reference/` | How a subsystem works today | Working that area |
 | Decision | `docs/decisions/` | Why a choice was made (dated ADRs) | That area — `status: proposed` is NOT current truth |
-| Research | `docs/research/`, `docs/archive/` | Non-authoritative AI analysis | Only when explicitly told |
+| Research | `docs/private/research/`, `docs/private/archive/` | Non-authoritative AI analysis (local only, gitignored) | Only when explicitly told |
 
-**Conflict order (highest wins):** this `CLAUDE.md` → `canonical/` → `reference/` → accepted `decisions/`. Never cite `research/` or `archive/` as truth. `docs/decisions/ia-proposal.md` is an unaccepted proposal — do not treat its nav/IA as current.
+**Private notes:** `docs/private/` is gitignored and local only — raw research, archived docs, business strategy, internal links, throwaway prototypes. Read it when relevant; never move its contents into a tracked folder, and never cite it as truth.
 
-**Drift rule (applies to Claude and Gemini):** raw analysis lands in `docs/research/`, dated and frozen. It becomes truth only after a human promotes it into `canonical/` or an accepted `decisions/` ADR. Never edit `canonical/` directly from a raw sweep.
+**Conflict order (highest wins):** this `CLAUDE.md` → `canonical/` → `reference/` → accepted `decisions/`. Never cite `private/research/` or `private/archive/` as truth. `docs/decisions/ia-proposal.md` is an unaccepted proposal — do not treat its nav/IA as current.
+
+**Drift rule:** raw analysis lands in `docs/private/research/`, dated and frozen. It becomes truth only after a human promotes it into `canonical/` or an accepted `decisions/` ADR. Never edit `canonical/` directly from a raw sweep.

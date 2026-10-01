@@ -6,7 +6,7 @@ You are running a UI prototyping session for the Pulse app. Prototypes are stand
 
 ## How this works
 
-**Prototypes live at:** `apps/web/public/prototypes/`
+**Prototypes live at:** `docs/private/prototypes/` (gitignored, local only)
 
 **Naming convention:** `{component}-v{N}.html`
 - Find the highest existing version for the component, increment by 1
@@ -140,7 +140,7 @@ document.addEventListener('keydown', e => {
 - Read prior prototype versions if they exist.
 
 ### Step 2 — Build the prototype
-- Create `apps/web/public/prototypes/{component}-v{N}.html`
+- Create `docs/private/prototypes/{component}-v{N}.html`
 - Show all relevant states (e.g. MUST / WANT / MAYBE / Unrated for crew cards)
 - Label each variant clearly with a `.var-badge` or section label
 - Make modals openable by clicking cards

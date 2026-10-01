@@ -40,6 +40,16 @@ yarn-error.log*
 # vercel
 .vercel
 
+# private — local only, never committed (research, archive, business strategy, prototypes)
+docs/private/
+
+# app-data caches — never commit these from any directory
+**/leveldb/
+**/Cache/
+**/IndexedDB/
+**/Local Storage/
+**/Session Storage/
+
 # claude code — machine-specific
 .claude/settings.local.json
 .claude/skills/

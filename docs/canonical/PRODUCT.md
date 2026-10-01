@@ -77,7 +77,7 @@ All five answered a different question about the same data. The matrix tab was r
 | **Find your crew** | For each activity, who's my crew? |
 | **Travel Twin** | Which members have the most overlapping MUSTs? |
 | **Timeline** | When are we doing what, and with whom? |
-| *(By activity / By member / Who's in)* | Retired to prototypes — `apps/web/src/prototypes/` |
+| *(By activity / By member / Who's in)* | Retired — explored in prototypes, not shipped |
 
 ---
 
@@ -109,7 +109,7 @@ While competitors use AI to "solve" travel, Pulse uses AI as a servant to human 
 
 - Expense tracking → Splitwise owns it
 - Real-time chat → WhatsApp group already open
-- Booking engine → premature; ***REMOVED*** play is post-traction
+- Booking engine → out of scope
 - AI itinerary generation from docs/photos → Frienzy's lane, feature not differentiator
 
 ---
@@ -120,7 +120,7 @@ While competitors use AI to "solve" travel, Pulse uses AI as a servant to human 
 2. **Gap detector** — surface conflicts early: "Sara's Rome MUSTs need 3 days but her crew only overlaps for 2."
 3. **Crew card (shareable)** — per-activity card with MUST/MAYBE avatars + overlap dates, one-tap share to WhatsApp. Every share is an ad.
 4. **Sub-trip clustering** — given ratings + dates, suggest "these 4 activities cluster in Rome on days 3–5 with 80% crew overlap." MVP = manual; v2 = smart.
-5. **Organizer role (paid) — JAB-86** — trip owner who is not a member. Doesn't rate, doesn't appear in crew/compatibility views, invisible to the Jaccard model. Curates activities and facilitates the trip for members. Targets both professional travel agents and the "friend who organizes everything." Trip-level role (not account-level). Unlock path: read-only client share link → organizer notes → template trips → agency branding. See JAB-86 for full data model and open questions.
+5. **Organizer role — JAB-86** — trip owner who is not a member. Doesn't rate, doesn't appear in crew/compatibility views, invisible to the Jaccard model. Curates activities and facilitates the trip for members. Trip-level role, not account-level. See JAB-86 for the data model and open questions.
 
 ---
 
@@ -140,18 +140,9 @@ Every v1 release must ship all of these. If any are missing, the identity is not
 ## Out of Scope (MVP)
 - No booking integration, no payments, no maps, no real-time chat
 
-## Monetization (Ranked by effort/return)
-1. *****REMOVED*** links** — zero friction, natural fit, commission on clicks/bookings
-2. **Freemium** — free: 1 trip, 5 members. Paid: unlimited, export, advanced views
-3. **One-time trip purchase** — ~$5–15 per trip, no subscription fatigue
-4. **Subscription** — better for travel agencies than consumers
-5. **Ads** — avoid unless massive traffic
-
 ## Future Expansion
-- ***REMOVED*** links (***REMOVED***, ***REMOVED***, Booking.com) — primary passive revenue path
 - Budget tracking per person
 - Map view with region clustering
 - AI itinerary suggestions
 - Calendar export (Google, Apple, Proton)
-- Travel agency white-label
 - React Native / Expo port
