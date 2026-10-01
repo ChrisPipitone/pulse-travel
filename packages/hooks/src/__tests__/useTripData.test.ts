@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act } from '@testing-library/react'
-import { createMockClient } from './helpers/mockClient'
+import { createMockClient, mockQueryBuilder } from './helpers/mockClient'
 import { renderHookWithClient } from './helpers/renderHookWithProvider'
 import { useTripData } from '../useTripData'
 import { useTripStore } from '@pulse/store'
@@ -26,6 +26,7 @@ describe('useTripData', () => {
       if (table === 'profiles')     return { select: vi.fn().mockReturnThis(), in: vi.fn().mockResolvedValue({ data: fakeProfileRows, error: null }) } as never
       if (table === 'activities')   return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), order: vi.fn().mockResolvedValue({ data: fakeActivities, error: null }) } as never
       if (table === 'activity_ratings') return { select: vi.fn().mockReturnThis(), in: vi.fn().mockResolvedValue({ data: [], error: null }) } as never
+      if (table === 'stops')        return mockQueryBuilder([]) as never
       return {} as never
     })
   })
