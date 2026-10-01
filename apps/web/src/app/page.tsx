@@ -252,7 +252,7 @@ export default function Home() {
             <div>
               <h3 className="text-base font-bold text-text-primary">Planning with a new group?</h3>
               <p className="text-sm text-text-muted max-w-sm mt-1">
-                Start a fresh trip and invite your friends. No more "where should we eat?" debates.
+                Start a fresh trip and invite your friends. No more “where should we eat?” debates.
               </p>
             </div>
             <Button variant="outline" size="sm" onClick={() => setShowCreate(true)}>

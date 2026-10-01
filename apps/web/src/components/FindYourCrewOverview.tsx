@@ -539,7 +539,7 @@ export function FindYourCrewOverview() {
     return (
       <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-14 flex flex-col items-center gap-2 text-center">
         <p className="text-sm font-medium text-text-primary">No activities yet</p>
-        <p className="text-xs text-text-muted max-w-xs">Add activities to the trip — then come back to see who's going where.</p>
+        <p className="text-xs text-text-muted max-w-xs">Add activities to the trip — then come back to see who’s going where.</p>
       </div>
     )
   }

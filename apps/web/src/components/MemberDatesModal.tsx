@@ -69,7 +69,7 @@ export function MemberDatesModal({
 
         {tripStart && tripEnd && (
           <p className="text-xs text-text-muted -mt-2">
-            Trip runs {fmt(tripStart)} – {fmt(tripEnd)}. Leave blank if you're attending the full trip.
+            Trip runs {fmt(tripStart)} – {fmt(tripEnd)}. Leave blank if you’re attending the full trip.
           </p>
         )}
 

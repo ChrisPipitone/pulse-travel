@@ -114,7 +114,7 @@ export function InviteMemberModal({ tripName, tripId, inviteCode, expiresAt, isO
               <h2 className="text-xl font-semibold text-text-primary">Invite sent!</h2>
               <p className="text-sm text-text-muted mt-1">
                 Email sent to <span className="text-text-primary">{trimmed}</span>.
-                They'll get a 6-digit code to sign in and join <span className="text-text-primary font-medium">{tripName}</span>.
+                They’ll get a 6-digit code to sign in and join <span className="text-text-primary font-medium">{tripName}</span>.
               </p>
             </div>
             <div className="w-full flex flex-col gap-2">
