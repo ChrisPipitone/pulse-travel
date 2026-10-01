@@ -516,7 +516,7 @@ export function TripTimeline() {
       <div className="bg-bg-card rounded-[var(--radius-card)] border border-border px-6 py-12 flex flex-col items-center gap-2 text-center">
         <p className="text-sm font-medium text-text-primary">No stops yet</p>
         <p className="text-xs text-text-muted max-w-xs">
-          Add stops in the sidebar to see who's going where, stop by stop.
+          Add stops in the sidebar to see who’s going where, stop by stop.
         </p>
       </div>
     );

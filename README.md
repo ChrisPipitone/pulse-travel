@@ -2,205 +2,207 @@
 
 **Find your group's rhythm.**
 
-Group vacation planner built around one question: *who should do what together?* Everyone rates activities MUST / MAYBE / SKIP, and Pulse surfaces sub-groups, compatibility scores, and an itinerary pipeline — so the trip is planned around real enthusiasm, not assumed consensus.
+[![CI](https://github.com/ChrisPipitone/pulse-travel/actions/workflows/ci.yml/badge.svg)](https://github.com/ChrisPipitone/pulse-travel/actions/workflows/ci.yml)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=next.js&logoColor=white)](https://nextjs.org)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+
+Group trip planning breaks on a bad assumption: that everyone does everything together. So the loudest voice picks, half the group tags along to things they didn't want, and the two people who *both* wanted the 6am hike never find each other.
+
+Pulse is built around a different question — **who should do what together?** Everyone rates each activity MUST / MAYBE / SKIP, and the app surfaces the sub-groups hiding in those ratings: who's a crew for the food tour, who pairs on museums, which days converge enough to be worth planning around.
+
+> **Status:** MVP. Core loop ships end to end; not yet deployed.
 
 ---
 
-## Stack
+## Screenshots
 
-| Layer           | Choice                                        |
-| --------------- | --------------------------------------------- |
-| Frontend        | Next.js 16 + React 19 + TypeScript            |
-| Styling         | Tailwind CSS v4 — CSS custom property theming |
-| State           | Zustand 5                                     |
-| Backend / DB    | Supabase (Postgres + Auth)                    |
-| Package manager | pnpm v11                                      |
-| Monorepo        | Turborepo                                     |
+| ![Rate](docs/screenshots/01-rate-desktop.png) | ![Find Your Crew](docs/screenshots/02-crew-desktop.png) |
+| :-- | :-- |
+| **Rate** — MUST / MAYBE / SKIP per activity, with live crew state on every card | **Find Your Crew** — sub-groups and pairwise compatibility, derived from the rating matrix |
 
----
+![Timeline](docs/screenshots/04-timeline-desktop.png)
 
-## Prerequisites
+**Timeline** — the itinerary by stop, showing the confirmed crew behind each activity.
 
-- [pnpm](https://pnpm.io) v11+ — `brew install pnpm`
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required for local Supabase
-- [Supabase CLI](https://supabase.com/docs/guides/cli) — `brew install supabase/tap/supabase`
+<details>
+<summary><b>Mobile</b></summary>
 
----
+| <img src="docs/screenshots/01-rate-mobile.png" width="220"> | <img src="docs/screenshots/02-crew-mobile.png" width="220"> | <img src="docs/screenshots/04-timeline-mobile.png" width="220"> |
+| :--: | :--: | :--: |
+| Rate | Find Your Crew | Timeline |
 
-## Local Dev Setup
-
-```bash
-# 1. Install dependencies
-pnpm install
-
-# 2. Set up env vars
-cp apps/web/.env.local.example apps/web/.env.local
-# Fill in NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
-# (values from `make up` output — see below)
-
-# 3. Set up Google OAuth credentials for local Supabase
-# Create supabase/.env (gitignored):
-echo "SUPABASE_AUTH_GOOGLE_CLIENT_ID=your-client-id" >> supabase/.env
-echo "SUPABASE_AUTH_GOOGLE_SECRET=your-client-secret" >> supabase/.env
-
-# 4. Start local Supabase (Docker)
-make up
-# Outputs: Project URL, anon key — copy into apps/web/.env.local
-
-# 5. Load seed data
-make reseed
-# Creates test users, trips, activities, ratings
-
-# 6. Start the dev server
-make dev
-# App → http://localhost:3000
-```
+</details>
 
 ---
 
-## Make Targets
+## Architecture
 
-### Local Supabase
+The whole structure follows from one constraint: **the eventual Expo port must rewrite the UI layer and nothing else.** Every decision below falls out of that.
 
-| Command       | When to use                                                                           |
-| ------------- | ------------------------------------------------------------------------------------- |
-| `make up`     | Start local Supabase (Docker). Run once per session or after `make down`.             |
-| `make down`   | Stop local Supabase. Safe to run anytime — no data lost (Docker volume persists).     |
-| `make status` | Print local Supabase URLs and anon key. Useful if you lost the output from `make up`. |
+- **Zero business logic in components.** Fetching, scoring, and derivation live in `packages/hooks`; components render and nothing more. Hooks touch no platform APIs — no `window`, no `document`, no `localStorage`.
+- **Dual-file UI primitives.** Each primitive in `packages/ui` ships as `Button.tsx` (HTML + Tailwind) and `Button.native.tsx` (RN + NativeWind) — same props, same class strings. Metro resolves `.native.tsx` automatically.
+- **Services take a client, never read env.** Every function in `packages/services` accepts a `SupabaseClient` argument, so web (`NEXT_PUBLIC_*`) and mobile (`EXPO_PUBLIC_*`) each inject their own.
+- **Hybrid logic placement.** UI filtering, sorting, and search stay client-side so they feel instant. Rating scores, the compatibility matrix, and anything auth- or permission-shaped run server-side, where there's one source of truth and the client isn't trusted.
+- **RLS on every table.** Access control lives in Postgres policies, not in the client query.
 
-### Database — reset and seed
+Full detail: [`docs/reference/MVP_ARCHITECTURE.md`](docs/reference/MVP_ARCHITECTURE.md) · [`docs/reference/MONOREPO.md`](docs/reference/MONOREPO.md) · [`docs/reference/RATING_MATRIX.md`](docs/reference/RATING_MATRIX.md)
 
-| Command       | When to use                                                                                                                                                                                         |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `make reseed` | **Full reset.** Drops the DB, replays all migrations in order, runs `seed.sql`. Use when you want a clean known state or after pulling migrations written by someone else. Destroys all local data. |
-| `make reset`  | Alias for `make reseed` — same behaviour.                                                                                                                                                           |
-| `make seed`   | Re-runs `seed.sql` against the running DB without touching the schema. Use when you want to reload seed data but the schema is already correct. Truncates all data rows first.                      |
-| `make clear`  | Wipes all data rows but keeps the schema and `activity_categories` intact. Useful for manual testing with a clean slate.                                                                            |
+### Stack
 
-### Migrations
+| Layer           | Choice                             | Why                                                      |
+| --------------- | ---------------------------------- | -------------------------------------------------------- |
+| Frontend        | Next.js 16 + React 19 + TypeScript | App Router, strict mode                                   |
+| Styling         | Tailwind CSS v4                    | CSS-first config, custom-property theming via next-themes |
+| State           | Zustand 5                          | Behaves identically under React Native                    |
+| Backend / DB    | Supabase (Postgres + Auth)         | RLS, email+password / OTP / Google OAuth                  |
+| Monorepo        | Turborepo + pnpm workspaces        | Shared packages between web and a future Expo app         |
+| Tests           | Vitest + Testing Library           | Unit-tested hook layer, run in CI                         |
 
-Migrations live in `supabase/migrations/` and are applied in filename order. The filename prefix is a timestamp — never rename or reorder them.
-
-| Command                      | When to use                                                                                                                                                                                                                                                 |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `make migrate`               | Apply any pending migrations to the running local DB **without resetting data.** Use this when you write a new migration and want to apply it without losing your current rows. If the migration fails, check the error and fix the file before re-running. |
-| `make migration name=<name>` | Create a new timestamped migration file in `supabase/migrations/`. Always use this instead of creating the file manually — it ensures the timestamp prefix is correct. Example: `make migration name=add_budget_column`                                     |
-| `make push`                  | Push all migrations to the **hosted** Supabase project. Only run this when you are ready to apply schema changes to production. Requires the project to be linked (`make link ref=<project-ref>`).                                                          |
-
-**Typical migration workflow:**
-
-```bash
-make migration name=add_budget_to_trips
-# Write SQL in the generated file
-make migrate          # apply locally without losing data
-make push             # when ready for production
-```
-
-**After `make migrate`, if PostgREST shows "Database error querying schema":**
-
-```bash
-supabase stop && supabase start
-```
-
-PostgREST caches the schema at startup — a restart forces a reload.
-
-### Remote (hosted Supabase)
-
-| Command                       | When to use                                                                                                                         |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `make link ref=<project-ref>` | Link the CLI to a hosted Supabase project. Run once after creating a new hosted project. The ref is in your Supabase dashboard URL. |
-| `make push`                   | Push pending migrations to the hosted project. Does not push seed data — never run `make seed` against production.                  |
-
-### Development
-
-| Command      | When to use                                                                                                                                             |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `make dev`   | Start the Next.js dev server at `http://localhost:3000`.                                                                                                |
-| `make types` | Regenerate TypeScript types from the local DB schema into `packages/types/src/supabase.gen.ts`. Run after any migration that changes tables or columns. |
-
----
-
-## Auth
-
-Three sign-in methods on `/login`: email+password, OTP code, Google OAuth.
-
-**Seed users (local dev)** — all use password `password123`:
-
-| Email             | Name  |
-| ----------------- | ----- |
-| marco@example.com | Marco |
-| sara@example.com  | Sara  |
-| lena@example.com  | Lena  |
-| chris@example.com | Chris |
-| alex@example.com  | Alex  |
-| priya@example.com | Priya |
-| kai@example.com   | Kai   |
-| yuki@example.com  | Yuki  |
-
-**OTP emails (local)** — intercepted by Mailpit at `http://127.0.0.1:54324`
-
----
-
-## Testing
-
-```bash
-pnpm --filter @pulse/hooks test          # run all hook tests
-pnpm --filter @pulse/hooks test:watch    # watch mode
-pnpm --filter pulse-web exec tsc --noEmit  # type check
-```
-
-Tests live in `packages/hooks/src/__tests__/`. Stack: Vitest + @testing-library/react + happy-dom.
-
----
-
-## Monorepo Structure
+### Repo layout
 
 ```
 apps/
   web/                  # Next.js 16 — App Router
 
 packages/
-  types/                # @pulse/types — shared TypeScript interfaces
-  ui/                   # @pulse/ui — UI primitives (web + .native.tsx for RN)
-  store/                # @pulse/store — Zustand stores
-  services/             # @pulse/services — Supabase query functions
-  hooks/                # @pulse/hooks — custom hooks + tests
+  types/                # @pulse/types     — shared TypeScript interfaces
+  ui/                   # @pulse/ui        — primitives (.tsx + .native.tsx)
+  store/                # @pulse/store     — Zustand stores
+  services/             # @pulse/services  — Supabase query functions
+  hooks/                # @pulse/hooks     — custom hooks + tests
 
 supabase/
-  migrations/           # SQL migrations (applied in order by filename timestamp)
-  schema.sql            # DB schema reference (keep in sync with migrations)
-  rls.sql               # RLS policies reference (keep in sync with migrations)
-  seed.sql              # Dev seed data — local only, never push to production
-  config.toml           # Local Supabase config
-  .env                  # Local secrets — gitignored, never commit
+  migrations/           # SQL migrations, applied in filename-timestamp order
+  schema.sql            # Schema reference (kept in sync with migrations)
+  rls.sql               # RLS policy reference
+  seed.sql              # Dev seed data — local only
 ```
 
 ---
 
-## Environment Files
+## Quick start
 
-| File                  | Purpose                                     | Committed? |
-| --------------------- | ------------------------------------------- | ---------- |
-| `apps/web/.env.local` | Local dev Supabase URL + anon key           | No         |
-| `apps/web/.env.prod`  | Hosted Supabase URL + anon key              | No         |
-| `supabase/.env`       | Google OAuth credentials for local Supabase | No         |
+**Prerequisites:** [pnpm](https://pnpm.io) v11+, [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for local Supabase), [Supabase CLI](https://supabase.com/docs/guides/cli).
+
+```bash
+pnpm install
+
+cp apps/web/.env.local.example apps/web/.env.local
+# Fill NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY from `make up` output
+
+# Google OAuth for local Supabase — supabase/.env is gitignored
+echo "SUPABASE_AUTH_GOOGLE_CLIENT_ID=your-client-id" >> supabase/.env
+echo "SUPABASE_AUTH_GOOGLE_SECRET=your-client-secret" >> supabase/.env
+
+make up        # start local Supabase (Docker) — prints Project URL + anon key
+make reseed    # load schema + seed data
+make dev       # http://localhost:3000
+```
+
+Sign in with any seed user below, password `password123`.
+
+### Tests
+
+```bash
+pnpm --filter @pulse/hooks test             # unit tests (Vitest + happy-dom)
+pnpm --filter @pulse/hooks test:watch
+pnpm --filter pulse-web exec tsc --noEmit   # type check
+```
 
 ---
 
-## Docs & Workflow
+<details>
+<summary><b>Make targets</b></summary>
 
-All product and technical documentation lives in `docs/`. The index is at [`docs/INDEX.md`](docs/INDEX.md).
+#### Local Supabase
 
-**Key files:**
+| Command       | When to use                                                                       |
+| ------------- | --------------------------------------------------------------------------------- |
+| `make up`     | Start local Supabase (Docker). Once per session, or after `make down`.            |
+| `make down`   | Stop local Supabase. Safe anytime — the Docker volume persists, no data lost.     |
+| `make status` | Print local Supabase URLs and anon key, if you lost the `make up` output.         |
 
-| File | Purpose |
-| ---- | ------- |
-| `CLAUDE.md` | AI context: stack, architecture rules, code standards, Linear workflow |
-| `docs/canonical/PRODUCT.md` | **Single source of truth** for rating vocabulary, crew model, positioning, and launch checklist |
-| `docs/reference/RATING_MATRIX.md` | Scoring formula, data flow, CompatibilityScore type |
-| `docs/decisions/CREW_VIEW_DESIGN.md` | Find Your Crew UI — card/modal design, sub-group model |
-| `docs/canonical/BRANDING.md` | Origin story, positioning, voice |
+#### Database — reset and seed
 
-**Doc update rule:** Any `feat:` or `refactor:` commit that changes product-facing behaviour or vocabulary should be accompanied by a doc update in the same session. A post-commit hook will prompt you if you forget. `docs/canonical/PRODUCT.md` is the canonical source — update it first when vocabulary or the product model changes, then update feature docs that reference it.
+| Command       | When to use                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `make reseed` | **Full reset.** Drops the DB, replays all migrations, runs `seed.sql`. Destroys local data.                      |
+| `make reset`  | Alias for `make reseed`.                                                                                          |
+| `make seed`   | Re-run `seed.sql` against the running DB without touching the schema. Truncates data rows first.                 |
+| `make clear`  | Wipe all data rows, keep the schema and `activity_categories`. For manual testing from a clean slate.            |
 
-**Task tracking:** All open work lives in [Linear (Pulse MVP)](***REMOVED***). Not in `.md` files.
+#### Migrations
+
+Migrations live in `supabase/migrations/` and apply in filename order. The prefix is a timestamp — never rename or reorder them.
+
+| Command                      | When to use                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------ |
+| `make migration name=<name>` | Create a new timestamped migration. Always use this, never hand-create the file.          |
+| `make migrate`               | Apply pending migrations to the running local DB **without** resetting data.              |
+| `make push`                  | Push migrations to the **hosted** Supabase project. Requires `make link` first.           |
+| `make link ref=<project-ref>`| Link the CLI to a hosted project. Ref is in the Supabase dashboard URL.                   |
+| `make types`                 | Regenerate TS types from the local schema into `packages/types/src/supabase.gen.ts`.      |
+
+```bash
+make migration name=add_budget_to_trips
+# write the SQL
+make migrate    # apply locally, keep data
+make push       # when ready for production
+```
+
+If PostgREST reports `Database error querying schema` after `make migrate`, run `supabase stop && supabase start` — PostgREST caches the schema at startup.
+
+Never run `make seed` against production.
+
+</details>
+
+<details>
+<summary><b>Auth and seed data</b></summary>
+
+Three sign-in methods on `/login`: email + password, OTP code, Google OAuth.
+
+Seed users — all password `password123`:
+
+| Email | Name | | Email | Name |
+| ----- | ---- |-| ----- | ---- |
+| `marco@example.com` | Marco | | `alex@example.com`  | Alex  |
+| `sara@example.com`  | Sara  | | `priya@example.com` | Priya |
+| `lena@example.com`  | Lena  | | `kai@example.com`   | Kai   |
+| `chris@example.com` | Chris | | `yuki@example.com`  | Yuki  |
+
+OTP emails are intercepted locally by Mailpit at `http://127.0.0.1:54324`.
+
+#### Environment files
+
+| File                  | Purpose                                     | Committed |
+| --------------------- | ------------------------------------------- | --------- |
+| `apps/web/.env.local` | Local Supabase URL + anon key               | No        |
+| `apps/web/.env.prod`  | Hosted Supabase URL + anon key              | No        |
+| `supabase/.env`       | Google OAuth credentials for local Supabase | No        |
+
+</details>
+
+---
+
+## Docs
+
+Documentation is tiered by folder — trust is encoded in the path. Start at [`docs/INDEX.md`](docs/INDEX.md).
+
+| Folder               | Trust                                                  |
+| -------------------- | ------------------------------------------------------ |
+| `docs/canonical/`    | Source of truth — product model, branding, UX spec     |
+| `docs/reference/`    | How a subsystem works today                            |
+| `docs/decisions/`    | Dated ADRs — why a choice was made                     |
+| `docs/research/`     | Raw analysis, frozen and non-authoritative             |
+
+Key entry points: [`PRODUCT.md`](docs/canonical/PRODUCT.md) for the rating vocabulary and crew model, [`RATING_MATRIX.md`](docs/reference/RATING_MATRIX.md) for the scoring formula, [`CLAUDE.md`](CLAUDE.md) for architecture rules and code standards.
+
+Open work is tracked in Linear, not in markdown.
+
+---
+
+## License
+
+[GNU AGPL-3.0](LICENSE) — Copyright © 2026 Chris Pipitone.
+
+You may use, modify, and self-host this code; if you run a modified version as a network service, you must publish your source under the same license.

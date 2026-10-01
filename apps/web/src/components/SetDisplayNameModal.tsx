@@ -48,7 +48,7 @@ export function SetDisplayNameModal() {
         <div className="text-center">
           <h2 className="text-xl font-semibold text-text-primary">What should we call you?</h2>
           <p className="text-sm text-text-muted mt-1">
-            This is how you'll appear to your trip group.
+            This is how you’ll appear to your trip group.
           </p>
         </div>
 
