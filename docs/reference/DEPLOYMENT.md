@@ -166,15 +166,69 @@ If upgrading to Pro: enable **Spend Cap** immediately in billing settings.
 
 ---
 
+## Public Demo
+
+The deployed app is a portfolio piece before it is a product: a visitor who hits
+a signup wall and an empty trip list never sees what Pulse does. Two pieces make
+that work.
+
+**Demo data** — `supabase/seed.prod.sql` creates one populated trip ("Italy 2026":
+8 members, 12 activities, 95 ratings, 5 stops, a half-built itinerary). It never
+truncates, never touches existing rows, and is a no-op on re-run.
+
+```bash
+make seed-prod db="<hosted connection string>" pw=<demo-password>
+```
+
+The demo owner is set to the `planner` tier — the member-cap trigger rejects 8
+members on `free`.
+
+**Demo login** — set both vars in Vercel and the login page grows an "Explore the
+demo trip" button:
+
+| Variable | Value |
+|---|---|
+| `NEXT_PUBLIC_DEMO_EMAIL` | `demo@pulsetrip.app` |
+| `NEXT_PUBLIC_DEMO_PASSWORD` | whatever you passed as `pw=` |
+
+These are **deliberately public**. Auth is client-side (no `@supabase/ssr`, no
+middleware), so the password ships in the client bundle — that is the intent, not
+an oversight. The account is a normal RLS-bound user: it sees only its own trip,
+and anyone signed in as it can edit that trip's data. If the demo gets vandalised,
+delete the trip and re-run the seed.
+
+The other seven members have random discarded passwords and cannot be signed into.
+
+---
+
+## Keeping the project awake
+
+Supabase pauses free projects after **7 days** of inactivity, which would leave
+the public demo dead exactly when someone clicks the link.
+
+`.github/workflows/keepalive.yml` pings `/api/health` every 5 days. That route
+calls `get_trip_preview`, the one RPC granted to `anon`, so it reaches Postgres
+with no credentials beyond the public anon key.
+
+Set the repository **variable** `APP_URL` (Settings → Secrets and variables →
+Actions → Variables) to the deployed origin, e.g. `https://pulse.vercel.app`.
+Without it the workflow exits cleanly instead of failing.
+
+---
+
 ## Pre-Production Checklist
 
 | Item | Status | Action |
 |---|---|---|
-| Email confirmation | Not done | `supabase/config.toml`: `enable_confirmations = true` → `make push` |
-| OTP rate limit | Not done | `supabase/config.toml`: `max_frequency = "60s"` → `make push` |
-| Profile creation trigger | Not done | New migration: `AFTER INSERT ON auth.users` → insert `public.profiles` |
+| Email confirmation | **Done** | `enable_confirmations = true` in `supabase/config.toml` |
+| OTP rate limit | **Done** | `max_frequency = "60s"` in `supabase/config.toml` |
+| Profile creation trigger | **Done** | `20260520000004_profile_creation_trigger.sql` |
 | Google OAuth redirect URIs | Not done | Add prod domain to Google Cloud Console |
 | Supabase redirect URLs | Not done | Add prod domain to Supabase Auth → URL Configuration |
 | Vercel env vars | Not done | Set `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
 | Deploy | Not done | Create Vercel project, set `rootDirectory = apps/web` |
-| Verify hosted migrations | Not done | `make push` — confirm all 6 migrations applied |
+| Verify hosted migrations | Not done | `make push` — confirm all 32 migrations applied |
+| Custom SMTP | Not done | Supabase's built-in mailer is dev-only (a few/hour, often spam-filed). Wire Resend or similar, or rely on Google OAuth + the demo button |
+| Demo data | Not done | `make seed-prod db="..." pw=...` |
+| Demo env vars | Not done | `NEXT_PUBLIC_DEMO_EMAIL` + `NEXT_PUBLIC_DEMO_PASSWORD` in Vercel |
+| Keep-alive | Not done | Set repo variable `APP_URL` so `keepalive.yml` can ping |
