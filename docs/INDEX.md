@@ -1,13 +1,13 @@
 # Pulse — Documentation Index & Authority Map
 
-> Entry point for humans and AI assistants (Claude + Gemini). Read this before using any doc.
+> Entry point for humans and AI assistants. Read this before using any doc.
 > Trust is encoded in the **folder**. The path tells you how much to believe a file.
 
 ---
 
 ## 1. How to use this index
 
-1. Read root `CLAUDE.md` / `GEMINI.md` (process + this authority contract).
+1. Read root `CLAUDE.md` (process + this authority contract).
 2. Always load `canonical/PRODUCT.md` and `canonical/BRANDING.md`.
 3. Pull the matching **reference** / **decision** doc only for the area you are working in.
 4. Never load `private/research/` or `private/archive/` as truth — only when a task explicitly says to analyze them.
@@ -23,7 +23,7 @@ Every doc carries frontmatter: `tier`, `status`, `updated` (and `supersedes` / `
 | **Decision** | `decisions/` | Why a choice was made (dated ADRs) | That area |
 | **Private** | `private/` | Raw research, archive, business strategy — gitignored | Only when told |
 
-**Conflict order (highest wins):** root `CLAUDE.md`/`GEMINI.md` → `canonical/` → `reference/` → accepted `decisions/`. `private/` never overrides anything. A `decisions/` file with `status: proposed` is **not** current truth.
+**Conflict order (highest wins):** root `CLAUDE.md` → `canonical/` → `reference/` → accepted `decisions/`. `private/` never overrides anything. A `decisions/` file with `status: proposed` is **not** current truth.
 
 ## 3. Canonical — `canonical/`
 
@@ -87,16 +87,13 @@ AI analysis ─────────► private/research/ (dated, frozen, non
         canonical/ or reference/ updated
 ```
 
-Raw AI output is never canonical. Gemini = divergent sweeps → `private/research/`. Claude = convergent promotion → `canonical/` / `decisions/`.
+Raw AI output is never canonical. Divergent sweeps land in `private/research/`; promotion into `canonical/` / `decisions/` is a separate, deliberate step.
 
 ## 10. Open decisions (pending human call)
 
-- **Theme:** direction chosen = `human` (terracotta/indigo/bone). **Not yet implemented** — `reference/UI_DESIGN.md` only defines `modern` (active) + `editorial`; the `human` palette exists only as prose in the deferred `BRANDING_STRATEGY.md`. Implementation waits for the branding revisit; until then code stays on `modern`.
+- **Theme:** direction chosen = `human` (terracotta/indigo/bone). **Not yet implemented** — `reference/UI_DESIGN.md` only defines `modern` (active) + `editorial`; the `human` palette exists only as prose in the deferred `private/BRANDING_STRATEGY.md`. Implementation waits for the branding revisit; until then code stays on `modern`.
 - **IA pivot:** accept or reject `decisions/ia-proposal.md`. Until then its navigation is not current truth.
 
 ## 11. Pending cleanup (not yet filed)
 
-Still in `docs/` root, awaiting extraction-then-archive:
-
-- `BRANDING_STRATEGY.md` — obsolete; extract its Linear backlog first, then archive.
-- `summary.md` — research; mine its drift report into Linear tickets, then archive.
+- `private/BRANDING_STRATEGY.md` — obsolete; mine its backlog into tickets, then drop it.

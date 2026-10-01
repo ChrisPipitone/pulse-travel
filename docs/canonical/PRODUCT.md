@@ -77,7 +77,7 @@ All five answered a different question about the same data. The matrix tab was r
 | **Find your crew** | For each activity, who's my crew? |
 | **Travel Twin** | Which members have the most overlapping MUSTs? |
 | **Timeline** | When are we doing what, and with whom? |
-| *(By activity / By member / Who's in)* | Retired to prototypes — `apps/web/src/prototypes/` |
+| *(By activity / By member / Who's in)* | Retired — explored in prototypes, not shipped |
 
 ---
 

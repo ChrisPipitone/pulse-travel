@@ -91,4 +91,4 @@ The current `useState<Tab>("crew")` starts on Find Your Crew. This is a product 
 
 ### MC1 — Confirm accent-2 usage before removing
 
-Search codebase for `accent-2` and `var(--accent-2)` before deleting. If it's unused in production (likely, given it was the WANT color), remove. If it's used in a prototype file (CompatibilityMatrix in src/prototypes), that's fine to remove from production CSS.
+Search codebase for `accent-2` and `var(--accent-2)` before deleting. If it's unused in production (likely, given it was the WANT color), remove. If it's only used in a throwaway prototype, that's fine to remove from production CSS.
