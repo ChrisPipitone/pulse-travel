@@ -169,35 +169,45 @@ If upgrading to Pro: enable **Spend Cap** immediately in billing settings.
 ## Public Demo
 
 The deployed app is a portfolio piece before it is a product: a visitor who hits
-a signup wall and an empty trip list never sees what Pulse does. Two pieces make
-that work.
+a signup wall and an empty trip list never sees what Pulse does. `/demo` fixes
+that — link to it from outside the app.
 
-**Demo data** — `supabase/seed.prod.sql` creates one populated trip ("Italy 2026":
-8 members, 12 activities, 95 ratings, 5 stops, a half-built itinerary). It never
-truncates, never touches existing rows, and is a no-op on re-run.
+**How it works** — `/demo` opens an anonymous Supabase session and calls
+`create_demo_trip()`, which clones the template trip into a trip that visitor
+owns, with their own ratings blank and dates re-anchored 45 days out. Every
+visitor gets a private sandbox: nothing they do reaches anyone else, and there is
+no shared account or password. Reloading `/demo` returns the same sandbox.
+Migration: `20261012000000_demo_sandbox.sql`.
+
+**Template data** — `supabase/seed.prod.sql` creates the template ("Italy": 8
+members, 12 activities, 95 ratings, 5 stops, a half-built itinerary). It never
+truncates, never touches existing rows, and is a no-op on re-run. None of its
+eight accounts can be signed into.
 
 ```bash
-make seed-prod db="<hosted connection string>" pw=<demo-password>
+make seed-prod      # linked project, no DB password needed
 ```
 
-The demo owner is set to the `planner` tier — the member-cap trigger rejects 8
-members on `free`.
+**Anonymous sign-ins** — on in `supabase/config.toml` for local. On the hosted
+project enable it in the dashboard: Authentication → Sign In / Providers → Allow
+anonymous sign-ins. Supabase rate-limits these per IP (30/hour by default); add
+Turnstile CAPTCHA there if the demo gets abused.
 
-**Demo login** — set both vars in Vercel and the login page grows an "Explore the
-demo trip" button:
+**Limits on demo sessions** — enforced in Postgres, not the client:
 
-| Variable | Value |
-|---|---|
-| `NEXT_PUBLIC_DEMO_EMAIL` | `demo@pulsetrip.app` |
-| `NEXT_PUBLIC_DEMO_PASSWORD` | whatever you passed as `pw=` |
+- Anonymous users cannot create trips or join by invite code.
+- Nobody can join a sandbox by its invite code.
+- `trips.is_demo` is only settable by `create_demo_trip()`. It exempts the sandbox
+  from the member cap (the template has 8 members; `free` caps at 5).
+- Real accounts cannot call `create_demo_trip()`, and `/demo` sends them home
+  rather than replacing their session.
 
-These are **deliberately public**. Auth is client-side (no `@supabase/ssr`, no
-middleware), so the password ships in the client bundle — that is the intent, not
-an oversight. The account is a normal RLS-bound user: it sees only its own trip,
-and anyone signed in as it can edit that trip's data. If the demo gets vandalised,
-delete the trip and re-run the seed.
+**Cleanup** — `purge_demo_sandboxes()` runs hourly via pg_cron and deletes
+sandboxes and anonymous users older than 24 hours. A returning visitor just gets
+a fresh clone.
 
-The other seven members have random discarded passwords and cannot be signed into.
+**Login button** — set `NEXT_PUBLIC_DEMO_ENABLED=true` in Vercel and the login
+page shows "Explore the demo trip", which goes to `/demo`.
 
 ---
 
@@ -227,8 +237,9 @@ Without it the workflow exits cleanly instead of failing.
 | Supabase redirect URLs | Not done | Add prod domain to Supabase Auth → URL Configuration |
 | Vercel env vars | Not done | Set `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
 | Deploy | Not done | Create Vercel project, set `rootDirectory = apps/web` |
-| Verify hosted migrations | Not done | `make push` — confirm all 32 migrations applied |
+| Verify hosted migrations | Not done | `make push` — confirm all 34 migrations applied |
 | Custom SMTP | Not done | Supabase's built-in mailer is dev-only (a few/hour, often spam-filed). Wire Resend or similar, or rely on Google OAuth + the demo button |
-| Demo data | Not done | `make seed-prod db="..." pw=...` |
-| Demo env vars | Not done | `NEXT_PUBLIC_DEMO_EMAIL` + `NEXT_PUBLIC_DEMO_PASSWORD` in Vercel |
+| Demo template | Not done | `make seed-prod` |
+| Anonymous sign-ins | Not done | Enable in the Supabase dashboard — `/demo` fails without it |
+| Demo env var | Not done | `NEXT_PUBLIC_DEMO_ENABLED=true` in Vercel |
 | Keep-alive | Not done | Set repo variable `APP_URL` so `keepalive.yml` can ping |
