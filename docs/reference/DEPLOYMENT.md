@@ -224,6 +224,11 @@ Set the repository **variable** `APP_URL` (Settings → Secrets and variables �
 Actions → Variables) to the deployed origin, e.g. `https://pulse.vercel.app`.
 Without it the workflow exits cleanly instead of failing.
 
+`apps/web/vercel.json` adds a second, independent ping: a Vercel Cron job hits
+the same route daily (the Hobby plan allows one run a day). It covers the case
+the workflow cannot — GitHub disables scheduled workflows on a public repo after
+60 days without repository activity.
+
 ---
 
 ## Pre-Production Checklist
