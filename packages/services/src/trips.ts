@@ -282,6 +282,14 @@ export async function joinTrip(client: SupabaseClient, inviteCode: string): Prom
   return (data as string | null) ?? null
 }
 
+// Returns the caller's demo trip, cloning the template on first call. Anonymous
+// sessions only — enforced server-side in create_demo_trip.
+export async function createDemoTrip(client: SupabaseClient): Promise<string> {
+  const { data, error } = await client.rpc('create_demo_trip')
+  if (error) throw new Error(error.message)
+  return data as string
+}
+
 export async function sendInviteEmail(
   client: SupabaseClient,
   email: string,

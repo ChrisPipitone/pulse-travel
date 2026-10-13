@@ -10,7 +10,7 @@ export function AppNav() {
   const { signOut, loading } = useSignOut()
   const router = useRouter()
 
-  if (!pathname || pathname === '/login' || pathname.startsWith('/auth/')) return null
+  if (!pathname || pathname === '/login' || pathname === '/demo' || pathname.startsWith('/auth/')) return null
 
   const isOnTripPage = pathname.startsWith('/trip/')
 

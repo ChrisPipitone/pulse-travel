@@ -15,7 +15,7 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [pwLoading, setPwLoading] = useState(false)
   const [pwError, setPwError] = useState<string | null>(null)
-  const { sendOtp, verifyOtp, signInWithGoogle, signInAsDemo, loading, error } = useSignIn()
+  const { sendOtp, verifyOtp, signInWithGoogle, loading, error } = useSignIn()
   const router = useRouter()
   const searchParams = useSearchParams()
   const returnTo = searchParams.get('returnTo') || '/'
@@ -54,17 +54,9 @@ function LoginPage() {
     setOtp('')
   }
 
-  // Public demo account — the button only renders when both vars are set, so
-  // local dev and forks don't show a control that cannot work.
-  const demoEmail = process.env.NEXT_PUBLIC_DEMO_EMAIL
-  const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD
-  const demoEnabled = Boolean(demoEmail && demoPassword)
-
-  async function handleDemoSignIn() {
-    if (!demoEmail || !demoPassword) return
-    const ok = await signInAsDemo(demoEmail, demoPassword)
-    if (ok) router.replace('/')
-  }
+  // Off by default so local dev and forks don't show a control that cannot
+  // work without the seeded template trip.
+  const demoEnabled = process.env.NEXT_PUBLIC_DEMO_ENABLED === 'true'
 
   function handleGoogleSignIn() {
     const callbackUrl = returnTo === '/'
@@ -198,7 +190,7 @@ function LoginPage() {
         </Button>
 
         {demoEnabled && (
-          <Button variant="outline" disabled={loading} onClick={handleDemoSignIn}>
+          <Button variant="outline" disabled={loading} onClick={() => router.push('/demo')}>
             Explore the demo trip
           </Button>
         )}
