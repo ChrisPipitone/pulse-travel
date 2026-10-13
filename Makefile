@@ -72,13 +72,11 @@ link:
 push:
 	supabase db push
 
-# One-time demo data for the HOSTED project. Safe to re-run — it is a no-op once
-# the demo trip exists. Never point this at a real users' database.
-#   make seed-prod db="postgresql://..." pw=<demo-password>
+# One-time demo template for the LINKED hosted project (make link first). Goes
+# through the Management API, so it needs no DB password. Safe to re-run — it is
+# a no-op once the template trip exists.
 seed-prod:
-	@test -n "$(db)" || (echo 'Usage: make seed-prod db="<connection-string>" pw=<demo-password>' && exit 1)
-	@test -n "$(pw)" || (echo 'Usage: make seed-prod db="<connection-string>" pw=<demo-password>' && exit 1)
-	psql "$(db)" -v demo_password=$(pw) -f supabase/seed.prod.sql
+	supabase db query --linked -f supabase/seed.prod.sql
 
 # ── Dev server ───────────────────────────────────────────────────────────────
 

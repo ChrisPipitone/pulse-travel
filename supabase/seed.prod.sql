@@ -1,42 +1,32 @@
 -- Production demo seed — SAFE to run against the hosted project.
 --
 -- Unlike seed.sql this NEVER truncates and NEVER touches existing rows. It
--- creates one public demo trip so a first-time visitor sees the product working
--- instead of an empty trip list. Re-running it is a no-op.
+-- creates the demo TEMPLATE trip. Nobody signs into it: /demo gives each visitor
+-- an anonymous session and create_demo_trip() clones this trip for them (see
+-- migration 20261012000000_demo_sandbox). Re-running it is a no-op.
 --
---   psql "$DATABASE_URL" -v demo_password=<password> -f supabase/seed.prod.sql
+--   make seed-prod      (runs against the LINKED project, no DB password)
 --
--- Only demo@pulsetrip.app can be signed into. The seven other members exist so
--- crews and compatibility have real data behind them; their passwords are random
--- and discarded, so none of them is a usable account.
+-- All eight accounts get random discarded passwords, so none can be signed into.
+-- demo@pulsetrip.app owns the template and is the seat the visitor takes in a
+-- clone; the other seven are shared by every clone so crews and compatibility
+-- have real data behind them.
 
-\set ON_ERROR_STOP on
-
--- pgcrypto lives in the extensions schema on hosted Supabase; crypt() and
--- gen_salt() are not on the default search_path without this.
-set search_path = public, extensions;
-
--- psql substitutes :'demo_password' here; it cannot reach inside the dollar-quoted
--- block below, so hand it over as a setting the block can read.
-select set_config('seed.demo_password', :'demo_password', false);
-
+-- One statement only: `supabase db query` prepares the file, and a prepared
+-- statement cannot hold several commands. Hence the schema-qualified pgcrypto
+-- calls below rather than a `set search_path` up front.
 do $seed$
 declare
-  demo_pw   text := current_setting('seed.demo_password', true);
   v_trip_id uuid;
   v_start   date := current_date + 45;
 begin
-  if demo_pw is null or demo_pw = '' then
-    raise exception 'Set the demo password: psql -v demo_password=<password>';
-  end if;
-
-  if exists (select 1 from public.trips where name = 'Italy 2026' and destination = 'Italy') then
-    raise notice 'Demo trip already present — nothing to do.';
+  -- create_demo_trip() finds the template by this owner id.
+  if exists (select 1 from public.trips where created_by = '11111111-0000-4000-8000-000000000001') then
+    raise notice 'Demo template already present — nothing to do.';
     return;
   end if;
 
   -- ── Accounts ───────────────────────────────────────────────────────────────
-  -- The demo account is loginable. The rest get throwaway passwords.
   insert into auth.users (
     instance_id, id, email, encrypted_password, email_confirmed_at,
     created_at, updated_at, role, aud,
@@ -47,8 +37,7 @@ begin
     '00000000-0000-0000-0000-000000000000',
     m.id,
     m.email,
-    crypt(case when m.email = 'demo@pulsetrip.app' then demo_pw else gen_random_uuid()::text end,
-          gen_salt('bf')),
+    extensions.crypt(gen_random_uuid()::text, extensions.gen_salt('bf')),
     now(), now(), now(), 'authenticated', 'authenticated',
     '{"provider":"email","providers":["email"]}'::jsonb,
     jsonb_build_object('display_name', m.name),
@@ -74,7 +63,7 @@ begin
   on conflict (id) do update set display_name = excluded.display_name;
 
   -- The member-cap trigger reads the trip owner's tier; free caps at 5 and the
-  -- demo trip needs 8 to make the crew split legible.
+  -- template needs 8 to make the crew split legible. (Clones skip the cap.)
   update public.profiles
      set tier = 'planner'
    where id = '11111111-0000-4000-8000-000000000001';
@@ -82,7 +71,7 @@ begin
   -- ── Trip ───────────────────────────────────────────────────────────────────
   insert into public.trips (name, destination, start_date, end_date, created_by, invite_code,
                             invite_code_expires_at)
-  values ('Italy 2026', 'Italy', v_start, v_start + 21,
+  values ('Italy', 'Italy', v_start, v_start + 21,
           '11111111-0000-4000-8000-000000000001',
           'demotrip', now() + interval '10 years')
   returning id into v_trip_id;
@@ -178,6 +167,6 @@ begin
   ) as s(name, day_off)
   join public.activities a on a.trip_id = v_trip_id and a.name = s.name;
 
-  raise notice 'Demo trip created: % (invite code: demotrip)', v_trip_id;
+  raise notice 'Demo template created: %', v_trip_id;
 end
 $seed$;
